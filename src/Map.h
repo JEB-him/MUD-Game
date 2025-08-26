@@ -10,7 +10,7 @@ class Position {
 };
 
 /**
- * @breif Map 类，用于读取 map 文件
+ * @brief Map 类，用于读取 map 文件
  */
 class Map {
 public:

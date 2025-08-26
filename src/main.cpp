@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Map.h"
 
 using std::cin, std::cout;
 int main() {

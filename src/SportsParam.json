@@ -1,0 +1,37 @@
+{
+    "badminton": {
+        "base_energy": 5,
+        "if_have_bat": true,
+        "sum_money": {
+            "if_have_bat": 15,
+            "if_not_have_bat": 35
+        },
+        "time": 0.5
+    },
+    "base": {
+        "max_health": 100
+    },
+    "basketball": {
+        "base_energy": 5,
+        "if_have_ball": false,
+        "sum_money": {
+            "if_have_ball": 5,
+            "if_not_have_ball": 15
+        },
+        "time": 0.5
+    },
+    "football": {
+        "base_energy": 8,
+        "if_have_ball": false,
+        "sum_money": {
+            "if_have_ball": 10,
+            "if_not_have_ball": 15
+        },
+        "time": 1
+    },
+    "running": {
+        "base_energy": 5,
+        "money": 0,
+        "time": 1
+    }
+}

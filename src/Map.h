@@ -2,11 +2,11 @@
  * @file Map.h
  * @author Jie Jiang
  * */
-
+#pragma once
 #include <string>
 
 /**
- * @brief 一个通用的坐标类，建议都是用该类来储存坐标
+ * @brief 一个通用的坐标类，建议都使用该类来储存坐标
  */
 class Position {
 public:

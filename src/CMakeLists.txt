@@ -1,0 +1,27 @@
+# 这个是运行游戏的入口
+add_executable(game main.cpp)
+
+# 将主要代码编译为静态库
+add_library(OUCSurvSim STATIC
+            Map.cpp  # 添加 Map.cpp 原文件)
+)
+
+# 为 OUCSurvSim 添加版本号宏
+target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}")
+# 将 OUCSurvSim 静态库链接到 game
+target_link_libraries(game PUBLIC OUCSurvSim)
+
+# 编译模式下开启警告和调试信息
+if (CACHE{DEBUG})
+    target_compile_options(game
+        PRIVATE -g -Wall -Wextra
+    )
+else()
+    # release 启用编译优化
+    target_compile_options(game
+        PRIVATE -O3
+    )
+endif()
+
+install(TARGETS game
+        RUNTIME DESTINATION ".")

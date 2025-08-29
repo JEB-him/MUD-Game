@@ -34,7 +34,7 @@
 
 ### 编码规范
 
-大家可以先去读一下 Google 的 Style document, 讲了各种场景下的编码规范，按照规范写的代码可读性一般都很高。
+大家可以先去读一下 Google 的 [Style Guide](https://google.github.io/styleguide/cppguide.html), 讲了各种场景下的编码规范，按照规范写的代码可读性一般都很高。
 
 #### 命名
 

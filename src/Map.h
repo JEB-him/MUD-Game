@@ -61,7 +61,7 @@ public:
 
     /**
      * @brief 若地图加载不成功，可以调用此函数来获得信息
-     * @return a 一个string常量
+     * @return 一个string常量
      */
     const std::string& getValidMsg() const;
 
@@ -72,21 +72,21 @@ public:
     Position getPos() const;
 
     /**
-     * @brief 获取主角当前坐标
-     * @param[in] direction 方向
-     *            0: 向上
-     *            1: 向右
-     *            2: 向下
-     *            3: 向左
-     * @param[out] event_type 事件类型, 一个引用
-     *             0: 抵达入口/空地 位置变化,无事件发生
-     *             1: 碰撞NPC，位置不变，但 Controller 应当与 NPC 交互
+     * @brief 移动主角
+     * @param[in] direction 方向\n
+     *            0: 向上\n
+     *            1: 向右\n
+     *            2: 向下\n
+     *            3: 向左\n
+     * @param[out] event_type 事件类型, 一个引用\n
+     *             0: 抵达入口/空地 位置变化,无事件发生\n
+     *             1: 碰撞NPC，位置不变，但 Controller 应当与 NPC 交互\n
      *             2: 抵达出口，位置变化，Controller 应当向场景类请求下一个场景
-     *             的编号
-     *             3: 碰撞器械，位置不变，Controller 应当与物品类交互
-     *             4: 碰撞墙壁，位置不变
-     * @param[out] id 出口/NPC/器械编号
-     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id, 器械同理
+     *             的编号\n
+     *             3: 碰撞器械，位置不变，Controller 应当与物品类交互\n
+     *             4: 碰撞墙壁，位置不变\n
+     * @param[out] id 出口/NPC/器械编号\n
+     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id, 器械同理\n
      *             
      * @note 该函数会通过修改 event_type 来告诉 Controller 事件类型
      * @return a Message.

@@ -2,9 +2,9 @@ add_library(CatchMain STATIC
     test_main.cpp       # 包含 CATCH_CONFIG_MAIN，是测试的入口
 )
 
-add_executable(test
-    unit/Map-test.cpp   # Map 测试模块
-)
+
+file(GLOB SOURCES "unit/*.cpp")
+add_executable(test ${SOURCES})
 
 target_compile_options( CatchMain
     PRIVATE -Wall

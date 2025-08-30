@@ -2,9 +2,11 @@
 add_executable(game main.cpp)
 
 # 将主要代码编译为静态库
-add_library(OUCSurvSim STATIC
-            Map.cpp  # 添加 Map.cpp 原文件)
-)
+# 这个地方为了大家编码方便，用了一个不太规范的方法来导入源文件
+file(GLOB SOURCES "*.cpp")
+file(GLOB_RECURSE excluded_files main.cpp)
+list(REMOVE_ITEM SOURCES ${excluded_files})
+add_library(OUCSurvSim STATIC ${SOURCES})
 
 # 为 OUCSurvSim 添加版本号宏
 target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}")

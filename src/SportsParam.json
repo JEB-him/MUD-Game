@@ -13,7 +13,7 @@
     },
     "basketball": {
         "base_energy": 5,
-        "if_have_ball": false,
+        "if_have_ball": true,
         "sum_money": {
             "if_have_ball": 5,
             "if_not_have_ball": 15

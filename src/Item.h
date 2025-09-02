@@ -226,3 +226,4 @@ private:
     ifstream config_file_item;
     json config_item;
 };
+

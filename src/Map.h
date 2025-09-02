@@ -10,15 +10,29 @@
  * @brief Map 类，用于读取 map 文件
  * @details 关于地图文件的一些规定：\n
  *          1. 使用 # 来表示墙壁\n
- *          2. 使用 0-9,a-z,A-Z 共 61 个字符来表示所有特殊对象，如床、主角\n
- *          3. 入口和出口宽度/高度只能为 4\n
+ *          2. 使用 0-9,a-z,A-Z 共 62 个字符来表示所有特殊对象，如床、主角\n
+ *          3. 入口和出口宽度只能为 4，高度只能为 2\n
+ *          4. 初始坐标默认为从入口内侧的空白位置（取中点）,
+ *          5. 若在地图中检测到主角的符号（由 Special Chars 列表决定）则参数 pos 无效\n
+ *          7. 加载地图文件时将会删除上方的空白\n
+ *          8. 要求地图尺寸不大于 100x50 （宽x高）
+ *          9. 为了避免 Map 检测到地图尺寸异常，请不要在文件末尾添加空行
+ * @note 该类的重要原则应当是保证任何状态下 Map 类中的所有成员全部设置正确
  */
 class Map {
 public:
     /**
+     * @brief 地图最大宽度
+     */
+    constexpr static int MAX_WIDTH = 100;
+    /**
+     * @brief 地图最大高度
+     */
+    constexpr static int MAX_HEIGHT = 50;
+    /**
      * @brief SPECIAL_CHARS 的最大长度
      */
-    constexpr static int CHAR_MAXN = 61;
+    constexpr static int CHAR_MAXN = 62;
     /**
      * @brief 所有特殊符号的定义
      * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中
@@ -40,28 +54,26 @@ public:
      * @brief 使用地图文件初始化地图
      * @param map_path String 类型
      * @param pos 设置主角的初始坐标
-     * @note 初始坐标默认为从入口内侧的空白位置（取中点）,
-     * 若在地图中检测到主角的符号（#），则参数 pos 无效\n
-     * 现在在哪一个场景应该由 Controller 统一管理
      */
     Map(const std::string& map_path, const Position& pos=Position());
 
     /**
      * @brief 析构函数，Map 应当将当前地图下的所有修改保存到文件中
-     * @note 只有地图有效才会进行保存
+     * @note 只有地图有效且地图被修改时才会进行保存, 通过析构函数来保存地图并不稳定,
+     *       如果有任何错误，析构函数都不会反馈任何信息, 因此，Controller
+     *       应当确保在释放 Map 之前调用 save 保存地图，以确保游戏的稳定运行。
      */
-    ~Map() = default;
+    ~Map();
 
     /**
      * @brief 返回地图加载是否成功
-     * @details 要求地图尺寸不大于 100x50 （宽x高）
      * @return a bool.
      */
     bool valid() const;
 
     /**
      * @brief 若地图加载不成功，可以调用此函数来获得信息
-     * @return 一个string常量
+     * @return 一个string常量引用
      */
     const std::string& getValidMsg() const;
 
@@ -92,9 +104,35 @@ public:
      * @return a Message.
      */
     Message moveProtagonist(const int& direction, int& event_type, int& id);
+
+    /**
+     * @brief 保存当前地图到文件中
+     * @note 要求当前地图有效，即 is_valid 为 True\n
+     *       TODO: save() 在程序退出时应当被 Controller 调用，在接收到终止信号时,
+     *       程序 Controller 也应当调用 save()，这要求程序手动管理信号！！！
+     */
+    Message save() const;
 private:
-    bool        is_valid;     // 该地图类是否有效
-    std::string valid_msg;    // 关于地图是否有效的消息
+    enum class LineType {
+        TOP_OF_WALL,           // 从上到下第一行墙壁,即地图顶部
+        BOTTOM_OF_WALL,        // 从下到上第一行墙壁,即地图底部
+        MIDDLE_LINE_OF_WALL,   // 中间的墙壁
+        EMPTY_LINE,            // 空行
+        OVER_SIZE,             // 尺寸超限
+        INVAILD_LINE           // 非法的行
+    };
+
+    /**
+     * @brief 一个结构体，用于储存读取时是否已经读到了某些必要的行
+     * @note 此处缩写了，因为与 LineType 前 3 个一一对应
+     */
+    struct {
+        bool top = 0, middle = 0, bottom = 0;
+    } checked;
+    bool        modified;                    // 地图是否被修改过
+    bool        is_valid;                    // 该地图类是否有效
+    std::string valid_msg;                   // 关于地图是否有效的消息
+    char        map[MAX_HEIGHT][MAX_WIDTH];  // 地图数组
     // 方向数组
     inline static int directions[4][2] = {
         { 0, -1},
@@ -122,5 +160,32 @@ private:
      * @brief 加载地图
      * @param map_path 地图文件路径
      */
-    static int loadMap(const std::string& map_path);
+    Message loadMap();
+
+    /**
+     * @brief 储存行到地图中，并检查是否含有非法字符
+     */
+    bool line_copy(char map_line[], const std::string& line);
+
+    /**
+     * @brief 对行的类型进行辨别
+     * @return 返回一个 enum class LineType
+     */
+    LineType classifyLine(const std::string& line);
+
+    /**
+     * @brief 处理所有 NPC 和出入口，并进行封闭性和宽字符放置检查
+     * @return bool 地图是否封闭, 宽字符放置是否合理
+     */
+    bool processMap();
+
+    /**
+     * @brief 获取字符的 index
+     */
+    static int char2index(const char& ch);
+
+    /**
+     * @brief 在沿地图边界检查地图时，判断是否应当转向
+     */
+    int calcDir(int& x, int& y, const bool& reset);
 };

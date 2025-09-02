@@ -122,7 +122,7 @@ SeniorStudent::SeniorStudent(const std::string& title, int intelligence ,
              const std::string& major)
     : Student(title, intelligence), major(major) {
     setIdentity("学长");
-    setInteractionText("你好，我是" + major + "专业的学长" + title + "，最近有点忙，能帮帮我吗？");
+    setInteractionText("你好,我是" + major + "专业的学长" + title + ",最近有点忙,能帮帮我吗?");
     addInteractionOption("帮助处理问题");
 }
 

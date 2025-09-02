@@ -17,7 +17,8 @@
  */
 class NPC {
 public:
-    NPC(const std::string& title, const std::string& job);
+    NPC(const std::string& title, const std::string& job)
+        : title(title), job(job) {}
 
     virtual ~NPC() = default;
 
@@ -243,7 +244,7 @@ public:
         int cost;          // 总开销（金币）
         int stamina_gain;   // 体力收益
     };
-    
+
     Coach(const std::string& title, const std::string& sport_type);
     
     /**

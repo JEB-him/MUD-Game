@@ -25,3 +25,12 @@ target_link_libraries(test PRIVATE CatchMain)
 
 install(TARGETS test
         RUNTIME DESTINATION ".")
+
+# 仅为 Windows 平台设置代码页
+if(WIN32)
+    # 设置代码页为 UTF-8 (65001)
+    add_custom_command(TARGET test POST_BUILD
+        COMMAND powershell -Command "chcp 65001 > nul"
+        COMMENT "Setting console code page to UTF-8"
+    )
+endif()

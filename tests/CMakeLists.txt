@@ -30,7 +30,7 @@ install(TARGETS test
 if(WIN32)
     # 设置代码页为 UTF-8 (65001)
     add_custom_command(TARGET test POST_BUILD
-        COMMAND powershell -Command "chcp 65001 > nul"
+        COMMAND cmd /c "chcp 65001 > nul"
         COMMENT "Setting console code page to UTF-8"
     )
 endif()

@@ -4,6 +4,8 @@
  * @author Jie Jiang
  */
 
+#pragma once
+
 #include <string>
 
 /**

@@ -1,3 +1,24 @@
+/**
+ * @brief 等待并获取键盘输入
+ *
+ * 调用 waitKeyDown 函数可获取键盘输入，支持数字、字母、空格、Esc和Enter键。
+ * 函数会阻塞直到有符合条件的按键被按下。
+ *
+ * @return int 返回按键的ASCII码值
+ * @retval 27 Esc键
+ * @retval 32 空格键
+ * @retval 10 回车键(Enter)
+ * @retval 48-57 数字键0-9
+ * @retval 65-90 字母键A-Z(大写)
+ * @retval 97-122 字母键a-z(小写)
+ * @retval -1 获取按键失败
+ *
+ * @note 此函数跨平台支持Windows和Linux系统
+ * @note Windows使用键盘钩子实现，Linux使用ncurses库实现
+ *
+ * @see vkToAscii()
+ */
+
 #include <iostream>
 #include <atomic>
 #include <iomanip>
@@ -47,7 +68,7 @@ int waitKeyDown()
     capturedKey = -1;
     keyCaptured = false;
 
-    std::cout << "Press any key (ESC to exit)..." << std::endl;
+    std::cout << "Waiting key down ..." << std::endl;
 
     /* 设置低级键盘钩子 */
     hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, GetModuleHandle(NULL), 0);
@@ -85,9 +106,61 @@ int waitKeyDown()
 }
 
 #else
+#include <ncurses.h>
+#include <unistd.h>
+#include <cstdlib>
 
+int vkToAscii(int keyCode)
+{
+    // Linux下直接返回按键值，因为我们已经从getch()获得了ASCII字符
+    return keyCode;
+}
+
+int waitKeyDown()
+{
+    capturedKey = -1;
+    keyCaptured = false;
+
+    std::cout << "Press any key (ESC to exit)..." << std::endl;
+
+    // 初始化ncurses
+    initscr();             // 初始化ncurses模式
+    cbreak();              // 禁用行缓冲，使按键立即可用
+    noecho();              // 不显示输入的字符
+    nodelay(stdscr, TRUE); // 非阻塞输入
+    keypad(stdscr, TRUE);  // 启用功能键
+
+    int ch = -1;
+
+    // 等待按键
+    while (!keyCaptured)
+    {
+        ch = getch(); // 获取按键
+
+        if (ch != ERR) // 如果有按键按下
+        {
+            capturedKey = ch;
+            keyCaptured = true;
+            std::cout << "Key pressed: " << (char)ch << std::endl;
+
+            // 检查ESC键
+            if (ch == 27) // ESC键
+            {
+                break;
+            }
+        }
+
+        usleep(10000); // 睡眠10ms，减少CPU占用
+    }
+
+    // 清理ncurses
+    endwin();
+
+    return capturedKey;
+}
 #endif
 
+// 测试代码12
 int main()
 {
     while (1)
@@ -102,9 +175,9 @@ int main()
         }
         if (key != -1)
         {
-            std::cout << "\nCaptured key code: " << std::dec << key << " " << (char)key;
+            std::cout << "Captured key code: " << std::dec << key << " " << (char)key << std::endl;
         }
     }
-    std::cout << "\nExit execution." << std::endl;
+    std::cout << " Exit execution." << std::endl;
     return 0;
 }

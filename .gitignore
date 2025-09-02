@@ -1,4 +1,6 @@
 build/
 .cache/
 docs/
+.vscode/
+build.bat
 compile_commands.json

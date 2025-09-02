@@ -499,6 +499,42 @@ void Coach::handleTrainingOptions() const {
 void Coach::handleTrainingReward(const Sport& sport) const {
     //从主角类中获取接口
 
+    // 更新JSON文件中的器材拥有状态
+    std::ifstream fileIn("SportsParam.json");
+    if (!fileIn.is_open()) {
+        std::cerr << "无法打开SportsParam.json文件进行读取" << std::endl;
+        return;
+    }
+    
+    try {
+        json sports_json;
+        fileIn >> sports_json;
+        fileIn.close();
+        
+        // 根据运动类型更新器材拥有状态
+        if (sport.name == "篮球" && sports_json.contains("basketball")) {
+            sports_json["basketball"]["if_have_ball"] = true;
+        } else if (sport.name == "足球" && sports_json.contains("football")) {
+            sports_json["football"]["if_have_ball"] = true;
+        } else if (sport.name == "羽毛球" && sports_json.contains("badminton")) {
+            sports_json["badminton"]["if_have_bat"] = true;
+        }
+        
+        // 写回JSON文件
+        std::ofstream fileOut("SportsParam.json");
+        if (!fileOut.is_open()) {
+            std::cerr << "无法打开SportsParam.json文件进行写入" << std::endl;
+            return;
+        }
+        
+        fileOut << sports_json.dump(4); // 使用4个空格进行格式化
+        fileOut.close();
+        
+        std::cout << "已成功获得" << sport.name << "器材！" << std::endl;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "JSON处理错误: " << e.what() << std::endl;
+    }
 }
     
 /**

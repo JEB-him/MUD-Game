@@ -1,3 +1,4 @@
+#pragma once
 /**
  * @brief 非玩家角色类
  * @details   身份一览：学生Student、舍友Roommate(继承于学生)、宿舍管理员DormManager 、
@@ -16,8 +17,7 @@
  */
 class NPC {
 public:
-    NPC(const std::string& title, const std::string& job)
-        : title(title), job(job) {}
+    NPC(const std::string& title, const std::string& job);
 
     virtual ~NPC() = default;
 
@@ -59,8 +59,7 @@ protected:
  * */
 class Student : public NPC {
 public:
-    Student(const std::string& title, int intelligence = 50)
-        : NPC(title, "学生"), intelligence(intelligence);
+    Student(const std::string& title, int intelligence = 50);
 
     void handleInteraction(int option_index) const override;
 
@@ -79,8 +78,7 @@ protected:
 class SeniorStudent : public Student {
 public:
     SeniorStudent(const std::string& title, int intelligence = 60, 
-                 const std::string& major = "计算机")
-        : Student(title, intelligence), major(major);
+                 const std::string& major = "计算机");
 
     void handleInteraction(int option_index) const override;
 
@@ -102,8 +100,7 @@ private:
  * */
 class Roommate : public Student {
 public:
-    Roommate(const std::string& title, int intelligence = 50)
-        : Student(title, intelligence);
+    Roommate(const std::string& title, int intelligence = 50);
         
     /**
      * @brief 完成玩家请室友带饭后交互内容
@@ -137,8 +134,7 @@ private:
  * */
 class DormManager : public NPC {
 public:
-    DormManager(const std::string& title)
-        : NPC(title, "宿舍管理员"), familiarity(0);
+    DormManager(const std::string& title);
 
     /**
      * @brief 处理对话
@@ -168,8 +164,7 @@ private:
 class Employer : public NPC {
 public:
     Employer(const std::string& title, int money_reward, int stamina_cost, 
-             const std::string& promotion_text)
-        : NPC(title, "招聘人员"), money_reward(money_reward), stamina_cost(stamina_cost);
+             const std::string& promotion_text);
 
     /**
      * @brief 处理与招聘人员的交互
@@ -187,8 +182,7 @@ private:
  * */
 class Librarian : public NPC {
 public:
-    Librarian(const std::string& title)
-        : NPC(title, "图书管理员");
+    Librarian(const std::string& title);
 
     /**
      * @brief 处理与图书管理员的交互
@@ -205,9 +199,7 @@ public:
     CanteenStaff(const std::string& title, 
                 const std::vector<std::string>& food_types,
                 const std::vector<int>& stamina_recovery,
-                const std::vector<int>& food_costs)
-        : NPC(title, "食堂工作人员"), food_types(food_types), 
-          stamina_recovery(stamina_recovery), food_costs(food_costs);
+                const std::vector<int>& food_costs);
 
     /**
      * @brief 处理与食堂工作人员的交互
@@ -230,8 +222,7 @@ private:
  * */
 class Professor : public NPC {
 public:
-    Professor(const std::string& title, const std::string& subject)
-        : NPC(title, "教师"), subject(subject);
+    Professor(const std::string& title, const std::string& subject);
     /**
      * @brief 处理与教师的交互
      */
@@ -246,8 +237,14 @@ private:
  * */
 class Coach : public Professor {
 public:
-    Coach(const std::string& title, const std::string& sport_type)
-        : Professor(title, "体育"), sport_type(sport_type);
+    struct SportData {     ///< 运动项目数据结构体
+        std::string name;  // 运动项目名称
+        double time_cost;   // 消耗时间（小时）
+        int cost;          // 总开销（金币）
+        int stamina_gain;   // 体力收益
+    };
+    
+    Coach(const std::string& title, const std::string& sport_type);
     
     /**
      * @brief 处理与教练员的交互
@@ -262,7 +259,7 @@ public:
     /**
      * @brief 处理训练奖励
      */
-    void handleTrainingReward(const Sport& sport) const;
+    void handleTrainingReward(const Coach::SportData& sport) const;
     
     /**
      * @brief 初始化运动项目数据
@@ -276,12 +273,6 @@ public:
     std::string getSportType() const;
 
 private:
-    struct SportData {     ///< 运动项目数据结构体
-        std::string name;  // 运动项目名称
-        double time_cost;   // 消耗时间（小时）
-        int cost;          // 总开销（金币）
-        int stamina_gain;   // 体力收益
-    };
     
     std::string sport_type; ///< 运动类型
     std::vector<SportData> sports_data; ///< 运动项目数据

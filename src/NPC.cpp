@@ -3,6 +3,9 @@
 * */
 
 #include "NPC.h"
+#include "Protagonist.h"
+#include "tools.h"
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -66,7 +69,7 @@ void NPC::handleInteraction(int option_index) const {
     /// @brief 处理具体交互选项（可被子类重写）
     std::cout << "你选择了：" << interaction_options[option_index] << "\n";
     // 基类默认处理，子类可以重写实现具体逻辑
-    std::cout << "这个功能还在开发中。\n";
+    std::cout << "这个功能还在开发中。\n"; // 正常应该不会显示
 }
 
 /// @brief 获取称呼
@@ -90,7 +93,7 @@ void NPC::addInteractionOption(const std::string& option) { interaction_options.
 /**
 *@brief 学生类构造函数
 * */
-Student::Student(const std::string& title, int intelligence = 50)
+Student::Student(const std::string& title, int intelligence)
     : NPC(title, "学生"), intelligence(intelligence) {
     setInteractionText("你好，我是学生" + title + "，我们一起学习吧！");
     addInteractionOption("请教问题");
@@ -115,8 +118,8 @@ void Student::setIntelligence(int value) { intelligence = value; } ///< 设置�
 /**
 *@brief 学长类构造函数
 * */
-SeniorStudent::SeniorStudent(const std::string& title, int intelligence = 60, 
-             const std::string& major = "计算机")
+SeniorStudent::SeniorStudent(const std::string& title, int intelligence , 
+             const std::string& major)
     : Student(title, intelligence), major(major) {
     setIdentity("学长");
     setInteractionText("你好，我是" + major + "专业的学长" + title + "，最近有点忙，能帮帮我吗？");
@@ -171,7 +174,7 @@ void SeniorStudent::setMajor(const std::string& new_major) { major = new_major; 
 /**
  * @brief 舍友类构造函数
  * */
-Roommate::Roommate(const std::string& title, int intelligence = 50)
+Roommate::Roommate(const std::string& title, int intelligence )
     : Student(title, intelligence) {
     setIdentity("舍友");
     setInteractionText("嘿，" + title + "在这里！需要帮忙吗？");
@@ -483,7 +486,7 @@ void Coach::handleTrainingOptions() const {
             
             if (player_gold >= sport.cost) {
                 std::cout << "金币足够，训练成功！\n";
-                Coach::handleTrainingReward(sport);
+                handleTrainingReward(sport);
             } else {
                 std::cout << "金币不足！需要" << sport.cost << "金币，但您只有" << player_gold << "金币。训练失败！\n";
             }
@@ -496,7 +499,7 @@ void Coach::handleTrainingOptions() const {
 /**
  * @brief 处理训练奖励
  * */
-void Coach::handleTrainingReward(const Sport& sport) const {
+void Coach::handleTrainingReward(const SportData& sport) const {
     //从主角类中获取接口
 
     // 更新JSON文件中的器材拥有状态

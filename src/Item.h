@@ -9,8 +9,8 @@
  *          物品的作用是提供增减益，其实现逻辑参考群里发的"增减益设计建议——隐藏属性方案.docx"
  *          物品的基础信息和增减益数据目前考虑通过json文件存储和后续修改
  * @note 接口使用说明:
- *          首先要创建ItemManager类对象。
- *          通过unique_ptr<Item> item_ptr = item_manager.create(item_name) 动态地创建名字为item_name的物品的对象。
+ *          首先要创建ItemCreator类对象。
+ *          通过unique_ptr<Item> item_ptr = item_creator.create(item_name) 动态地创建名字为item_name的物品的对象。
  *          由此创建的对象可以使用其父类的接口，即item、Equippable、Comsumable接口。
  *          任何物品类不提供访问和修改物品增减益效果的任何方法，只能通过use或equipAndUnequip接口使其生效。
  * @note 接口说明：
@@ -24,7 +24,7 @@
  *              equippable.equipAndUnquip()   装备/卸下
  *          消耗品Comsumable接口:
  *              comsumable.use()  使用物品(调用完记得释放指向该物品的智能指针)
- *          管理器ItemManager接口:
+ *          管理器ItemCreator接口:
  *              createItem(string item_name)  创建名字为item_name的物品(item_name即每个细分类别的类名，可查表"item_name.txt")
  * */
 #pragma once
@@ -217,10 +217,10 @@ private:
 * @param config_file_item 存储所有物品参数的json文件，方便物品参数读取和修改
 * @param config_item 读取json具体数据的对象
 */
-class ItemManager {
+class ItemCreator {
 public:
-    ItemManager(char[] file_name);
-    ~ItemManager();
+    ItemCreator(string file_name);
+    ~ItemCreator();
     unique_ptr<Item> createItem(string item_name);
 private:
     ifstream config_file_item;

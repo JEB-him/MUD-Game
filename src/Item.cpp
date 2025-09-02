@@ -20,8 +20,9 @@ enum class ItemType {
     sports_equipment,
     study_aid,
     food,
-    gearning_aid,
-    health_item
+    learning_aid,
+    health_item,
+    unknown
 };
 
 /**
@@ -31,18 +32,18 @@ enum class ItemType {
  */
 ItemType getItemType(const string& item_class) {
     static const map<string, ItemType> stringToEnum = {
-        {"StudyMaterial", ItemType::StudyMaterial},
-        {"SportsEquipment", ItemType::SportsEquipment},
-        {"StudyAid", ItemType::StudyAid},
-        {"Food", ItemType::Food},
-        {"LearningAid", ItemType::LearningAid},
-        {"HealthItem", ItemType::HealthItem},
+        {"study_material", ItemType::study_material},
+        {"sports_equipment", ItemType::sports_equipment},
+        {"study_aid", ItemType::study_aid},
+        {"food", ItemType::food},
+        {"learning_aid", ItemType::learning_aid},
+        {"health_item", ItemType::health_item},
     };
     auto it = stringToEnum.find(item_class);
     if (it != stringToEnum.end()) {
         return it->second;
     }
-    return ItemType::Unknown;
+    return ItemType::unknown;
 }
 
 /**
@@ -298,13 +299,13 @@ void HealthItem::use(Protagonist& protagonist) override {
  * @brief 初始化json文件读取
  * @param file_name 包含所有物品参数信息的json文件的名字（字符串）
  */
-ItemManager::ItemManager(char[] file_name) {
+ItemCreator::ItemCreator(string file_name) {
     config_file_item.open(file_name);
     if (!config_file_item.is_open()) {
         throw std::runtime_error("无法打开物品配置文件");
     }
     config_file_item >> config_item;
-    config_file.close();
+    config_file_item.close();
 }
 
 /**
@@ -313,7 +314,7 @@ ItemManager::ItemManager(char[] file_name) {
  * @return unique智能指针
  * TODO: json文件数据不可强转为string的问题待解决,eg: 第297、298行中的(string)强转
  */
-unique_ptr<Item> ItemManager::createItem(string item_name) {
+unique_ptr<Item> ItemCreator::createItem(string item_name) {
     /**
     * @note 读取该物品所属类，并将string类型的类名转化为enum类型
     */
@@ -323,7 +324,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
     * @note 根据物品所属类获取物品参数，动态创建对象
     */
     switch (item_class) {
-    case study_material:
+    case ItemType::study_material:
         /**
         * @brief 读取物品参数
         */
@@ -340,7 +341,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
         return item_ptr;
 
         break;
-    case sports_equipment:
+    case ItemType::sports_equipment:
         /**
         * @brief 读取物品参数
         */
@@ -355,7 +356,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
         return item_ptr;
 
         break;
-    case study_aid:
+    case ItemType::study_aid:
         /**
         * @brief 读取物品参数
         */
@@ -372,7 +373,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
         return item_ptr;
 
         break;
-    case food:
+    case ItemType::food:
         /**
         * @brief 读取物品参数
         */
@@ -390,7 +391,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
         return item_ptr;
 
         break;
-    case learning_aid:
+    case ItemType::learning_aid:
         /**
         * @brief 读取物品参数
         */
@@ -410,7 +411,7 @@ unique_ptr<Item> ItemManager::createItem(string item_name) {
         return item_ptr;
 
         break;
-    case health_item:
+    case ItemType::health_item:
         /**
         * @brief 读取物品参数
         */

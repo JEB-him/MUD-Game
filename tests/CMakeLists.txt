@@ -14,8 +14,8 @@ target_compile_options( test
     PRIVATE -Wall -Wextra
 )
 
-# 包含 Catch2 头文件
-target_include_directories(CatchMain PUBLIC "${PROJECT_SOURCE_DIR}/Catch")
+# 包含第三方头文件
+target_include_directories(CatchMain PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 # 包含项目库的头文件
 target_include_directories(test PRIVATE "${PROJECT_SOURCE_DIR}/src")
 # 链接项目库

@@ -10,6 +10,8 @@ add_library(OUCSurvSim STATIC ${SOURCES})
 
 # 为 OUCSurvSim 添加版本号宏
 target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}")
+# 包含第三方头文件
+target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 # 将 OUCSurvSim 静态库链接到 game
 target_link_libraries(game PUBLIC OUCSurvSim)
 

@@ -11,7 +11,7 @@ target_compile_options( CatchMain
 )
 
 target_compile_options( test
-    PRIVATE -Wall -Wextra
+    PRIVATE -Wall -Wextra -g
 )
 
 # 包含第三方头文件

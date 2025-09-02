@@ -58,7 +58,7 @@ private:
 class SpecialChar {
 public:
     const std::string special_char;     ///< 因为这些符号一般都占 3 字节，所以需要使用string
-    const int width;                    ///< 符号宽度
+    const int width;                    ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
     /**
      * @brief 构造函数，参数意义见上
      */

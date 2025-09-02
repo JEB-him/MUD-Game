@@ -129,7 +129,6 @@ private:
     struct {
         bool top = 0, middle = 0, bottom = 0;
     } checked;
-
     bool        modified;                    // 地图是否被修改过
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息

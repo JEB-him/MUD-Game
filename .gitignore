@@ -2,6 +2,7 @@ build/
 .cache/
 docs/
 compile_commands.json
+.vscode/
 
 game
 test

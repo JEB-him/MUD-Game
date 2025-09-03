@@ -1,0 +1,9 @@
+{
+    "editor.suggest.showClasses": false,
+    "editor.suggest.showConstructors": false,
+    "editor.suggest.showEnums": false,
+    "editor.suggest.showEvents": false,
+    "editor.suggest.showFunctions": false,
+    "editor.suggest.showStructs": false,
+    "editor.quickSuggestionsDelay": 10
+}

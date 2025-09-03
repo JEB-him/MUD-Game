@@ -1,4 +1,5 @@
 #include "tools.h"
+#pragma once
 
 Position::Position(const int& x, const int& y) : x(x), y(y) {}
 

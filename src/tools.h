@@ -1,10 +1,11 @@
-/**
+﻿/**
  * @file tools.h
  * @details 这是一个工具文件，用于存放常用的工具类
  * @author Jie Jiang
  */
 
 #include <string>
+#pragma once
 
 /**
  * @brief 一个通用的坐标类，建议都使用该类来储存坐标

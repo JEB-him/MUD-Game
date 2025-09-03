@@ -3,7 +3,6 @@
 #include "NPC.h"
 
 TEST_CASE("npc seniorstudent", "[npc][SeniorStudent]") {
-    system("chcp 65001");
     SeniorStudent SeniorStudent("aaa", 70, "computer");
     
     // Important!!! 这种表达式必须使用一个大括号括起来
@@ -15,6 +14,6 @@ TEST_CASE("npc seniorstudent", "[npc][SeniorStudent]") {
         REQUIRE(SeniorStudent.getTitle() == "李四");
     }
 
-    std::cout << SeniorStudent.getInteractionText() << std::endl;
+    // std::cout << SeniorStudent.getInteractionText() << std::endl;
     SeniorStudent.startInteraction();
 }

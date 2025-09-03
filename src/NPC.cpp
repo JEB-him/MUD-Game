@@ -27,10 +27,10 @@ void NPC::startInteraction() const {
        
     // 显示一级交互选项
     std::cout << "请选择交互选项：\n";
+    std::cout << "0. 退出交互\n";
     for (size_t i = 0; i < static_cast<int>(interaction_options.size()); ++i) {
         std::cout << i + 1 << ". " << interaction_options[i] << "\n";
     }
-    std::cout << "0. 退出交互\n";
         
     int choice;
     while (true) {
@@ -93,10 +93,13 @@ void NPC::addInteractionOption(const std::string& option) { interaction_options.
 /**
 *@brief 学生类构造函数
 * */
-Student::Student(const std::string& title, int intelligence)
+Student::Student(const std::string& title, int intelligence, bool initBase)
     : NPC(title, "学生"), intelligence(intelligence) {
-    setInteractionText("你好，我是学生" + title + "，我们一起学习吧！");
-    addInteractionOption("请教问题");
+    if (initBase) {
+        setInteractionText("你好，我是学生" + title + "，我们一起学习吧！");
+        addInteractionOption("请教问题");
+        std::cout << "xueshenglei111" << std::endl;
+    }
 }
 
 /**
@@ -120,7 +123,7 @@ void Student::setIntelligence(int value) { intelligence = value; } ///< 设置�
 * */
 SeniorStudent::SeniorStudent(const std::string& title, int intelligence , 
              const std::string& major)
-    : Student(title, intelligence), major(major) {
+    : Student(title, intelligence, false), major(major) {
     setIdentity("学长");
     setInteractionText("你好,我是" + major + "专业的学长" + title + ",最近有点忙,能帮帮我吗?");
     addInteractionOption("帮助处理问题");
@@ -175,7 +178,7 @@ void SeniorStudent::setMajor(const std::string& new_major) { major = new_major; 
  * @brief 舍友类构造函数
  * */
 Roommate::Roommate(const std::string& title, int intelligence )
-    : Student(title, intelligence) {
+    : Student(title, intelligence, false) {
     setIdentity("舍友");
     setInteractionText("嘿，" + title + "在这里！需要帮忙吗？");
     addInteractionOption("开黑打游戏");

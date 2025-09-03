@@ -60,7 +60,9 @@ protected:
  * */
 class Student : public NPC {
 public:
-    Student(const std::string& title, int intelligence = 50);
+    bool initBase;
+    Student(const std::string& title, int intelligence = 50, bool initBase = true);
+    virtual ~Student() = default;
 
     void handleInteraction(int option_index) const override;
 
@@ -71,6 +73,7 @@ public:
 
 protected:
     mutable int intelligence; ///< 智力
+    
 };
 
 /**

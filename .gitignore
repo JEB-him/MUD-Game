@@ -2,8 +2,6 @@ build/
 .cache/
 docs/
 compile_commands.json
-
 game
 test
-
 *.exe

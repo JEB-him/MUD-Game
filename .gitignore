@@ -2,3 +2,5 @@ build/
 .cache/
 docs/
 compile_commands.json
+src/json.hpp
+build.bat

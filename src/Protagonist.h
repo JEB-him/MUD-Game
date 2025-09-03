@@ -40,6 +40,7 @@ namespace BasicValue {
         LEARNING_TIME_REDUCTION_RATE,///< 学习时间消耗减少比率
         LEARNING_HEALTH_PRESERVATION_RATE,///< 学习健康保留率
         IS_INJURED           ///< 受伤状态标志
+
     };
 
      /**
@@ -57,7 +58,6 @@ namespace BasicValue {
 class Protagonist {
 public:
 
-   
     /**
      * @brief 构造函数：初始化主角基础数据（属性、状态）
      * @param protagonistId 主角唯一ID（如“OUC_2024_001”，供Controller区分角色）
@@ -87,6 +87,7 @@ public:
 
 
 
+
     /**
      * @brief 获取所有隐藏属性（供Controller同步UI/存档）
      * @return std::unordered_map 键值对：key=BasicValue::ProtagonistAttr，value=当前值
@@ -103,11 +104,6 @@ public:
     BasicValue::HealthState getHealthState(std::string& outStateDesc) const;
 
 
-
-
-
-
-    
     // -------------------------- 2. 属性修改接口（供Controller/Item类交互） --------------------------
     /**
      * @brief 通用属性修改（供Controller和Item类调用，如学习/打工导致的属性变化）
@@ -115,7 +111,9 @@ public:
      * @param val 变化量（isAdd=true）或目标值（isAdd=false）
      * @param isAdd 是否为增减（true=val为变化量，false=val为目标值）
      * @return Message 操作结果：status=0（成功）/-1（属性名错误）/1（值越界）；msg=结果描述
+
      * @note 对于受伤状态（IS_INJURED），val=1表示受伤，val=0表示恢复 isAdd参数为false
+
      */
     Message updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd = true);
 
@@ -156,6 +154,7 @@ private:
     int m_money ;                  ///< 金币（≥0）
     int m_health ;                 ///< 健康状态（0~100，关联HealthState）
     //隐藏属性
+
     float intelSci_boost = 0.0;		            	///< 理科智力基础增确保大于等于0
     float intelSci_boost_rate = 1.0;		        ///< 理科智力比例增量确保大于等于1
     float intelArts_boost = 0.0;			        ///< 文科智力基础增量确保大于等于0
@@ -167,7 +166,7 @@ private:
   
   
   
-  // -------------------------- 私有辅助方法（仅内部数据校验/同步） --------------------------
+ 
     /**
      * @brief 校验属性值是否合法（如health 0~100，money≥0）
      * @param attrKey 属性名

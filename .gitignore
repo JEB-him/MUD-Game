@@ -1,6 +1,9 @@
 build/
+cmake-build-debug/
 .cache/
 docs/
+.idea/
+.vscode/
 compile_commands.json
 
 game

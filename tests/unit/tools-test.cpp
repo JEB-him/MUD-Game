@@ -34,5 +34,4 @@ TEST_CASE("Message should be set correctly", "[tools][message]") {
 TEST_CASE("SpecialChar should be set correctly", "[tools][special_char]") {
     SpecialChar special_char1("\U000f1302", 2);
     REQUIRE(special_char1.special_char == "󱌂");
-    std::cout << special_char1.special_char << std::endl;
 }

@@ -17,10 +17,12 @@
  *          7. 加载地图文件时将会删除上方的空白\n
  *          8. 要求地图尺寸不大于 100x50 （宽x高）
  *          9. 为了避免 Map 检测到地图尺寸异常，请不要在文件末尾添加空行
+ *         10. 为了同时兼容 Linux 和 Windows, 地图路径只能是一个文件名，不能有任何 `/` 或 '\' 符号
  * @note 该类的重要原则应当是保证任何状态下 Map 类中的所有成员全部设置正确
  */
 class Map {
 public:
+    inline const static std::string BASE_DIR = ROOT_DIR "maps/";
     /**
      * @brief 地图最大宽度
      */
@@ -35,7 +37,8 @@ public:
     constexpr static int CHAR_MAXN = 62;
     /**
      * @brief 所有特殊符号的定义
-     * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中
+     * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中\n
+     *       请按照顺序填写
      */
     inline const static SpecialChar SPECIAL_CHARS[CHAR_MAXN] = {
         SpecialChar("\U000f1302", 2),
@@ -46,16 +49,21 @@ public:
         SpecialChar("\U00002557", 1),
         SpecialChar("\U0000255d", 1),
         SpecialChar("\U00002550", 1),
-        SpecialChar("\U00002551", 1)
+        SpecialChar("\U00002551", 1),
+        SpecialChar("", -1),    ///< NPC
+                                                         // 待补充
+        SpecialChar("", -1),    ///< 入口
+                                                          // 待补充
+        SpecialChar("", -1),    ///< 出口
     };
 
     Map() = default;
     /**
      * @brief 使用地图文件初始化地图
-     * @param map_path String 类型
+     * @param filename String 类型
      * @param pos 设置主角的初始坐标
      */
-    Map(const std::string& map_path, const Position& pos=Position());
+    Map(const std::string& filename, const Position& pos=Position());
 
     /**
      * @brief 析构函数，Map 应当将当前地图下的所有修改保存到文件中
@@ -160,12 +168,7 @@ private:
      * @brief 加载地图
      * @param map_path 地图文件路径
      */
-    Message loadMap();
-
-    /**
-     * @brief 储存行到地图中，并检查是否含有非法字符
-     */
-    bool line_copy(char map_line[], const std::string& line);
+    Message loadMap(const std::string& filename);
 
     /**
      * @brief 对行的类型进行辨别
@@ -180,12 +183,23 @@ private:
     bool processMap();
 
     /**
+     * @brief 在沿地图边界检查地图时，修改参数以进行转向
+     */
+    bool calcDir(int& x, int& y, const bool& reset=false);
+
+    /**
+     * @brief 检查宽字符
+     */
+    bool checkWideChar(const int& x, const int& y);
+
+    /**
      * @brief 获取字符的 index
      */
     static int char2index(const char& ch);
 
     /**
-     * @brief 在沿地图边界检查地图时，判断是否应当转向
+     * @brief 储存行到地图中，并检查是否含有非法字符
      */
-    int calcDir(int& x, int& y, const bool& reset);
+    static bool line_copy(char map_line[], const std::string& line);
+
 };

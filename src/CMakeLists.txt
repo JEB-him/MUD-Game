@@ -8,8 +8,11 @@ file(GLOB_RECURSE excluded_files main.cpp)
 list(REMOVE_ITEM SOURCES ${excluded_files})
 add_library(OUCSurvSim STATIC ${SOURCES})
 
-# 为 OUCSurvSim 添加版本号宏
-target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}")
+file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}" ROOT_DIR)
+string(REPLACE "\\" "/" ROOT_DIR "${ROOT_DIR}/")
+
+# 为 OUCSurvSim 添加版本号宏以及根目录
+target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}" PUBLIC ROOT_DIR="${ROOT_DIR}")
 # 包含第三方头文件
 target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 # 将 OUCSurvSim 静态库链接到 game

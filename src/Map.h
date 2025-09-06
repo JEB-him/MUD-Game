@@ -50,11 +50,11 @@ public:
         SpecialChar("\U0000255d", 1),
         SpecialChar("\U00002550", 1),
         SpecialChar("\U00002551", 1),
-        SpecialChar("", -1),    ///< NPC
+        SpecialChar("\U0000c6c3", 2, "blue"),
                                                          // 待补充
-        SpecialChar("", -1),    ///< 入口
+        SpecialChar("", 4),    ///< 入口
                                                           // 待补充
-        SpecialChar("", -1),    ///< 出口
+        SpecialChar("", 4),    ///< 出口
     };
 
     Map() = default;
@@ -106,8 +106,8 @@ public:
      *             3: 碰撞器械，位置不变，Controller 应当与物品类交互\n
      *             4: 碰撞墙壁，位置不变\n
      * @param[out] id 出口/NPC/器械编号\n
-     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id, 器械同理\n
-     *             
+     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id\n
+     *             器械返回 SPECIAL_CHARS 中的索引\n
      * @note 该函数会通过修改 event_type 来告诉 Controller 事件类型
      * @return a Message.
      */
@@ -120,11 +120,16 @@ public:
      *       程序 Controller 也应当调用 save()，这要求程序手动管理信号！！！
      */
     Message save() const;
+
+    /**
+     * @brief 检查这个坐标处是否有器械、NPC、出口
+     * @param pos Position，这个位置的坐标
+     * @return a int index of SPECIAL_CHARS, -1 表示未碰撞 -2 表示空间狭小/墙壁
+     */
+    int detectCollision(const Position& pos) const;
 private:
     enum class LineType {
-        TOP_OF_WALL,           // 从上到下第一行墙壁,即地图顶部
-        BOTTOM_OF_WALL,        // 从下到上第一行墙壁,即地图底部
-        MIDDLE_LINE_OF_WALL,   // 中间的墙壁
+        WALL,                  // 墙壁
         EMPTY_LINE,            // 空行
         OVER_SIZE,             // 尺寸超限
         INVAILD_LINE           // 非法的行
@@ -134,19 +139,17 @@ private:
      * @brief 一个结构体，用于储存读取时是否已经读到了某些必要的行
      * @note 此处缩写了，因为与 LineType 前 3 个一一对应
      */
-    struct {
-        bool top = 0, middle = 0, bottom = 0;
-    } checked;
+    bool        is_empty;                    // 地图读取到目前位置是否为空
     bool        modified;                    // 地图是否被修改过
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息
     char        map[MAX_HEIGHT][MAX_WIDTH];  // 地图数组
     // 方向数组
-    inline static int directions[4][2] = {
-        { 0, -1},
-        { 1,  0},
-        { 0,  1},
-        {-1,  0}
+    inline static int DIRECTIONS[4][2] = {
+        {-1, 0},
+        { 0, 1},
+        { 1, 0},
+        { 0,-1}
     };
     // Map path
     std::string map_path;
@@ -171,6 +174,12 @@ private:
     Message loadMap(const std::string& filename);
 
     /**
+     * @brief 设置 NPC 和出口的 ID
+     * @parm rows 扫描的行数
+     */
+    void setId(const int& rows);
+
+    /**
      * @brief 对行的类型进行辨别
      * @return 返回一个 enum class LineType
      */
@@ -193,6 +202,16 @@ private:
     bool checkWideChar(const int& x, const int& y);
 
     /**
+     * @brief 获取出口 ID
+     */
+    int getExitId(const Position& pos);
+
+    /**
+     * @brief 获取NPC ID
+     */
+    int getNPCId(const Position& pos);
+
+    /**
      * @brief 获取字符的 index
      */
     static int char2index(const char& ch);
@@ -201,5 +220,4 @@ private:
      * @brief 储存行到地图中，并检查是否含有非法字符
      */
     static bool line_copy(char map_line[], const std::string& line);
-
 };

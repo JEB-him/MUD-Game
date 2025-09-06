@@ -45,7 +45,7 @@ public:
      *         0 正常退出\n
      *        >0 正常退出，但有部分警告或不恰当参数，不影响程序正常运行
      */
-    Message(const std::string& msg, const int& status);
+    Message(const std::string& msg="", const int& status=0);
 private:
     // private 块中的注释也不会被识别到，无论使用什么形式的注释
 };
@@ -59,12 +59,20 @@ private:
  */
 class SpecialChar {
 public:
-    const std::string special_char;     ///< 因为这些符号一般都占 3 字节，所以需要使用string
-    const int width;                    ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string special_char;            ///< 因为这些符号一般都占 3 字节，所以需要使用string
+    const int width;                           ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string simple_color;            ///< ANSI 普通颜色
+    const std::string rgb_color;               ///< ANSI RGB 颜色
     /**
-     * @brief 构造函数，参数意义见上
+     * @brief 构造函数，有特殊意义的参数见下
+     * @param simple_color 默认为 "white"
+     * @param rgb_color 默认为空，当次参数有值时覆盖 simple_color 的效果
      */
-    SpecialChar(const std::string& specail_char, const int& width);
+    SpecialChar(
+        const std::string& specail_char,
+        const int& width,
+        const std::string& simple_color="white",
+        const std::string& rgb_color="");
 
     /**
      * @brief 默认构造函数

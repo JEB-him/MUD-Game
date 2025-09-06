@@ -1,4 +1,3 @@
-#include <iostream>
 #include "catch.hpp"
 #include "tools.h"
 

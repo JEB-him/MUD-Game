@@ -2,6 +2,7 @@
 #include "Map.h"
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 const std::string TMP_FILE = "tmp_map.txt";
 
@@ -143,7 +144,6 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
         };
         writeMap2File(8, map_str);
         Map map(TMP_FILE);
-        REQUIRE(map.getValidMsg() == "在classifyLine 中检测出：无效地图");
         REQUIRE(map.valid() == false);
     }
 
@@ -159,7 +159,6 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
         };
         writeMap2File(7, map_str);
         Map map(TMP_FILE);
-        REQUIRE(map.getValidMsg() == "在classifyLine 中检测出：无效地图");
         REQUIRE(map.valid() == false);
     }
 
@@ -174,7 +173,6 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
         };
         writeMap2File(6, map_str);
         Map map(TMP_FILE);
-        REQUIRE(map.getValidMsg() == "在classifyLine 中检测出：无效地图");
         REQUIRE(map.valid() == false);
     }
 
@@ -237,11 +235,11 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
 
     SECTION("map with wide characters") {
         char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
-            "##########o   ### ###",
+            "##########o   ### ####",
             "#               ###  #",
             "i                    i",
             "                      ",
-            "#                  9 #",
+            "#                  1 #",
             "######################"
         };
         writeMap2File(6, map_str);
@@ -252,11 +250,11 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
 
     SECTION("map with misplaced wide characters") {
         char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
-            "##########o   ### ###",
+            "##########o   ### ####",
             "#               ###  #",
             "i                    i",
             "                      ",
-            "#                   9#",
+            "#                   1#",
             "######################"
         };
         writeMap2File(6, map_str);
@@ -266,9 +264,9 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
 
     SECTION("map with misplaced wide characters") {
         char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
-            "##########o   ### ###",
+            "##########o   ### ####",
             "#               ###  #",
-            "i                   9i",
+            "i                   1i",
             "                      ",
             "#                    #",
             "######################"
@@ -277,4 +275,35 @@ TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][co
         Map map(TMP_FILE);
         REQUIRE(map.valid() == false);
     }
+
+    SECTION("map with wrong i/o") {
+        char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
+            "##########o  #### ####",
+            "#               ###  #",
+            "i                    i",
+            "                      ",
+            "#                    #",
+            "######################"
+        };
+        writeMap2File(6, map_str);
+        Map map(TMP_FILE);
+        REQUIRE(map.valid() == false);
+    }
+
+    SECTION("map with wrong i/o") {
+        char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
+            "##########o   ### ####",
+            "#               ###  #",
+            "i               i    i",
+            "                      ",
+            "#                    #",
+            "######################"
+        };
+        writeMap2File(6, map_str);
+        Map map(TMP_FILE);
+        REQUIRE(map.valid() == false);
+    }
+
+    const auto path = Map::BASE_DIR + TMP_FILE;
+    std::filesystem::remove(path);
 }

@@ -8,7 +8,7 @@
 #include <filesystem>
 
 Map::Map(const std::string& filename, const Position& pos):
-    modified(false), map() {
+    modified(false), map(), x(-1), y(-1) {
     // 这个地方被搞到了，由于我是在测试中写了很多次 Map，而释放 Map 再创建一个
     // Map 的对象时，C++ 让 map 数组重新使用了原来的内存区域，巧合的导致了一些
     // 没有赋值的地方储存了旧的垃圾值，导致程序出现了异常判断，因此需要在初始
@@ -21,8 +21,10 @@ Map::Map(const std::string& filename, const Position& pos):
         this->is_valid = true;
         this->valid_msg = "";
     }
-    this->x = pos.x;
-    this->y = pos.y;
+    if (x == -1) {
+        this->x = pos.x;
+        this->y = pos.y;
+    }
 }
 
 Map::~Map() {
@@ -52,7 +54,10 @@ Position Map::getPos() const {
  *          2. 主角碰撞完器械、NPC、墙壁以及进入出口后，位置不会发生改变
  */
 Message Map::moveProtagonist(const int& direction, int& event_type, int& id) {
-    int back_code = detectCollision({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
+    if (y + 1 >= MAX_WIDTH) {
+        return {"Bad position", -1};
+    }
+    char back_code = detectCollision({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
     switch (back_code) {
         case -2:    // 墙壁/空间狭小
             event_type = 4;
@@ -60,11 +65,13 @@ Message Map::moveProtagonist(const int& direction, int& event_type, int& id) {
             return {"不可通行：墙壁/空间狭小", 1};
             break;
         case -1:    // 普通移动
+            map[x][y] = ' ';
+            x += DIRECTIONS[direction][0];
+            y += DIRECTIONS[direction][1];
+            map[x][y] = '1';
         case 'i':
             event_type = 0;
             id = -1;
-            x += DIRECTIONS[direction][0];
-            y += DIRECTIONS[direction][1];
             return {"Success", 0};
         case 'o':
             event_type = 2;
@@ -76,34 +83,59 @@ Message Map::moveProtagonist(const int& direction, int& event_type, int& id) {
             return {"与 NPC 交互", 0};
         default:
             event_type = 3;
-            id = back_code;
+            id = char2index(back_code);
             return {"与器械交互", 0};
     }
     return {"", 0};
 }
 
 Message Map::save() const {
-    return {"", 0};
+    std::ofstream map_file(map_path.c_str());
+    if (!map_file.is_open()){
+        return {"无法打开: " + map_path, -1};
+    }
+
+    for (int i = 0; i < MAX_HEIGHT; ++i) {
+        for (int j = 0; j < MAX_WIDTH; ++j)
+            map_file << map[i][j];
+        map_file << std::endl;
+    }
+
+    return {"Success", 0};
 }
 
-int Map::detectCollision(const Position& pos) const {
-    /* 首先判断是否有任何宽字符 */
-    for (int i = 0, st; i < CHAR_MAXN; ++ i) {
-        st = pos.y - SPECIAL_CHARS[i].width + 1;
-        st = std::max(st, 0 );
-        while (st <= pos.y) {
-            if (char2index(map[pos.x][st]) == i) {
-                return i;
-            }
-        }
-    }
-    /* 检查是否到了竖着的出口 */
-    for (int i = std::max(0, pos.x - 1); i <= pos.x; ++i) {
-        if (map[i][pos.y] == 'o') return char2index('e');
-    }
-
+char Map::detectCollision(const Position& pos) const {
     /* 检查是否碰壁或空间狭小 */
     if (map[pos.x][pos.y] == '#' || map[pos.x][pos.y + 1] == '#') return -2;
+
+    /* 判断是否有任何宽字符 */
+    for (int i = 0, st, ed; i < CHAR_MAXN; ++ i) {
+        if (i == 1) continue;
+        if (i == char2index('o')) continue;
+        if (i == char2index('i')) continue;
+        st = pos.y - SPECIAL_CHARS[i].width + 1;
+        st = std::max(st, 0 );
+        ed = std::min(pos.y + SPECIAL_CHARS[1].width - 1, MAX_WIDTH);
+        while (st <= ed) {
+            if (char2index(map[pos.x][st]) == i) {
+                return map[pos.x][st];
+            }
+            ++st;
+        }
+    }
+    if (pos.x != x) {
+        /* 检查是否到横的exit/entry */
+        for (int i = std::max(0, pos.y - 3); i <= std::min(MAX_WIDTH, pos.y + SPECIAL_CHARS[1].width - 1); ++i) {
+            if (map[pos.x][i] == 'o') return 'o';
+            if (map[pos.x][i] == 'i') return 'i';
+        }
+    } else {
+        /* 检查是否到竖的exit/entry */
+        for (int i = std::max(0, pos.x - 1); i <= pos.x; ++i) {
+            if (map[i][pos.y] == 'o' || map[i][pos.y + 1] == 'o') return 'o';
+            if (map[i][pos.y] == 'i' || map[i][pos.y + 1] == 'i') return 'i';
+        }
+    }
 
     return -1;
 }
@@ -163,6 +195,7 @@ Message Map::loadMap(const std::string& filename) {
         LineType line_type = classifyLine(line);
         switch (line_type) {
             case LineType::WALL:
+                if (rows >= MAX_HEIGHT) return {"尺寸超出最大限制", -1};
                 if (!line_copy(map[rows], line)) {
                     return {"无效地图：含有非法字符", -1};
                 }
@@ -189,23 +222,35 @@ Message Map::loadMap(const std::string& filename) {
     bool approved = processMap();
     if (approved) {
         // 设置出口和 NPC 的 Id
-        setId(rows);
+        if (!indexInit(rows)) {
+            return {"地图索引建立，主角生成失败", -1};
+        }
         return {"", 0};
     } else return {"地图未封闭，宽字符放置不合理或未知异常", -1};
 }
 
-void Map::setId(const int& rows) {
-    // 多扫一行放心一些
-    for (int i = 0; i <= std::min(MAX_HEIGHT, rows); ++ i) {
+bool Map::indexInit(const int& rows) {
+    int times = std::min(MAX_HEIGHT, rows + 1);
+    for (int i = 0; i < times; ++i) {
         for (int j = 0;j < MAX_WIDTH; ++ j) {
             if (!map[i][j]) break;
             if (map[i][j] == 'o') {
                 // TODO 添加出口 ID
+            } else if (map[i][j] == 'i') {
+                // TODO 添加入口 ID
             } else if (map[i][j] == '9') {
                 // TODO 添加 NPC ID
+
+            } else if (map[i][j] == '1') {
+                if (x != -1 || y != -1) {
+                    return false;
+                }
+                x = i;
+                y = j;
             }
         }
     }
+    return true;
 }
 
 bool Map::line_copy(char map_line[], const std::string& line) {

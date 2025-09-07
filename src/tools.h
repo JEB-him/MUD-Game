@@ -29,12 +29,13 @@ public:
 /**
  * @brief 一个通用的消息类，用于在调用中返回消息,
  * @details 建议使用该类来返回调用是否成功
- * @note 只有初始化的时候能够对 Message 赋值，以后就不允许更改了
+ * @note 只有初始化的时候能够对 Message 赋值，以后就不允许更改了\n
+ *       **remove the const specifier**
  */
 class Message {
 public:
-    const std::string msg;    ///< 消息体 !const
-    const int status;         ///< 状态码 !const
+    std::string msg;    ///< 消息体
+    int status;         ///< 状态码
 
     /**
      * @brief 初始化一条消息

@@ -51,9 +51,20 @@ public:
         SpecialChar("\U00002550", 1),
         SpecialChar("\U00002551", 1),
         SpecialChar("\U0000c6c3", 2, "blue"),
-                                                         // 待补充
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
         SpecialChar("", 4),    ///< 入口
-                                                          // 待补充
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
         SpecialChar("", 4),    ///< 出口
     };
 
@@ -99,7 +110,7 @@ public:
      *            2: 向下\n
      *            3: 向左\n
      * @param[out] event_type 事件类型, 一个引用\n
-     *             0: 抵达入口/空地 位置变化,无事件发生\n
+     *             0: 抵达入口/空地 位置变化,无事件发生(入口位置不变)\n
      *             1: 碰撞NPC，位置不变，但 Controller 应当与 NPC 交互\n
      *             2: 抵达出口，位置变化，Controller 应当向场景类请求下一个场景
      *             的编号\n
@@ -107,11 +118,27 @@ public:
      *             4: 碰撞墙壁，位置不变\n
      * @param[out] id 出口/NPC/器械编号\n
      *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id\n
-     *             器械返回 SPECIAL_CHARS 中的索引\n
+     *             器械为 SPECIAL_CHARS 中的索引\n
      * @note 该函数会通过修改 event_type 来告诉 Controller 事件类型
      * @return a Message.
      */
     Message moveProtagonist(const int& direction, int& event_type, int& id);
+
+    /**
+     * @brief 传送主角到某一个地点
+     * @details 支持地图内传送到某个 NPC 的附近\n
+     *          一旦成功传送，应当建立一个坐标索引，减少搜索耗时\n
+     *          默认从该对象的下、右、上、左的顺序寻找空位\n
+     *          若无法找到空位，寻找从左到右，从上到下的第一个空位
+     *          TODO 尚未实现空位寻找
+     * @param ind 传送目的地（对象）的 ID 或索引
+     * @param type 传送对象的类别，器械旁/NPC旁/出口入口\n
+     *        0: NPC
+     *        1: 器械
+     *        2: 出口
+     *        3: 入口
+     */
+    Message goTo(const int& ind, const int& type);
 
     /**
      * @brief 保存当前地图到文件中
@@ -120,13 +147,12 @@ public:
      *       程序 Controller 也应当调用 save()，这要求程序手动管理信号！！！
      */
     Message save() const;
-
     /**
      * @brief 检查这个坐标处是否有器械、NPC、出口
      * @param pos Position，这个位置的坐标
-     * @return a int index of SPECIAL_CHARS, -1 表示未碰撞 -2 表示空间狭小/墙壁
+     * @return a char index of SPECIAL_CHARS value, -1 表示未碰撞 -2 表示空间狭小/墙壁
      */
-    int detectCollision(const Position& pos) const;
+    char detectCollision(const Position& pos) const;
 private:
     enum class LineType {
         WALL,                  // 墙壁
@@ -174,10 +200,11 @@ private:
     Message loadMap(const std::string& filename);
 
     /**
-     * @brief 设置 NPC 和出口的 ID
+     * @brief 设置 NPC 和出口等的 ID
      * @parm rows 扫描的行数
+     * @return 返回索引建立是否成功
      */
-    void setId(const int& rows);
+    bool indexInit(const int& rows);
 
     /**
      * @brief 对行的类型进行辨别

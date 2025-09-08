@@ -1,0 +1,11 @@
+{
+    "protagonist": {
+        "protaogonistId": "OUC_2025_08_31",
+        "name": "小明",
+        "intelSci": 10,
+        "intelArts": 10,
+        "strength": 50,
+        "money": 10,
+        "health": 10
+    }
+}

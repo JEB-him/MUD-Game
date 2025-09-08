@@ -10,7 +10,7 @@
  * @brief Map 类，用于读取 map 文件
  * @details 关于地图文件的一些规定：\n
  *          1. 使用 # 来表示墙壁\n
- *          2. 使用 0-9,a-z,A-Z 共 61 个字符来表示所有特殊对象，如床、主角\n
+ *          2. 使用 0-9,a-z,A-Z 共 62 个字符来表示所有特殊对象，如床、主角\n
  *          3. 入口和出口宽度只能为 4，高度只能为 2\n
  *          4. 初始坐标默认为从入口内侧的空白位置（取中点）,
  *          5. 若在地图中检测到主角的符号（由 Special Chars 列表决定）则参数 pos 无效\n
@@ -32,7 +32,7 @@ public:
     /**
      * @brief SPECIAL_CHARS 的最大长度
      */
-    constexpr static int CHAR_MAXN = 61;
+    constexpr static int CHAR_MAXN = 62;
     /**
      * @brief 所有特殊符号的定义
      * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中
@@ -114,11 +114,21 @@ public:
     Message save() const;
 private:
     enum class LineType {
-        FIRST_LINE_OF_WALL,    // 从上到下第一行墙壁,即地图顶部
-        LAST_LINE_OF_WALL,     // 从下到上第一行墙壁,即地图底部
+        TOP_OF_WALL,           // 从上到下第一行墙壁,即地图顶部
+        BOTTOM_OF_WALL,        // 从下到上第一行墙壁,即地图底部
         MIDDLE_LINE_OF_WALL,   // 中间的墙壁
+        EMPTY_LINE,            // 空行
+        OVER_SIZE,             // 尺寸超限
         INVAILD_LINE           // 非法的行
     };
+
+    /**
+     * @brief 一个结构体，用于储存读取时是否已经读到了某些必要的行
+     * @note 此处缩写了，因为与 LineType 前 3 个一一对应
+     */
+    struct {
+        bool top = 0, middle = 0, bottom = 0;
+    } checked;
     bool        modified;                    // 地图是否被修改过
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息
@@ -153,8 +163,29 @@ private:
     Message loadMap();
 
     /**
-     * @brief 添加一行到 map 数组中
+     * @brief 储存行到地图中，并检查是否含有非法字符
+     */
+    bool line_copy(char map_line[], const std::string& line);
+
+    /**
+     * @brief 对行的类型进行辨别
      * @return 返回一个 enum class LineType
      */
-    LineType addLine(Map);
+    LineType classifyLine(const std::string& line);
+
+    /**
+     * @brief 处理所有 NPC 和出入口，并进行封闭性和宽字符放置检查
+     * @return bool 地图是否封闭, 宽字符放置是否合理
+     */
+    bool processMap();
+
+    /**
+     * @brief 获取字符的 index
+     */
+    static int char2index(const char& ch);
+
+    /**
+     * @brief 在沿地图边界检查地图时，判断是否应当转向
+     */
+    int calcDir(int& x, int& y, const bool& reset);
 };

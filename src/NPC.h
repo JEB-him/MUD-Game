@@ -22,12 +22,6 @@ public:
 
     virtual ~NPC() = default;
 
-    /// @brief 树状交互逻辑入口
-    virtual void startInteraction() const;
-
-    /// @brief 处理具体交互选项（可被子类重写）
-    virtual void handleInteraction(int option_index) const;
-
     /// @brief 获取称呼
     std::string getTitle() const;
     /// @brief 获取身份
@@ -45,6 +39,12 @@ public:
     void setInteractionText(const std::string& text);
     /// @brief 添加交互选项
     void addInteractionOption(const std::string& option);
+
+    /// @brief 树状交互逻辑入口
+    virtual void startInteraction() const;
+
+    /// @brief 处理具体交互选项（可被子类重写）
+    virtual void handleInteraction(int option_index) const;
 
 protected:
     std::string title; ///< 称呼
@@ -182,6 +182,19 @@ private:
 };
 
 /**
+ * @brief 老板类
+ */
+class Boss : public NPC {
+public:
+    Boss(const std::string& title);
+    void handleInteraction(int option_index) const override;
+
+private:
+    mutable bool hasPraised; ///< 是否已经邀功过
+    mutable int leaveCount;  ///< 离开次数计数
+};
+
+/**
  * @brief 图书管理员类
  * */
 class Librarian : public NPC {
@@ -234,6 +247,24 @@ public:
 
 private:
     std::string subject; ///< 科目
+};
+
+/**
+ * @brief 文科教师类（大英）
+ */
+class LiberalArtsProfessor : public Professor {
+public:
+    LiberalArtsProfessor(const std::string& title);
+    void handleInteraction(int option_index) const override;
+};
+
+/**
+ * @brief 理科教师类（高数）
+ */
+class ScienceProfessor : public Professor {
+public:
+    ScienceProfessor(const std::string& title);
+    void handleInteraction(int option_index) const override;
 };
 
 /**

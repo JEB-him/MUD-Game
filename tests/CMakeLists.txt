@@ -6,7 +6,7 @@ add_library(CatchMain STATIC
 file(GLOB SOURCES "unit/*.cpp")
 add_executable(test ${SOURCES})
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
     message(STATUS "检测到 Visual Studio 生成器: ${CMAKE_GENERATOR}")
 else()
     message(STATUS "其他平台")

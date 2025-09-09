@@ -5,6 +5,7 @@ add_executable(game main.cpp)
 # 这个地方为了大家编码方便，用了一个不太规范的方法来导入源文件
 file(GLOB SOURCES "*.cpp")
 file(GLOB_RECURSE excluded_files main.cpp)
+file(GLOB_RECURSE excluded_files item.cpp)
 list(REMOVE_ITEM SOURCES ${excluded_files})
 add_library(OUCSurvSim STATIC ${SOURCES})
 

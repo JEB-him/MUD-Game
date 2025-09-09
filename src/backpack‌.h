@@ -1,5 +1,5 @@
 ﻿/**
-* @file beg.h
+* @file backpack‌.h
 * @author Xiaotian Wu(Cheongfan)
 * @brief 背包类
 * */
@@ -23,11 +23,11 @@ using std::vector
 /**
  * @brief 背包类
  * @param item_creator 物品生成器
- * @param beg_space 背包空间，储存所有物品对象的unique智能指针
+ * @param backpack‌_space 背包空间，储存所有物品对象的unique智能指针
  * @param num_items 当前背包物品数量
  * @param capacity  背包最大容量
  */
-class Beg {
+class Backpack‌ {
 public:
 
 	/**
@@ -36,13 +36,13 @@ public:
 	 * @details vector初始容量设定为10，容量超限则扩容10倍
 	 * @details num_items初始值为0
 	 */
-	Beg(int capacity);
+	Backpack‌(int capacity);
 
 	/**
 	 * @brief 背包类构造函数
 	 * @details 循环释放vector的所有unique智能指针
 	 */
-	~Beg();
+	~Backpack‌();
 
 	/**
 	 * @brief 打印序号+背包的所有物品名称
@@ -69,7 +69,7 @@ public:
 
 	/**
 	 * @brief  
-	* @details 利用ItemCreator的方法创造目标物品对象，存入beg_space中，num_items++
+	* @details 利用ItemCreator的方法创造目标物品对象，存入backpack‌_space中，num_items++
 	*/
 	void addItem(string item_name)
 
@@ -82,7 +82,7 @@ public:
 
 private:
 	ItemCreator item_creator;
-	vector<unique_ptr<Item>> beg_space;
+	vector<unique_ptr<Item>> backpack‌_space;
 	int num_items;
 	int capacity;
 };

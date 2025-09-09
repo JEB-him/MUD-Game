@@ -1,9 +1,13 @@
 build/
+cmake-build-debug/
 .cache/
 docs/
+.idea/
 .vscode/
+
 build.bat
 compile_commands.json
+
 game
 test
 *.exe

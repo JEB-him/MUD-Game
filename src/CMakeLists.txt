@@ -10,8 +10,6 @@ set(EXCLUDED_FILES
     "${PROJECT_SOURCE_DIR}/src/Item.cpp"
 )
 
-message(STATUS "SOURCES = ${SOURCES}")
-
 # 从 SOURCES 中移除
 list(REMOVE_ITEM SOURCES ${EXCLUDED_FILES})
 add_library(OUCSurvSim STATIC ${SOURCES})
@@ -27,7 +25,7 @@ target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 target_link_libraries(game PUBLIC OUCSurvSim)
 
 # 检测是否为 Visual Studio 生成器
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
     message(STATUS "检测到 Visual Studio 生成器: ${CMAKE_GENERATOR}")
 else()
     message(STATUS "其他平台")

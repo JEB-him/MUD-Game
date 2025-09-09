@@ -7,6 +7,9 @@
 class View {
 public:
     friend class Controller;
+    /**
+     * @brief 全局重绘
+     * @note 丢失所有已经绘制的图形，仅保留地图，建议在
+     */
 private:
-    
 };

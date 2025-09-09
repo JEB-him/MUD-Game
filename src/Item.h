@@ -27,14 +27,15 @@
  *          管理器ItemCreator接口:
  *              createItem(string item_name)  创建名字为item_name的物品(item_name即每个细分类别的类名，可查表"item_name.txt")
  * */
+
 #pragma once
 #include<iostream>
 #include<string>
-#include"Protagonist.h"
 #include<memory>
 #include <fstream>
 #include <map>
 #include "json.hpp"
+#include"Protagonist.cpp"
 
 using std::string;
 using std::cout;
@@ -226,4 +227,3 @@ private:
     ifstream config_file_item;
     json config_item;
 };
-

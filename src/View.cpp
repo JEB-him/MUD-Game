@@ -75,7 +75,7 @@ void View::get_cursor_position(int& x, int& y) {
 #endif
 }
 
-std::shared_ptr<View> View::getInstance(std::shared_ptr<Controller> controller) const {
+std::shared_ptr<View> View::getInstance(std::shared_ptr<Controller> controller) {
     static auto instance = std::shared_ptr<View>(new View(controller));
     return instance;
 }
@@ -100,6 +100,8 @@ bool View::reDraw() {
     if (width < MIN_WIN_WIDTH || height < MIN_WIN_HEIGHT) {
         return false;
     }
+    // 清屏
+    cout << REASE_S;
     // 设置日志和游戏输出的最大行数
     //         窗口高度-顶部与底部还有中部分割线-地图高度
     logs_height = height - 3 - controller->map->getMaxHeight();
@@ -119,13 +121,18 @@ bool View::reDraw() {
     // 中部
     for (int i = 0; i < height - 2; ++i) {
         std::cout << BV;
-        for (int i = 0; i < controller->map->getMaxWidth(); ++i)
-            std::cout << " ";
+        cout << R_COLS(controller->map->getMaxWidth());
         std::cout << BV;
-        for (int i = 0; i < width - controller->map->getMaxWidth() - 3; ++i)
-            std::cout << BH;
-        std::cout << BRT << std::endl;
+        cout << R_COLS(width - controller->map->getMaxWidth() - 3);
+        std::cout << BV << std::endl;
     }
+    // 中部的分割线
+    cout << SAVECUS;
+    cout << GOTO_XY(controller->map->getMaxHeight() + 1, 0);
+    cout << BLM;
+    cout << R_COLS(controller->map->getMaxWidth());
+    cout << BMM;
+    cout << LOADCUS;
     // 底部
     std::cout << BLB;
     for (int i = 0; i < controller->map->getMaxWidth(); ++i)

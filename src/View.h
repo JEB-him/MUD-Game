@@ -46,7 +46,7 @@ public:
      * @brief 单例模式获取 View 的函数
      * @return 一个 View 的 shared 智能指针
      */
-    std::shared_ptr<View> getInstance(std::shared_ptr<Controller> controller) const; /**
+    static std::shared_ptr<View> getInstance(std::shared_ptr<Controller> controller); /**
      * @brief 全局重绘
      * @note 丢失所有已经绘制的图形，仅保留地图，建议在窗口大小发生改变时应用此函数
      * @return bool

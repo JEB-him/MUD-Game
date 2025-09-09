@@ -11,7 +11,7 @@ Controller::Controller(
 }
 
 std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const std::string& log_dir, const std::string root_dir) {
-    static std::shared_ptr<Controller> instance(new Controller(level, log_dir, root_dir));
+    static auto instance = std::shared_ptr<Controller>(new Controller(level, log_dir, root_dir));
     return instance;
 }
 

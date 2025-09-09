@@ -15,6 +15,12 @@ int main() {
     exit(-1);
 #endif
 #ifdef _WIN32
+    // 启用虚拟终端
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hConsole, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING; // 启用虚拟终端
+    SetConsoleMode(hConsole, dwMode);
     system("chcp 65001");
 #endif
     cout << "你好世界.\n";

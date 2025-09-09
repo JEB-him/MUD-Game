@@ -103,6 +103,18 @@ public:
     Position getPos() const;
 
     /**
+     * @brief 获取地图最大宽度
+     * @return a int
+     */
+    int getMaxWidth() const;
+
+    /**
+     * @brief 获取地图最大高度
+     * @return a int
+     */
+    int getMaxHeight() const;
+
+    /**
      * @brief 移动主角
      * @param[in] direction 方向\n
      *            0: 向上\n
@@ -170,6 +182,8 @@ private:
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息
     char        map[MAX_HEIGHT][MAX_WIDTH];  // 地图数组
+    int         max_width;                   // 地图最大宽度
+    int         max_height;                  // 地图最大高度
     // 方向数组
     inline static int DIRECTIONS[4][2] = {
         {-1, 0},

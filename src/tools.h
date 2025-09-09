@@ -7,6 +7,17 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
+
+// 定义 RGB 颜色类
+class RGB {
+public:
+    std::uint8_t r;  // 红色分量
+    std::uint8_t g;  // 绿色分量
+    std::uint8_t b;  // 蓝色分量
+
+    RGB(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
+};
 
 /**
  * @brief 一个通用的坐标类，建议都使用该类来储存坐标
@@ -60,20 +71,21 @@ private:
  */
 class SpecialChar {
 public:
-    const std::string special_char;            ///< 因为这些符号一般都占 3 字节，所以需要使用string
-    const int width;                           ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
-    const std::string simple_color;            ///< ANSI 普通颜色
-    const std::string rgb_color;               ///< ANSI RGB 颜色
+    const std::string special_char;    ///< 因为这些符号一般都占 3 字节，所以需要使用string
+    const int width;                   ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string simple_color;    ///< ANSI 普通颜色
+    const RGB rgb_color;               ///< ANSI RGB 颜色
     /**
      * @brief 构造函数，有特殊意义的参数见下
      * @param simple_color 默认为 "white"
-     * @param rgb_color 默认为空，当次参数有值时覆盖 simple_color 的效果
+     * @param rgb_color 当 simple_color 为空时启用
      */
     SpecialChar(
-        const std::string& specail_char,
+        const std::string& special_char,
         const int& width,
         const std::string& simple_color="white",
-        const std::string& rgb_color="");
+        const RGB& rgb_color=RGB(0, 0, 0)
+    );
 
     /**
      * @brief 默认构造函数

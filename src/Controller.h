@@ -56,7 +56,11 @@ public:
 
     /**
      * @brief 游戏入口函数
-     * @details 游戏入口函数，供 main() 调用
+     * @details 游戏入口函数，供 main() 调用\n
+     *          游戏执行流程：
+     *          1. init
+     *          2. 登录/注册
+     *          3. 死循环等待按键响应
      * @return 一个状态码，供游戏 exit 使用
      */
     int run();
@@ -77,8 +81,11 @@ private:
     // 日志等级
     LogLevel level;
 
-    // Model 类的智能指针
+    //
+    // Model 的智能指针
     std::shared_ptr<Map> map;
+    std::shared_ptr<Protagonist> protagonist;
+    // std::shared_ptr<Backpack> backpack;
     // TODO 补充自己的智能指针
     // 要求： 若该类唯一，则可使用智能指针管理
 
@@ -98,21 +105,50 @@ private:
     Message init(const bool& create);
 
     /**
+     * TODO
      * @brief 登录
      * @details 实现登录逻辑
      */
+    Message playerLogin(const std::string username);
     
     /**
+     * TODO
      * @brief 注册
-     * @note 要求注册完立即调用保存游戏
+     * @details 应当用户进行一系列对话，在函数内部调用 View 的函数实现角色属性的设置
+     * @note 要求注册完立即调用保存游戏（或者可以稍微延后一点）
      */
+    Message playerRegister(const std::string username);
 
     /**
+     * TODO
      * @brief 保存游戏
      * @details 保存地图更改，序列化所有 Model
      */
+    Message save();
 
     /**
-     * @brief 获取按键响应，并设置当前游戏状态
+     * TODO
+     * @brief 获得用户操作
+     * @details 这个按键响应的逻辑可能会有点复杂
+     * @param[out] cmd 用户命令(包括选项)
+     * @param[out] move_dir 移动方向
+     */
+    Message getCmd();
+
+    /**TODO
+     * @brief 与 NPC 碰撞的 handler
+     * @param npc_id NPC 编号
+     * @return Message
+     */
+    Message interactNPC();
+
+    /**
+     * @brief 与器械交互
+     */
+    
+    /**
+     * @brief 跳转场景
+     * @details 遍历跳转场景的入口，拿到传送到哪个入口
+     * @param[in] exit_id 
      */
 };

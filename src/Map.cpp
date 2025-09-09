@@ -48,6 +48,14 @@ Position Map::getPos() const {
     return {x, y};
 }
 
+int Map::getMaxWidth() const {
+    return max_width;
+}
+
+int Map::getMaxHeight() const {
+    return max_height;
+}
+
 /**
  * @details 移动主角有下面的事项需要注意：
  *          1. 主角不能进入宽度小于其 width 的空间（着重注意其他宽字符）
@@ -147,9 +155,11 @@ Map::LineType Map::classifyLine(const std::string& line) {
     if (line.length() > MAX_WIDTH) return LineType::OVER_SIZE;
     // 检查是否为空行
     int num = 0;
-    for (auto& ch : line) {
+    for (int i = 0; i < line.length(); ++i) {
+        const auto& ch = line[i];
         if (ch == '#') {
             ++ num;
+            max_width = i;
         } else if (ch == '\r') {
             /* Maybe some bad chars were typed in Windows. */
             return LineType::INVAILD_LINE;
@@ -214,6 +224,7 @@ Message Map::loadMap(const std::string& filename) {
         if (rows > MAX_HEIGHT)
             return {"尺寸超出最大限制", -1};
     }
+    max_height = rows;
     if (is_empty)
         return {"无效地图", -1};
     if (map_file.fail() && !map_file.eof())

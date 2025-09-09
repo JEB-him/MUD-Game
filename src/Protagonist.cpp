@@ -28,13 +28,14 @@
 
 
 
+
 ///使用json文件初始化角色属性
 using json = nlohmann::json;
 
 Message Protagonist::jsonReader(){
     try {
         ///打开并读取文件
-        std::ifstream JS(".\\..\\tests\\unit\\Protagonist_Test.json");
+        std::ifstream JS("./.config/student.json");
         if(!JS.is_open()){
             Message msg("打开JSON文件失败", -1);
             return msg;
@@ -170,7 +171,6 @@ BasicValue::HealthState Protagonist::getHealthState(std::string& outStateDesc) c
     }
 }
 
-
 //通用属性修改接口
 Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd) {
     // 辅助函数：处理int类型属性
@@ -283,7 +283,8 @@ BasicValue::HealthState Protagonist::syncHealthState() const {
         return BasicValue::HealthState::DEAD;
     }
 }
-/ 校验姓名是否合法
+
+    // 校验姓名是否合法
 bool Protagonist::isValidName(const std::string& name) {
     // 定义不允许的特殊字符集合
     const std::string invalidChars = ";:\"'\\/<>*?|";

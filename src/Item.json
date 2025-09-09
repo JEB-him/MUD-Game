@@ -112,6 +112,7 @@
     "strength_restore": 8,
     "health_restore": 0,
     "time_cooldown": 4,
+    "time_last_used":10,
     "class": "food"
   },
   "nutritious_meals": {
@@ -121,6 +122,7 @@
     "strength_restore": 40,
     "health_restore": 30,
     "time_cooldown": 0,
+    "time_last_used":0,
     "class": "food"
   },
   "energy_drink": {
@@ -131,6 +133,7 @@
     "intel_boost_rate": 1.1,
     "duration": 4,
     "have_abuse_punish": true,
+    "is_used_today": false,
     "health_reduce": 5,
     "class": "learning_aid"
   },
@@ -142,6 +145,7 @@
     "intel_boost_rate": 1.15,
     "duration": 2,
     "have_abuse_punish": false,
+    "is_used_today":false,
     "health_reduce": 0,
     "class": "learning_aid"
   },

@@ -3,15 +3,16 @@ cmake-build-debug/
 .cache/
 docs/
 .idea/
+.vs/
 .vscode/
 .idea/
+out/
 
 build.bat
 compile_commands.json
-<<<<<<< HEAD
-.vscode/
-=======
->>>>>>> 4af5c74b408bf6de4c0c26a69a18fbe989ea0591
+
+CMakeSettings.json
+.editorconfig
 
 game
 test

@@ -225,7 +225,7 @@ private:
      * @param name 待校验的姓名
      * @return bool true=合法，false=包含非法字符
      */
-    static bool isValidName(const std::string& name);
+    bool isValidName(const std::string& name) ;
 
 };
 

@@ -6,13 +6,18 @@ add_library(CatchMain STATIC
 file(GLOB SOURCES "unit/*.cpp")
 add_executable(test ${SOURCES})
 
-target_compile_options( CatchMain
-    PRIVATE -Wall
-)
+if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
+    message(STATUS "检测到 Visual Studio 生成器: ${CMAKE_GENERATOR}")
+else()
+    message(STATUS "其他平台")
+    target_compile_options( CatchMain
+        PRIVATE -Wall
+    )
 
-target_compile_options( test
-    PRIVATE -Wall -Wextra -g
-)
+    target_compile_options( test
+        PRIVATE -Wall -Wextra -g
+    )
+endif()
 
 # 包含第三方头文件
 target_include_directories(CatchMain PUBLIC "${PROJECT_SOURCE_DIR}/Third")

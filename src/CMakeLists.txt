@@ -4,8 +4,16 @@ add_executable(game main.cpp)
 # 将主要代码编译为静态库
 # 这个地方为了大家编码方便，用了一个不太规范的方法来导入源文件
 file(GLOB SOURCES "*.cpp")
-file(GLOB_RECURSE excluded_files main.cpp)
-list(REMOVE_ITEM SOURCES ${excluded_files})
+# 需要排除的文件（多个文件写在一个 list 里）
+set(EXCLUDED_FILES
+    "${PROJECT_SOURCE_DIR}/src/main.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Item.cpp"
+)
+
+message(STATUS "SOURCES = ${SOURCES}")
+
+# 从 SOURCES 中移除
+list(REMOVE_ITEM SOURCES ${EXCLUDED_FILES})
 add_library(OUCSurvSim STATIC ${SOURCES})
 
 file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}" ROOT_DIR)

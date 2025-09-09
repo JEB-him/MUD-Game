@@ -4,10 +4,12 @@ cmake-build-debug/
 docs/
 .idea/
 .vscode/
+.idea/
 
 build.bat
 compile_commands.json
 
 game
 test
+
 *.exe

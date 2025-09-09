@@ -40,7 +40,7 @@ using json = nlohmann::json;
 Message Protagonist::jsonReader(){
     try {
         ///打开并读取文件
-        std::ifstream JS(".\\..\\tests\\unit\\Protagonist_Test.json");
+        std::ifstream JS("./.config/student.json");
         if(!JS.is_open()){
             Message msg("打开JSON文件失败", -1);
             return msg;

@@ -11,18 +11,16 @@
 #include <stdexcept>
 
 
-
  Protagonist::Protagonist(const std::string& protagonistId, const std::string& name)
      : m_protagonistId(protagonistId), m_name(name){
+         if(!isValidName(name)){
+             throw std::invalid_argument("姓名包含非法字符");
+         }
         if(jsonReader().status == 0); ///< 读取成功
         else{
             std::cout <<jsonReader().msg<<std::endl;
             // 读取失败，使用默认值
-            m_intelSci = 0;
-            m_intelArts = 0;
-            m_strength = 0;
-            m_money = 0;
-            m_health = 100;
+
         }
     }
 
@@ -175,161 +173,75 @@ BasicValue::HealthState Protagonist::getHealthState(std::string& outStateDesc) c
 
 //通用属性修改接口
 Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd) {
-    int* targetAttr = nullptr;
-    float* targetFloatAttr = nullptr; // 用于浮点数属性
+    // 辅助函数：处理int类型属性
+    auto processIntAttr = [&](int& member) {
+        std::unique_ptr<int> newVal = std::make_unique<int>(isAdd ? member + val : val);
+        if (!isValidAttr(attr, *newVal)) {
+            return Message("属性值越界", 1);
+        }
+        member = *newVal;
+        return Message("属性更新成功", 0);
+    };
+
+    // 辅助函数：处理float类型属性
+    auto processFloatAttr = [&](float& member) {
+        std::unique_ptr<float> newVal = std::make_unique<float>(isAdd ? member + static_cast<float>(val) : static_cast<float>(val));
+        if (!isValidAttr(attr, static_cast<int>(*newVal))) {  // 适配原验证逻辑
+            return Message("属性值越界", 1);
+        }
+        member = *newVal;
+        return Message("属性更新成功", 0);
+    };
 
     switch (attr) {
-        case BasicValue::ProtagonistAttr::INTEL_SCI:
-            targetAttr = &m_intelSci;
-            break;
-        case BasicValue::ProtagonistAttr::INTEL_ARTS:
-            targetAttr = &m_intelArts;
-            break;
-        case BasicValue::ProtagonistAttr::STRENGTH:
-            targetAttr = &m_strength;
-            break;
-        case BasicValue::ProtagonistAttr::MONEY:
-            targetAttr = &m_money;
-            break;
-        case BasicValue::ProtagonistAttr::HEALTH:
-            targetAttr = &m_health;
-            break;
-        case BasicValue::ProtagonistAttr::INTELSCI_BOOST:
-            targetFloatAttr = &intelSci_boost;
-            break;
-        case BasicValue::ProtagonistAttr::INTELARTS_BOOST:
-            targetFloatAttr = &intelArts_boost;
-            break;
-        case BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE:
-            targetFloatAttr = &intelSci_boost_rate;
-            break;
+        case BasicValue::ProtagonistAttr::INTEL_SCI:        return processIntAttr(m_intelSci);
+        case BasicValue::ProtagonistAttr::INTEL_ARTS:       return processIntAttr(m_intelArts);
+        case BasicValue::ProtagonistAttr::STRENGTH:         return processIntAttr(m_strength);
+        case BasicValue::ProtagonistAttr::MONEY:            return processIntAttr(m_money);
+        case BasicValue::ProtagonistAttr::HEALTH:           return processIntAttr(m_health);
+        case BasicValue::ProtagonistAttr::INTELSCI_BOOST:   return processFloatAttr(intelSci_boost);
+        case BasicValue::ProtagonistAttr::INTELARTS_BOOST:  return processFloatAttr(intelArts_boost);
+        case BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE: 
+                                                            return processFloatAttr(intelSci_boost_rate);
         case BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE:
-            targetFloatAttr = &intelArts_boost_rate;
-            break;
-        case BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE:
-            targetFloatAttr = &learning_time_reduction_rate;
-            break;
-        case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
-            targetFloatAttr = &learning_health_preservation_rate;
-            break;
+                                                            return processFloatAttr(intelArts_boost_rate);
+        case BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE: 
+                                                            return processFloatAttr(learning_time_reduction_rate);
+        case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE: 
+                                                            return processFloatAttr(learning_health_preservation_rate);
         case BasicValue::ProtagonistAttr::IS_INJURED:
-            if (!isAdd) {
-                isInjured = (val != 0);
-                return Message("受伤状态更新成功", 0);
-            } else {
-                isInjured = (val != 0);
-                return Message("受伤状态设置成功", 0);
-            }
+            isInjured = (val != 0);
+            return Message("受伤状态更新成功", 0);
         default:
             return Message("属性名错误", -1);
     }
-
-    if (targetAttr) {
-        int newValue = isAdd ? (*targetAttr + val) : val;
-
-        // 属性合法性校验
-        if (!isValidAttr(attr, newValue)) {
-            return Message("属性值越界", 1);
-        }
-
-        *targetAttr = newValue;
-        return Message("属性更新成功", 0);
-    }
-
-    if (targetFloatAttr) {
-        float newValue = isAdd ? (*targetFloatAttr + val) : val;
-
-        // 属性合法性校验
-        if (!isValidAttr(attr, newValue)) {
-            return Message("属性值越界", 1);
-        }
-
-        *targetFloatAttr = newValue;
-        return Message("属性更新成功", 0);
-    }
-
-    return Message("未知错误", -1);
 }
 
 // 序列化主角数据
-//尚未完成
 std::string Protagonist::serialize() const {
-    std::string data;
-    data += "ID:" + m_protagonistId + ";";
-    data += "NAME:" + m_name + ";";
-    data += "INTEL_SCI:" + std::to_string(m_intelSci) + ";";
-    data += "INTEL_ARTS:" + std::to_string(m_intelArts) + ";";
-    data += "STRENGTH:" + std::to_string(m_strength) + ";";
-    data += "MONEY:" + std::to_string(m_money) + ";";
-    data += "HEALTH:" + std::to_string(m_health) + ";";
-    data += "INTELSCI_BOOST:" + std::to_string(intelSci_boost) + ";";
-    data += "INTELARTS_BOOST:" + std::to_string(intelArts_boost) + ";";
-    data += "INTELSCI_BOOST_RATE:" + std::to_string(intelSci_boost_rate) + ";";
-    data += "INTELARTS_BOOST_RATE:" + std::to_string(intelArts_boost_rate) + ";";
-    data += "LEARNING_TIME_REDUCTION_RATE:" + std::to_string(learning_time_reduction_rate) + ";";
-    data += "LEARNING_HEALTH_PRESERVATION_RATE:" + std::to_string(learning_health_preservation_rate) + ";";
-    data += "IS_INJURED:" + std::to_string(isInjured ? 1 : 0) + ";";
-    return data;
+    std::stringstream os;
+    {
+        cereal::BinaryOutputArchive oarchive(os);
+        const_cast<Protagonist*>(this)->serialize(oarchive);
+    }
+    return os.str();
 }
 
 
-//反序列化主角数据 
-//尚未完成
+//反序列化主角数据 (供Controller从存档文件恢复)
 Message Protagonist::deserialize(const std::string& data) {
-    std::istringstream ss(data);
-    std::string token;
-
-    while (std::getline(ss, token, ';')) {
-        auto delimiterPos = token.find(':');
-        if (delimiterPos == std::string::npos) continue;
-
-        std::string key = token.substr(0, delimiterPos);
-        std::string valueStr = token.substr(delimiterPos + 1);
-        int value = std::stoi(valueStr);
-
-        if (key == "INTEL_SCI") {
-            if (!isValidAttr(BasicValue::ProtagonistAttr::INTEL_SCI, value)) {
-                return Message("属性值越界", 1);
-            }
-            m_intelSci = value;
-        } else if (key == "INTEL_ARTS") {
-            if (!isValidAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, value)) {
-                return Message("属性值越界", 1);
-            }
-            m_intelArts = value;
-        } else if (key == "STRENGTH") {
-            if (!isValidAttr(BasicValue::ProtagonistAttr::STRENGTH, value)) {
-                return Message("属性值越界", 1);
-            }
-            m_strength = value;
-        } else if (key == "MONEY") {
-            if (!isValidAttr(BasicValue::ProtagonistAttr::MONEY, value)) {
-                return Message("属性值越界", 1);
-            }
-            m_money = value;
-        } else if (key == "HEALTH") {
-            if (!isValidAttr(BasicValue::ProtagonistAttr::HEALTH, value)) {
-                return Message("属性值越界", 1);
-            }
-            m_health = value;
-        } else if (key == "INTELSCI_BOOST") {
-            intelSci_boost = static_cast<float>(value);
-        } else if (key == "INTELARTS_BOOST") {
-            intelArts_boost = static_cast<float>(value);
-        } else if (key == "INTELSCI_BOOST_RATE") {
-            intelSci_boost_rate = static_cast<float>(value);
-        } else if (key == "INTELARTS_BOOST_RATE") {
-            intelArts_boost_rate = static_cast<float>(value);
-        } else if (key == "LEARNING_TIME_REDUCTION_RATE") {
-            learning_time_reduction_rate = static_cast<float>(value);
-        } else if (key == "LEARNING_HEALTH_PRESERVATION_RATE") {
-            learning_health_preservation_rate = static_cast<float>(value);
-        } else if (key == "IS_INJURED") {
-            isInjured = (value != 0);
+    try {
+        std::stringstream is(data);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            const_cast<Protagonist*>(this)->serialize(iarchive);
         }
+        return Message("反序列化成功", 0);
+    } catch (const std::exception& e) {
+        return Message(std::string("反序列化失败: ") + e.what(), -1);
+    } catch (...) {
+        return Message("反序列化时发生未知错误", -1);
     }
-
-    return Message("反序列化成功", 0);
 }
 
 
@@ -371,3 +283,10 @@ BasicValue::HealthState Protagonist::syncHealthState() const {
         return BasicValue::HealthState::DEAD;
     }
 }
+/ 校验姓名是否合法
+bool Protagonist::isValidName(const std::string& name) {
+    // 定义不允许的特殊字符集合
+    const std::string invalidChars = ";:\"'\\/<>*?|";
+    // 检查是否包含任何非法字符
+    return name.find_first_of(invalidChars) == std::string::npos;
+};

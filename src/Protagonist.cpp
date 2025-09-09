@@ -1,7 +1,7 @@
 ﻿/**
  * @brief 主角的数据模型实现（Protagonist类）
  * @author Haozhe Tang
- * @date 2024-08-31
+ * @date 2025-08-31
  */
 
 #include <iostream>
@@ -14,6 +14,9 @@
 
  Protagonist::Protagonist(const std::string& protagonistId, const std::string& name)
      : m_protagonistId(protagonistId), m_name(name){
+         if(!isValidName(name)){
+             throw std::invalid_argument("姓名包含非法字符");
+         }
         if(jsonReader().status == 0); ///< 读取成功
         else{
             std::cout <<jsonReader().msg<<std::endl;
@@ -25,6 +28,7 @@
             m_health = 100;
         }
     }
+
 
 
 
@@ -172,83 +176,50 @@ BasicValue::HealthState Protagonist::getHealthState(std::string& outStateDesc) c
     }
 }
 
-
 //通用属性修改接口
 Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd) {
-    int* targetAttr = nullptr;
-    float* targetFloatAttr = nullptr; // 用于浮点数属性
+    // 辅助函数：处理int类型属性
+    auto processIntAttr = [&](int& member) {
+        std::unique_ptr<int> newVal = std::make_unique<int>(isAdd ? member + val : val);
+        if (!isValidAttr(attr, *newVal)) {
+            return Message("属性值越界", 1);
+        }
+        member = *newVal;
+        return Message("属性更新成功", 0);
+    };
+
+    // 辅助函数：处理float类型属性
+    auto processFloatAttr = [&](float& member) {
+        std::unique_ptr<float> newVal = std::make_unique<float>(isAdd ? member + static_cast<float>(val) : static_cast<float>(val));
+        if (!isValidAttr(attr, static_cast<int>(*newVal))) {  // 适配原验证逻辑
+            return Message("属性值越界", 1);
+        }
+        member = *newVal;
+        return Message("属性更新成功", 0);
+    };
 
     switch (attr) {
-        case BasicValue::ProtagonistAttr::INTEL_SCI:
-            targetAttr = &m_intelSci;
-            break;
-        case BasicValue::ProtagonistAttr::INTEL_ARTS:
-            targetAttr = &m_intelArts;
-            break;
-        case BasicValue::ProtagonistAttr::STRENGTH:
-            targetAttr = &m_strength;
-            break;
-        case BasicValue::ProtagonistAttr::MONEY:
-            targetAttr = &m_money;
-            break;
-        case BasicValue::ProtagonistAttr::HEALTH:
-            targetAttr = &m_health;
-            break;
-        case BasicValue::ProtagonistAttr::INTELSCI_BOOST:
-            targetFloatAttr = &intelSci_boost;
-            break;
-        case BasicValue::ProtagonistAttr::INTELARTS_BOOST:
-            targetFloatAttr = &intelArts_boost;
-            break;
-        case BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE:
-            targetFloatAttr = &intelSci_boost_rate;
-            break;
+        case BasicValue::ProtagonistAttr::INTEL_SCI:        return processIntAttr(m_intelSci);
+        case BasicValue::ProtagonistAttr::INTEL_ARTS:       return processIntAttr(m_intelArts);
+        case BasicValue::ProtagonistAttr::STRENGTH:         return processIntAttr(m_strength);
+        case BasicValue::ProtagonistAttr::MONEY:            return processIntAttr(m_money);
+        case BasicValue::ProtagonistAttr::HEALTH:           return processIntAttr(m_health);
+        case BasicValue::ProtagonistAttr::INTELSCI_BOOST:   return processFloatAttr(intelSci_boost);
+        case BasicValue::ProtagonistAttr::INTELARTS_BOOST:  return processFloatAttr(intelArts_boost);
+        case BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE: 
+                                                            return processFloatAttr(intelSci_boost_rate);
         case BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE:
-            targetFloatAttr = &intelArts_boost_rate;
-            break;
-        case BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE:
-            targetFloatAttr = &learning_time_reduction_rate;
-            break;
-        case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
-            targetFloatAttr = &learning_health_preservation_rate;
-            break;
+                                                            return processFloatAttr(intelArts_boost_rate);
+        case BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE: 
+                                                            return processFloatAttr(learning_time_reduction_rate);
+        case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE: 
+                                                            return processFloatAttr(learning_health_preservation_rate);
         case BasicValue::ProtagonistAttr::IS_INJURED:
-            if (!isAdd) {
-                isInjured = (val != 0);
-                return Message("受伤状态更新成功", 0);
-            } else {
-                isInjured = (val != 0);
-                return Message("受伤状态设置成功", 0);
-            }
+            isInjured = (val != 0);
+            return Message("受伤状态更新成功", 0);
         default:
             return Message("属性名错误", -1);
     }
-
-    if (targetAttr) {
-        int newValue = isAdd ? (*targetAttr + val) : val;
-
-        // 属性合法性校验
-        if (!isValidAttr(attr, newValue)) {
-            return Message("属性值越界", 1);
-        }
-
-        *targetAttr = newValue;
-        return Message("属性更新成功", 0);
-    }
-
-    if (targetFloatAttr) {
-        float newValue = isAdd ? (*targetFloatAttr + val) : val;
-
-        // 属性合法性校验
-        if (!isValidAttr(attr, newValue)) {
-            return Message("属性值越界", 1);
-        }
-
-        *targetFloatAttr = newValue;
-        return Message("属性更新成功", 0);
-    }
-
-    return Message("未知错误", -1);
 }
 
 // 序列化主角数据
@@ -371,3 +342,10 @@ BasicValue::HealthState Protagonist::syncHealthState() const {
         return BasicValue::HealthState::DEAD;
     }
 }
+    // 校验姓名是否合法
+bool Protagonist::isValidName(const std::string& name) {
+    // 定义不允许的特殊字符集合
+    const std::string invalidChars = ";:\"'\\/<>*?|";
+    // 检查是否包含任何非法字符
+    return name.find_first_of(invalidChars) == std::string::npos;
+};

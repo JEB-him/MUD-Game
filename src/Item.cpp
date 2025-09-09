@@ -1,4 +1,4 @@
-﻿ /**
+ /**
   * @file Item.cpp
   * @author Xiaotian Wu(Cheongfan)
   * @brief 物品类及其派生类的实现方法
@@ -99,49 +99,49 @@
  * @brief 装备学习资料，提高（文或理）智力比例增量
  * @note  item.getIsConsumable() == false时可调用该接口
  */
- // void StudyMaterial::equipAndUnequip(Protagonist& protagonist) override {
+  void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
 
- //     /**
- //     * @brief 装备前判断是否未装备
- //     */
- //     if (!equip_state) {
+      ///**
+      //* @brief 装备前判断是否未装备
+      //*/
+      //if (!equip_state) {
 
- //         /**
- //         * @brief 装备状态：已装备
- //         */
- //         equip_state = true;
+      //    /**
+      //    * @brief 装备状态：已装备
+      //    */
+      //    equip_state = true;
 
- //         /**
- //         * @brief 根据学习资料的文理类型，提高对应的智力比例增量
- //         * TODO: 主角类接口发生了修改，未作适配
- //         */
- //         if (is_science) {
- //             protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() + intel_boost_rate);
- //         }
- //         else {
- //             protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() + intel_boost_rate);
- //         }
+      //    /**
+      //    * @brief 根据学习资料的文理类型，提高对应的智力比例增量
+      //    * TODO: 主角类接口发生了修改，未作适配
+      //    */
+      //    if (is_science) {
+      //        protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() + intel_boost_rate);
+      //    }
+      //    else {
+      //        protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() + intel_boost_rate);
+      //    }
 
- //         /**
- //         * @brief feedback，后续可用View的方法替换
- //         */
- //         cout << "\"" << name << "\"" << "已装备。" << endl;
- //     }
- //     else {
- //         /**
- //         * @brief 与上一个scope相反
- //         * TODO: 主角类接口发生了修改，未作适配
- //         */
- //         equip_state = false;
- //         if (is_science) {
- //             protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() - intel_boost_rate);
- //         }
- //         else {
- //             protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() - intel_boost_rate);
- //         }
- //         cout << "\"" << name << "\"" << "已取消装备。" << endl;
- //     }
- // }
+      //    /**
+      //    * @brief feedback，后续可用View的方法替换
+      //    */
+      //    cout << "\"" << name << "\"" << "已装备。" << endl;
+      //}
+      //else {
+      //    /**
+      //    * @brief 与上一个scope相反
+      //    * TODO: 主角类接口发生了修改，未作适配
+      //    */
+      //    equip_state = false;
+      //    if (is_science) {
+      //        protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() - intel_boost_rate);
+      //    }
+      //    else {
+      //        protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() - intel_boost_rate);
+      //    }
+      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
+      //}
+  }
 
  /**
  * @brief 体育器材类构造函数
@@ -153,32 +153,32 @@
  * @brief 装备体育器材，允许参加特定需要器材的运动
  * @note  item.getIsConsumable() == false时存在该接口
  */
- // void SportsEquipment::equipAndUnequip(Protagonist& protagonist) override {
+  void SportsEquipment::equipAndUnequip(Protagonist& protagonist) {
 
- //     /**
- //     * @brief 装备前判断是否未装备
- //     */
- //     if (!equip_state) {
+      /**
+      * @brief 装备前判断是否未装备
+      */
+      //if (!equip_state) {
 
- //         /**
- //         * @brief 装备状态：已装备
- //         */
- //         equip_state = true;
+      //    /**
+      //    * @brief 装备状态：已装备
+      //    */
+      //    equip_state = true;
 
- //         /**
- //         * @brief feedback，后续可用View的方法替换
- //         */
- //         cout << "\"" << name << "\"" << "已装备。" << endl;
- //     }
- //     else {
+      //    /**
+      //    * @brief feedback，后续可用View的方法替换
+      //    */
+      //    cout << "\"" << name << "\"" << "已装备。" << endl;
+      //}
+      //else {
 
- //         /**
- //         * @brief 与上一个scope相反
- //         */
- //         equip_state = false;
- //         cout << "\"" << name << "\"" << "已取消装备。" << endl;
- //     }
- // }
+      //    /**
+      //    * @brief 与上一个scope相反
+      //    */
+      //    equip_state = false;
+      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
+      //}
+  }
 
  /**
  * @brief 学习辅助工具类构造函数
@@ -190,40 +190,40 @@
  * @brief 装备学习辅助工具，降低学习损耗
  * @note  item.getIsConsumable() == false时存在该接口
  */
- // void StudyAid::equipAndUnequip(Protagonist& protagonist) override {
- //     if (!equip_state) {
+  void StudyAid::equipAndUnequip(Protagonist& protagonist) {
+      //if (!equip_state) {
 
- //         /**
- //         * @brief 装备状态：已装备
- //         */
- //         equip_state = true;
+      //    /**
+      //    * @brief 装备状态：已装备
+      //    */
+      //    equip_state = true;
 
- //         /**
- //         * @brief 学习消耗时间和健康，基础消耗量要乘以一个rate = 1,这里把这个rate降低至小于1。
- //         * TODO: 主角类接口发生了修改，未作适配
- //         */
- //         protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() - time_reduction_rate);
- //         protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() - health_preservation_rate);
+      //    /**
+      //    * @brief 学习消耗时间和健康，基础消耗量要乘以一个rate = 1,这里把这个rate降低至小于1。
+      //    * TODO: 主角类接口发生了修改，未作适配
+      //    */
+      //    protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() - time_reduction_rate);
+      //    protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() - health_preservation_rate);
 
- //         /**
- //         * @brief feedback，后续可用View的方法替换
- //         */
- //         cout << "\"" << name << "\"" << "已装备。" << endl;
- //     }
- //     else {
+      //    /**
+      //    * @brief feedback，后续可用View的方法替换
+      //    */
+      //    cout << "\"" << name << "\"" << "已装备。" << endl;
+      //}
+      //else {
 
- //         /**
- //         * @brief 与上一个scope相反 
- //         * TODO: 主角类接口发生了修改，未作适配
- //         */
- //         equip_state = false;
+      //    /**
+      //    * @brief 与上一个scope相反 
+      //    * TODO: 主角类接口发生了修改，未作适配
+      //    */
+      //    equip_state = false;
 
- //         protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() + time_reduction_rate);
- //         protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() + health_preservation_rate);
+      //    protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() + time_reduction_rate);
+      //    protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() + health_preservation_rate);
 
- //         cout << "\"" << name << "\"" << "已取消装备。" << endl;
- //     }
- // }
+      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
+      //}
+  }
 
 
  /**
@@ -232,30 +232,34 @@
  Food::Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used) :
      Consumable(name, description, value), strength_restore(strength_restore), health_restore(health_restore), time_cooldown(time_cooldown), time_last_used(time_last_used) { }
 
+ /*TODO*/
+ bool Food::isOnCooldown()const {
+     return true;
+ }
  /**
  * @brief 使用“食品类物品”
  * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
  * TODO: 这里需要获取当前时间的接口now(),需要等时间(计时)的具体逻辑出来后再具体修改
  */
- // void Food::use(Protagonist& protagonist) override {
+  void Food::use(Protagonist& protagonist) {
 
- //     /**
- //     * @brief 等CD
- //     */
- //     if (/*now()*/ -time_last_used > time_cooldown) {
+      /**
+      * @brief 等CD
+      */
+      //if (/*now()*/ -time_last_used > time_cooldown) {
 
- //         /**
- //         * @brief 恢复主角一定体力和健康，建议reset接口自行判断是否超出MAX_STRENGTH和MAX_HEALTH
- //         */
- //         protagonist.resetStrength(protagonist.getStrength() + strength_restore);
- //         protagonist.resetHealth(protagonist.getHealth() + health_restore);
+      //    /**
+      //    * @brief 恢复主角一定体力和健康，建议reset接口自行判断是否超出MAX_STRENGTH和MAX_HEALTH
+      //    */
+      //    protagonist.resetStrength(protagonist.getStrength() + strength_restore);
+      //    protagonist.resetHealth(protagonist.getHealth() + health_restore);
 
- //         cout << "\"" << name << "\"" <<"已使用消耗品"  << endl;
- //     }
- //     else {
- //         cout << "冷却中,暂时无法使用该道具" << endl;
- //     }
- // }
+      //    cout << "\"" << name << "\"" << "已使用消耗品" << endl;
+      //}
+      //else {
+      //    cout << "冷却中,暂时无法使用该道具" << endl;
+      //}
+  }
 
  /**
  * @brief 学习辅助类构造函数
@@ -267,13 +271,13 @@
  * @brief 使用“学习辅助类物品”
  * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
  */
- // void LearningAid::use(Protagonist& protagonist) override {
+  void LearningAid::use(Protagonist& protagonist) {
 
- //     /**
- //     * TODO:此处需要设置定时器，在一定时间(duration)后增益解除(执行解除增益的函数)
- //     *       具体逻辑在完善时间(计时)逻辑后写
- //     */
- // }
+      /**
+      * TODO:此处需要设置定时器，在一定时间(duration)后增益解除(执行解除增益的函数)
+      *       具体逻辑在完善时间(计时)逻辑后写
+      */
+  }
 
  /**
  * @brief 健康类构造函数
@@ -285,13 +289,13 @@
  * @brief 使用“健康类物品”
  * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
  */
- // void HealthItem::use(Protagonist& protagonist) override {
- //     protagonist.resetHealth(protagonist.getHealth() + health_restore);
- //     /**
- //     * TODO:此处需要暂停健康值损耗一段时间，具体实现需要考虑健康值损耗逻辑和时间（计时）逻辑
- //     *       待上述逻辑完备后再写
- //     */
- // }
+  void HealthItem::use(Protagonist& protagonist) {
+     // protagonist.resetHealth(protagonist.getHealth() + health_restore);
+      /**
+      * TODO:此处需要暂停健康值损耗一段时间，具体实现需要考虑健康值损耗逻辑和时间（计时）逻辑
+      *       待上述逻辑完备后再写
+      */
+  }
 
  /**
  * @brief 物品管理器类

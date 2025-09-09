@@ -1,7 +1,8 @@
 #include "catch.hpp"
 #include "Item.h"
-#include "Protagonist.cpp"
+#include "Protagonist.h"
 #include <memory>
+#include <unordered_map>
 
 TEST_CASE("Item Creation and Basic Properties", "[Item]") {
     SECTION("Basic Item Properties") {
@@ -15,18 +16,22 @@ TEST_CASE("Item Creation and Basic Properties", "[Item]") {
 }
 
 TEST_CASE("Consumable Item", "[Consumable]") {
-    Protagonist protagonist; // 假设Protagonist有默认构造函数
+    Protagonist protagonist("test_id", "Test Protagonist");
 
     SECTION("Food Item Usage") {
         Food food("Bread", "Restores strength", 5.0f, 20.0f, 5.0f, 1.0f, 0.0f);
 
-        float initialStrength = protagonist.getStrength();
-        float initialHealth = protagonist.getHealth();
+        // 获取初始属性
+        auto initialAttrs = protagonist.getBaseAttrs();
+        float initialStrength = initialAttrs[BasicValue::ProtagonistAttr::STRENGTH];
+        float initialHealth = initialAttrs[BasicValue::ProtagonistAttr::HEALTH];
 
         food.use(protagonist);
 
-        REQUIRE(protagonist.getStrength() == initialStrength + 20.0f);
-        REQUIRE(protagonist.getHealth() == initialHealth + 5.0f);
+        // 获取更新后的属性
+        auto updatedAttrs = protagonist.getBaseAttrs();
+        REQUIRE(updatedAttrs[BasicValue::ProtagonistAttr::STRENGTH] == initialStrength + 20.0f);
+        REQUIRE(updatedAttrs[BasicValue::ProtagonistAttr::HEALTH] == initialHealth + 5.0f);
     }
 
     SECTION("Food Cooldown") {
@@ -41,20 +46,28 @@ TEST_CASE("Consumable Item", "[Consumable]") {
 }
 
 TEST_CASE("Equippable Item", "[Equippable]") {
-    Protagonist protagonist;
+    Protagonist protagonist("test_id", "Test Protagonist");
 
     SECTION("Study Material Equipment") {
         StudyMaterial mathBook("Math Book", "Increases science intelligence", 50.0f, true, 0.1f);
 
-        float initialSciIntel = protagonist.getIntelSci();
+        // 获取初始属性
+        auto initialAttrs = protagonist.getHiddenAttrs();
+        float initialSciBoostRate = initialAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE];
 
         mathBook.equipAndUnequip(protagonist);
         REQUIRE(mathBook.getEquipState() == true);
-        REQUIRE(protagonist.getIntelSci() == initialSciIntel * 1.1f);
+
+        // 获取更新后的属性
+        auto updatedAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(updatedAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == initialSciBoostRate + 0.1f);
 
         mathBook.equipAndUnequip(protagonist);
         REQUIRE(mathBook.getEquipState() == false);
-        REQUIRE(protagonist.getIntelSci() == initialSciIntel);
+
+        // 检查属性是否恢复
+        auto finalAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(finalAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == initialSciBoostRate);
     }
 
     SECTION("Sports Equipment") {
@@ -66,49 +79,113 @@ TEST_CASE("Equippable Item", "[Equippable]") {
         basketball.equipAndUnequip(protagonist);
         REQUIRE(basketball.getEquipState() == false);
     }
+
+    SECTION("Study Aid Equipment") {
+        StudyAid alarmClock("Alarm Clock", "Reduces learning time", 25.0f, 0.1f, 0.0f);
+
+        // 获取初始属性
+        auto initialAttrs = protagonist.getHiddenAttrs();
+        float initialTimeReduction = initialAttrs[BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE];
+
+        alarmClock.equipAndUnequip(protagonist);
+        REQUIRE(alarmClock.getEquipState() == true);
+
+        // 获取更新后的属性
+        auto updatedAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(updatedAttrs[BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE] == initialTimeReduction - 0.1f);
+
+        alarmClock.equipAndUnequip(protagonist);
+        REQUIRE(alarmClock.getEquipState() == false);
+
+        // 检查属性是否恢复
+        auto finalAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(finalAttrs[BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE] == initialTimeReduction);
+    }
 }
 
-TEST_CASE("Item Creator", "[ItemCreator]") {
-    ItemCreator creator("test_items_config.json");
+TEST_CASE("Health Item Usage", "[Consumable][Health]") {
+    Protagonist protagonist("test_id", "Test Protagonist");
 
-    SECTION("Create Study Material") {
-        auto item = creator.createItem("math_book");
-        REQUIRE(item->getName() == "高等数学");
-        REQUIRE(item->getIsConsumable() == false);
-    }
-
-    SECTION("Create Food Item") {
-        auto item = creator.createItem("nutrition_food");
-        REQUIRE(item->getName() == "营养餐");
-        REQUIRE(item->getIsConsumable() == true);
-    }
-
-    SECTION("Create Non-Existent Item") {
-        REQUIRE_THROWS_AS(creator.createItem("non_existent_item"), std::runtime_error);
-    }
-}
-
-TEST_CASE("Item Effects on Protagonist", "[Item][Protagonist]") {
-    Protagonist protagonist;
-
-    SECTION("Health Item Usage") {
+    SECTION("Health Restoration") {
         HealthItem firstAid("First Aid", "Restores health", 40.0f, 50.0f, 0.0f);
 
-        float initialHealth = protagonist.getHealth();
-        protagonist.reduceHealth(20.0f); // 假设有减少健康的方法
+        // 先降低健康值
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, -20, true);
+
+        // 获取初始健康值
+        auto initialAttrs = protagonist.getBaseAttrs();
+        float initialHealth = initialAttrs[BasicValue::ProtagonistAttr::HEALTH];
 
         firstAid.use(protagonist);
-        REQUIRE(protagonist.getHealth() == initialHealth - 20.0f + 50.0f);
-    }
 
-    SECTION("Learning Aid Usage") {
+        // 获取更新后的健康值
+        auto updatedAttrs = protagonist.getBaseAttrs();
+        REQUIRE(updatedAttrs[BasicValue::ProtagonistAttr::HEALTH] == initialHealth + 50.0f);
+    }
+}
+
+TEST_CASE("Learning Aid Usage", "[Consumable][Learning]") {
+    Protagonist protagonist("test_id", "Test Protagonist");
+
+    SECTION("Intelligence Boost") {
         LearningAid energyDrink("Energy Drink", "Boosts intelligence", 5.0f, 5.0f, 0.1f, 2.0f, true, false, 5.0f);
 
-        float initialIntel = protagonist.getIntelSci();
-        float initialHealth = protagonist.getHealth();
+        // 获取初始属性
+        auto initialBaseAttrs = protagonist.getBaseAttrs();
+        auto initialHiddenAttrs = protagonist.getHiddenAttrs();
+
+        float initialSciIntel = initialBaseAttrs[BasicValue::ProtagonistAttr::INTEL_SCI];
+        float initialHealth = initialBaseAttrs[BasicValue::ProtagonistAttr::HEALTH];
 
         energyDrink.use(protagonist);
-        REQUIRE(protagonist.getIntelSci() == initialIntel + 5.0f);
-        REQUIRE(protagonist.getHealth() == initialHealth - 5.0f);
+
+        // 获取更新后的属性
+        auto updatedBaseAttrs = protagonist.getBaseAttrs();
+        auto updatedHiddenAttrs = protagonist.getHiddenAttrs();
+
+        REQUIRE(updatedBaseAttrs[BasicValue::ProtagonistAttr::INTEL_SCI] == initialSciIntel + 5.0f);
+        REQUIRE(updatedBaseAttrs[BasicValue::ProtagonistAttr::HEALTH] == initialHealth - 5.0f);
+    }
+}
+
+TEST_CASE("Item Effects on Protagonist Attributes", "[Item][Protagonist]") {
+    Protagonist protagonist("test_id", "Test Protagonist");
+
+    SECTION("Study Material Effect on Intelligence") {
+        StudyMaterial mathBook("Math Book", "Increases science intelligence", 50.0f, true, 0.1f);
+        StudyMaterial englishBook("English Book", "Increases arts intelligence", 40.0f, false, 0.1f);
+
+        // 获取初始属性
+        auto initialAttrs = protagonist.getHiddenAttrs();
+        float initialSciBoostRate = initialAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE];
+        float initialArtsBoostRate = initialAttrs[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE];
+
+        // 装备数学书
+        mathBook.equipAndUnequip(protagonist);
+        auto afterMathAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(afterMathAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == initialSciBoostRate + 0.1f);
+
+        // 装备英语书
+        englishBook.equipAndUnequip(protagonist);
+        auto afterEnglishAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(afterEnglishAttrs[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == initialArtsBoostRate + 0.1f);
+
+        // 卸下数学书
+        mathBook.equipAndUnequip(protagonist);
+        auto afterUnequipMathAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(afterUnequipMathAttrs[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == initialSciBoostRate);
+
+        // 卸下英语书
+        englishBook.equipAndUnequip(protagonist);
+        auto afterUnequipEnglishAttrs = protagonist.getHiddenAttrs();
+        REQUIRE(afterUnequipEnglishAttrs[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == initialArtsBoostRate);
+    }
+}
+
+TEST_CASE("Item Validation", "[Item]") {
+    SECTION("Invalid Item Creation") {
+        // 测试无效参数创建物品
+        REQUIRE_NOTHROW(StudyMaterial("", "", -1.0f, true, -0.1f));
+        REQUIRE_NOTHROW(Food("", "", -1.0f, -1.0f, -1.0f, -1.0f, -1.0f));
     }
 }

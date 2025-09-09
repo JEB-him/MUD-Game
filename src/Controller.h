@@ -45,10 +45,7 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel& level=LogLevel::INFO, const std::string& log_dir="logs/", const std::string root_dir="") {
-        static std::shared_ptr<Controller> instance(new Controller(level, log_dir, root_dir));
-        return instance;
-    }
+    static std::shared_ptr<Controller> getInstance(const LogLevel& level=LogLevel::INFO, const std::string& log_dir="logs/", const std::string root_dir="");
 
     /**
      * @brief 日志函数

@@ -7,10 +7,7 @@ file(GLOB SOURCES "*.cpp")
 # 需要排除的文件（多个文件写在一个 list 里）
 set(EXCLUDED_FILES
     "${PROJECT_SOURCE_DIR}/src/main.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Item.cpp"
 )
-
-message(STATUS "SOURCES = ${SOURCES}")
 
 # 从 SOURCES 中移除
 list(REMOVE_ITEM SOURCES ${EXCLUDED_FILES})
@@ -26,16 +23,22 @@ target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 # 将 OUCSurvSim 静态库链接到 game
 target_link_libraries(game PUBLIC OUCSurvSim)
 
-# 编译模式下开启警告和调试信息
-if (CACHE{DEBUG})
-    target_compile_options(game
-        PRIVATE -g -Wall -Wextra
-    )
+# 检测是否为 Visual Studio 生成器
+if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
+    message(STATUS "检测到 Visual Studio 生成器: ${CMAKE_GENERATOR}")
 else()
-    # release 启用编译优化
-    target_compile_options(game
-        PRIVATE -O3
-    )
+    message(STATUS "其他平台: ${CMAKE_GENERATOR}")
+    # 编译模式下开启警告和调试信息
+    if (CACHE{DEBUG})
+        target_compile_options(game
+            PRIVATE -g -Wall -Wextra
+        )
+    else()
+        # release 启用编译优化
+        target_compile_options(game
+            PRIVATE -O3
+        )
+    endif()
 endif()
 
 install(TARGETS game

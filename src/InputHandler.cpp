@@ -5,12 +5,11 @@
  * 调用 waitKeyDown 函数可获取键盘输入，支持数字、字母、空格、Esc和Enter键。
  * 函数会阻塞直到有符合条件的按键被按下。
  *
- * @return int 返回按键的ASCII码值
- * @retval 27 Esc键
- * @retval 32 空格键
+ * @return int 返回数字的原始值/字母和ESC的ASCII码值
+ * @retval 0-9 数字键0-9
  * @retval 10 回车键(Enter)
- * @retval 48-57 数字键0-9
- * @retval 97-122 字母键a-z(小写)
+ * @retval 27 Esc键
+ * @retval 'a'-'z' 字母键a-z(小写)
  * @retval -1 获取按键失败
  *
  * @note 此函数跨平台支持Windows和Linux系统
@@ -18,7 +17,8 @@
  *
  * @see vkToAscii()
  */
-
+#include "InputHandler.h"
+#include "Controller.h"
 #include <iostream>
 
 #include <atomic>
@@ -32,16 +32,16 @@ std::atomic<bool> keyCaptured(false);
 #include <map>
 
 std::map<int, char> vkToAsciiMap = {
-    {0x30, '0'},
-    {0x31, '1'},
-    {0x32, '2'},
-    {0x33, '3'},
-    {0x34, '4'},
-    {0x35, '5'},
-    {0x36, '6'},
-    {0x37, '7'},
-    {0x38, '8'},
-    {0x39, '9'},
+    {0x30, 0},
+    {0x31, 1},
+    {0x32, 2},
+    {0x33, 3},
+    {0x34, 4},
+    {0x35, 5},
+    {0x36, 6},
+    {0x37, 7},
+    {0x38, 8},
+    {0x39, 9},
     {0x41, 'a'},
     {0x42, 'b'},
     {0x43, 'c'},
@@ -68,8 +68,8 @@ std::map<int, char> vkToAsciiMap = {
     {0x58, 'x'},
     {0x59, 'y'},
     {0x5A, 'z'},
-    {VK_SPACE, ' '},
-    {VK_RETURN, '\n'},
+    {VK_SPACE, ' '},   // 32
+    {VK_RETURN, '\n'}, // 10
     {VK_ESCAPE, 27}};
 
 int vkToAscii(int vkCode)
@@ -102,7 +102,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
 }
 
-int waitKeyDown()
+int InputHandler::waitKeyDown()
 {
     capturedKey = -1;
     keyCaptured = false;
@@ -148,7 +148,7 @@ int vkToAscii(int keyCode)
     return keyCode;
 }
 
-int waitKeyDown()
+int InputHandler::waitKeyDown()
 {
     capturedKey = -1;
     keyCaptured = false;
@@ -167,26 +167,44 @@ int waitKeyDown()
     {
         ch = getch(); // 获取按键
 
-        if (ch != ERR) // 如果有按键按下
+        if (ch == 27 || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z')) // 如果有按键按下
         {
             capturedKey = ch;
             keyCaptured = true;
-            // 检查ESC键
-            if (ch == 27) // ESC键
-            {
-                break;
-            }
+            break;
         }
 
-        usleep(10000); // 睡眠10ms，减少CPU占用
+        usleep(50000); // 睡50ms，减少CPU占用
     }
 
     // 清理ncurses
     endwin();
 
+    // 0-9返回原始值
+    if (capturedKey >= '0' && capturedKey <= '9')
+    {
+        return capturedKey - '0';
+    }
+    // 返回小写字母
+    else if (capturedKey >= 'A' && capturedKey <= 'Z')
+    {
+        return capturedKey - 'A' + 'a';
+    }
+    else if (capturedKey == 27)
+    {
+        quitGame();
+        return -1;
+    }
+
     return capturedKey;
 }
 #endif
+
+void InputHandler::quitGame()
+{
+    Controller controller;
+    controller.save();
+}
 
 // // 测试代码
 // int main()

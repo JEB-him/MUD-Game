@@ -1,24 +1,29 @@
 ﻿/**
-* @file backpack‌.h
-* @author Xiaotian Wu(Cheongfan)
-* @brief 背包类
-* */
+ * @file backpack‌.h
+ * @author Xiaotian Wu(Cheongfan)
+ * @brief 背包类
+ * */
 
 #pragma once
-#include<iostream>
-#include<string>
-#include<memory>
-#include<vector>
-#include"Item.h"
-#include"Item.cpp"
+#include <iostream>
+#include <string>
+#include <memory>
+#include <vector>
+#include "Item.h"
+#include "Item.cpp"
 
-using std::string;
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
+
 using std::cout;
 using std::endl;
-using std::unique_ptr;
 using std::make_unique;
 using std::move;
-using std::vector
+using std::string;
+using std::unique_ptr;
+using std::vector;
 
 /**
  * @brief 背包类
@@ -27,29 +32,30 @@ using std::vector
  * @param num_items 当前背包物品数量
  * @param capacity  背包最大容量
  */
-class Backpack‌ {
+class Backpack
+{
 public:
-
+	Backpack() : capacity(10), num_items(0), backpack_space() {};
 	/**
 	 * @brief 背包类构造函数
 	 * @param capacity 设置最大容量
 	 * @details vector初始容量设定为10，容量超限则扩容10倍
 	 * @details num_items初始值为0
 	 */
-	Backpack‌(int capacity);
+	Backpack(int capacity);
 
 	/**
 	 * @brief 背包类构造函数
 	 * @details 循环释放vector的所有unique智能指针
 	 */
-	~Backpack‌();
+	~Backpack();
 
 	/**
 	 * @brief 打印序号+背包的所有物品名称
 	 * @details 1.高等数学 2.篮球 3.压缩饼干 4....
 	 * @details 通过item类getName()获取物品名字
 	 */
-	void printItems()const;
+	void printItems() const;
 
 	/**
 	 * @brief 打印物品选项
@@ -58,20 +64,20 @@ public:
 	 * @details 通过item.getIsComsumable()区分消耗品和用具
 	 * @details 用具根据item.getEquipState()区分装备还是卸下
 	 */
-	void printOptionsOfItem()const;
+	void printOptionsOfItem() const;
 
 	/**
 	 * @brief 打印物品详细介绍
 	 * @note  上一个界面选"1.详情"后使用该接口反馈信息
 	 * @details 输出item.getDescription
 	 */
-	void printDetails()const;
+	void printDetails() const;
 
 	/**
-	 * @brief  
-	* @details 利用ItemCreator的方法创造目标物品对象，存入backpack‌_space中，num_items++
-	*/
-	void addItem(string item_name)
+	 * @brief
+	 * @details 利用ItemCreator的方法创造目标物品对象，存入backpack‌_space中，num_items++
+	 */
+	void addItem(string item_name);
 
 	/**
 	 * @brief 使用或装备或卸下物品(三合一功能函数)
@@ -80,9 +86,20 @@ public:
 	 */
 	void useFunctionOfItem();
 
+	/**
+	 * @brief 背包-序列化函数
+	 */
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(CEREAL_NVP(capacity),
+		   CEREAL_NVP(num_items),
+		   CEREAL_NVP(backpack_space));
+	}
+
 private:
 	ItemCreator item_creator;
-	vector<unique_ptr<Item>> backpack‌_space;
+	vector<unique_ptr<Item>> backpack_space;
 	int num_items;
 	int capacity;
 };

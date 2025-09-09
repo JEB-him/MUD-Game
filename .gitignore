@@ -18,3 +18,4 @@ game
 test
 
 *.exe
+.vscode/settings.json

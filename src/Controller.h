@@ -9,12 +9,19 @@
 #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
+#include "backpack.h"
+
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
 
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
  */
-class Controller {
+class Controller
+{
 public:
     friend class View;
 
@@ -23,11 +30,12 @@ public:
      * @note 日志消息会按照等级被输出到日志文件中，同时控制台会打印设定等级
      * 的消息，详见 README 日志输出
      */
-    enum class LogLevel {
-        DEBUG,      ///< 消息只应当在调试时被看到
-        INFO,       ///< 程序正常运行时可以输出的消息
-        WARN,       ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERROR       ///< 严重的错误，该事件发生时程序会 Crash
+    enum class LogLevel
+    {
+        DEBUG, ///< 消息只应当在调试时被看到
+        INFO,  ///< 程序正常运行时可以输出的消息
+        WARN,  ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
+        ERROR  ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**
@@ -36,8 +44,8 @@ public:
      */
 
     // 禁用拷贝构造函数和赋值运算符
-    Controller(const Controller&) = delete;
-    Controller& operator=(const Controller&) = delete;
+    Controller(const Controller &) = delete;
+    Controller &operator=(const Controller &) = delete;
 
     /**
      * @brief 单例模式创建实例
@@ -45,7 +53,8 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel& level=LogLevel::INFO, const std::string& log_dir="logs/", const std::string root_dir="") {
+    static std::shared_ptr<Controller> getInstance(const LogLevel &level = LogLevel::INFO, const std::string &log_dir = "logs/", const std::string root_dir = "")
+    {
         static std::shared_ptr<Controller> instance(new Controller(level, log_dir, root_dir));
         return instance;
     }
@@ -55,7 +64,7 @@ public:
      * @param level 日志等级
      * @param msg 日志消息
      */
-    void log(const LogLevel& level, const std::string& msg);
+    void log(const LogLevel &level, const std::string &msg);
 
     /**
      * @brief 游戏入口函数
@@ -63,6 +72,7 @@ public:
      * @return 一个状态码，供游戏 exit 使用
      */
     int run();
+
 private:
     // 项目根目录
     std::string root_dir;
@@ -86,24 +96,27 @@ private:
     // 要求： 若该类唯一，则可使用智能指针管理
 
     // 构造函数
-    Controller(const LogLevel& level, const std::string& log_dir, const std::string root_dir);
+    Controller(const LogLevel &level, const std::string &log_dir, const std::string root_dir);
 
     /**
      * @brief 初始化函数
-     * @details 这个函数应当：\n
+     * @details 初始化信息，包括：\n
      *          0. 调用 view 模块中的函数进行界面初始化
      *          1. 初始化必要的智能指针
-     * @param create 是否注册账号
-     * @note 初始化应该有默认参数，用于为新的玩家创建存档
-     * @return 一条消息
+     *          2. 初始化 角色 和 背包
+     * @param username 用户名
+     * @param pro 角色信息
+     * @param backpack 背包信息
+     * @note 使用 Protagonist 和 Backpack 的默认值，主函数需要提前创建 角色 和 背包 对象
+     * @return 初始化结果信息
      */
-    Message init(const bool& create);
+    Message init(std::string username, Protagonist &pro, Backpack &backpack);
 
     /**
      * @brief 登录
      * @details 实现登录逻辑
      */
-    
+
     /**
      * @brief 注册
      * @note 要求注册完立即调用保存游戏
@@ -111,10 +124,15 @@ private:
 
     /**
      * @brief 保存游戏
-     * @details 保存地图更改，序列化所有 Model
+     * @details 保存游戏的逻辑，包括：\n
+     *          1. 保存所有数据到文件中
+     * @param pro 角色信息
+     * @param backpack 背包信息
      */
+    Message Controller::save(Protagonist &pro, Backpack &backpack);
 
     /**
      * @brief 获取按键响应，并设置当前游戏状态
      */
+    void InputHandler();
 };

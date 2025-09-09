@@ -5,9 +5,14 @@ Position::Position(const int& x, const int& y) : x(x), y(y) {}
 
 Message::Message(const std::string& msg, const int& status) : msg(msg), status(status) {}
 
-SpecialChar::SpecialChar(const std::string& special_char, const int& width):
+SpecialChar::SpecialChar(const std::string& special_char,
+    const int& width,
+    const std::string& simple_color,
+    const std::string& rgb_color) :
     special_char(special_char),
-    width(width) {
+    width(width),
+    simple_color(simple_color),
+    rgb_color(rgb_color) {
     // 构造函数体
 }
 

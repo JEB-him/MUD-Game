@@ -179,6 +179,12 @@ private:
      */
     BasicValue::HealthState syncHealthState() const;
 
+    /**
+     * @brief 校验姓名是否包含非法字符
+     * @param name 待校验的姓名
+     * @return bool true=合法，false=包含非法字符
+     */
+    static bool isValidName(const std::string& name);
 
 };
 

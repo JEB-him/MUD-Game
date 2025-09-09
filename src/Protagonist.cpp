@@ -1,7 +1,7 @@
 ﻿/**
  * @brief 主角的数据模型实现（Protagonist类）
  * @author Haozhe Tang
- * @date 2024-08-31
+ * @date 2025-08-31
  */
 
 #include <iostream>
@@ -9,10 +9,6 @@
 #include "json.hpp"
 #include <fstream>
 #include <stdexcept>
-<<<<<<< HEAD
-#include "tools.cpp"
-=======
->>>>>>> 9fc3a6a65ea3f05c80176d532fa4e75b212d641f
 
 
 
@@ -347,8 +343,6 @@ bool Protagonist::isValidAttr(BasicValue::ProtagonistAttr attr, int val) const {
             return val >= 0; // 金钱不能为负
         case BasicValue::ProtagonistAttr::HEALTH:
             return val >= 0 && val <= 100; // 健康范围0~100
-<<<<<<< HEAD
-=======
         case BasicValue::ProtagonistAttr::IS_INJURED:
             return val == 0 || val == 1; // 受伤状态只能是0或1
         case BasicValue::ProtagonistAttr::INTELSCI_BOOST:
@@ -363,7 +357,6 @@ bool Protagonist::isValidAttr(BasicValue::ProtagonistAttr attr, int val) const {
             return val >= 0 && val <= 1; // 时间消耗减少比率只能在0~1之间
         case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
             return val >= 0 && val <= 1; // 健康损失保护比率只能在0~1之间
->>>>>>> 9fc3a6a65ea3f05c80176d532fa4e75b212d641f
         default:
             return false; // 非法属性
     }

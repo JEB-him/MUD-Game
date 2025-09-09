@@ -1,8 +1,17 @@
 build/
+cmake-build-debug/
 .cache/
 docs/
-compile_commands.json
+.idea/
 .vscode/
+.idea/
+
+build.bat
+compile_commands.json
+<<<<<<< HEAD
+.vscode/
+=======
+>>>>>>> 4af5c74b408bf6de4c0c26a69a18fbe989ea0591
 
 game
 test

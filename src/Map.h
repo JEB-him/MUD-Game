@@ -17,10 +17,12 @@
  *          7. 加载地图文件时将会删除上方的空白\n
  *          8. 要求地图尺寸不大于 100x50 （宽x高）
  *          9. 为了避免 Map 检测到地图尺寸异常，请不要在文件末尾添加空行
+ *         10. 为了同时兼容 Linux 和 Windows, 地图路径只能是一个文件名，不能有任何 `/` 或 '\' 符号
  * @note 该类的重要原则应当是保证任何状态下 Map 类中的所有成员全部设置正确
  */
 class Map {
 public:
+    inline const static std::string BASE_DIR = ROOT_DIR "maps/";
     /**
      * @brief 地图最大宽度
      */
@@ -35,7 +37,8 @@ public:
     constexpr static int CHAR_MAXN = 62;
     /**
      * @brief 所有特殊符号的定义
-     * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中
+     * @note TODO 后期考虑把这些配置迁移到一个专门的配置文件中\n
+     *       请按照顺序填写
      */
     inline const static SpecialChar SPECIAL_CHARS[CHAR_MAXN] = {
         SpecialChar("\U000f1302", 2),
@@ -46,16 +49,32 @@ public:
         SpecialChar("\U00002557", 1),
         SpecialChar("\U0000255d", 1),
         SpecialChar("\U00002550", 1),
-        SpecialChar("\U00002551", 1)
+        SpecialChar("\U00002551", 1),
+        SpecialChar("\U0000c6c3", 2, "blue"),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", 4),    ///< 入口
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", 4),    ///< 出口
     };
 
     Map() = default;
     /**
      * @brief 使用地图文件初始化地图
-     * @param map_path String 类型
+     * @param filename String 类型
      * @param pos 设置主角的初始坐标
      */
-    Map(const std::string& map_path, const Position& pos=Position());
+    Map(const std::string& filename, const Position& pos=Position());
 
     /**
      * @brief 析构函数，Map 应当将当前地图下的所有修改保存到文件中
@@ -91,19 +110,35 @@ public:
      *            2: 向下\n
      *            3: 向左\n
      * @param[out] event_type 事件类型, 一个引用\n
-     *             0: 抵达入口/空地 位置变化,无事件发生\n
+     *             0: 抵达入口/空地 位置变化,无事件发生(入口位置不变)\n
      *             1: 碰撞NPC，位置不变，但 Controller 应当与 NPC 交互\n
      *             2: 抵达出口，位置变化，Controller 应当向场景类请求下一个场景
      *             的编号\n
      *             3: 碰撞器械，位置不变，Controller 应当与物品类交互\n
      *             4: 碰撞墙壁，位置不变\n
      * @param[out] id 出口/NPC/器械编号\n
-     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id, 器械同理\n
-     *             
+     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id\n
+     *             器械为 SPECIAL_CHARS 中的索引\n
      * @note 该函数会通过修改 event_type 来告诉 Controller 事件类型
      * @return a Message.
      */
     Message moveProtagonist(const int& direction, int& event_type, int& id);
+
+    /**
+     * @brief 传送主角到某一个地点
+     * @details 支持地图内传送到某个 NPC 的附近\n
+     *          一旦成功传送，应当建立一个坐标索引，减少搜索耗时\n
+     *          默认从该对象的下、右、上、左的顺序寻找空位\n
+     *          若无法找到空位，寻找从左到右，从上到下的第一个空位
+     *          TODO 尚未实现空位寻找
+     * @param ind 传送目的地（对象）的 ID 或索引
+     * @param type 传送对象的类别，器械旁/NPC旁/出口入口\n
+     *        0: NPC
+     *        1: 器械
+     *        2: 出口
+     *        3: 入口
+     */
+    Message goTo(const int& ind, const int& type);
 
     /**
      * @brief 保存当前地图到文件中
@@ -112,11 +147,15 @@ public:
      *       程序 Controller 也应当调用 save()，这要求程序手动管理信号！！！
      */
     Message save() const;
+    /**
+     * @brief 检查这个坐标处是否有器械、NPC、出口
+     * @param pos Position，这个位置的坐标
+     * @return a char index of SPECIAL_CHARS value, -1 表示未碰撞 -2 表示空间狭小/墙壁
+     */
+    char detectCollision(const Position& pos) const;
 private:
     enum class LineType {
-        TOP_OF_WALL,           // 从上到下第一行墙壁,即地图顶部
-        BOTTOM_OF_WALL,        // 从下到上第一行墙壁,即地图底部
-        MIDDLE_LINE_OF_WALL,   // 中间的墙壁
+        WALL,                  // 墙壁
         EMPTY_LINE,            // 空行
         OVER_SIZE,             // 尺寸超限
         INVAILD_LINE           // 非法的行
@@ -126,19 +165,17 @@ private:
      * @brief 一个结构体，用于储存读取时是否已经读到了某些必要的行
      * @note 此处缩写了，因为与 LineType 前 3 个一一对应
      */
-    struct {
-        bool top = 0, middle = 0, bottom = 0;
-    } checked;
+    bool        is_empty;                    // 地图读取到目前位置是否为空
     bool        modified;                    // 地图是否被修改过
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息
     char        map[MAX_HEIGHT][MAX_WIDTH];  // 地图数组
     // 方向数组
-    inline static int directions[4][2] = {
-        { 0, -1},
-        { 1,  0},
-        { 0,  1},
-        {-1,  0}
+    inline static int DIRECTIONS[4][2] = {
+        {-1, 0},
+        { 0, 1},
+        { 1, 0},
+        { 0,-1}
     };
     // Map path
     std::string map_path;
@@ -160,12 +197,14 @@ private:
      * @brief 加载地图
      * @param map_path 地图文件路径
      */
-    Message loadMap();
+    Message loadMap(const std::string& filename);
 
     /**
-     * @brief 储存行到地图中，并检查是否含有非法字符
+     * @brief 设置 NPC 和出口等的 ID
+     * @parm rows 扫描的行数
+     * @return 返回索引建立是否成功
      */
-    bool line_copy(char map_line[], const std::string& line);
+    bool indexInit(const int& rows);
 
     /**
      * @brief 对行的类型进行辨别
@@ -180,12 +219,32 @@ private:
     bool processMap();
 
     /**
+     * @brief 在沿地图边界检查地图时，修改参数以进行转向
+     */
+    bool calcDir(int& x, int& y, const bool& reset=false);
+
+    /**
+     * @brief 检查宽字符
+     */
+    bool checkWideChar(const int& x, const int& y);
+
+    /**
+     * @brief 获取出口 ID
+     */
+    int getExitId(const Position& pos);
+
+    /**
+     * @brief 获取NPC ID
+     */
+    int getNPCId(const Position& pos);
+
+    /**
      * @brief 获取字符的 index
      */
     static int char2index(const char& ch);
 
     /**
-     * @brief 在沿地图边界检查地图时，判断是否应当转向
+     * @brief 储存行到地图中，并检查是否含有非法字符
      */
-    int calcDir(int& x, int& y, const bool& reset);
+    static bool line_copy(char map_line[], const std::string& line);
 };

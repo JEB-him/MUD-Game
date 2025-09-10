@@ -1,813 +1,256 @@
 /**
 * @brief NPC类实现
 * */
-
 #include "NPC.h"
 #include "Protagonist.h"
-#include "tools.h"
-
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-#include <random>
 #include <fstream>
+#include <algorithm>
+#include <string>
+#include <iostream>
 #include "json.hpp"
 
 using json = nlohmann::json;
 
-/// @brief 树状交互逻辑入口
-void NPC::startInteraction() const {
-    std::cout << interaction_text << "\n";
-        
-    if (interaction_options.empty()) {
-        std::cout << "暂时没有可交互的选项。\n";
+/**
+ * @brief 将NPCType枚举转换为字符串
+ * @param type NPC类型
+ * @return 对应的字符串表示
+ */
+const std::string& NPCTypeToString(NPCType type) {
+    static const std::unordered_map<NPCType, std::string> typeMap {
+        {NPCType::STUDENT, "Student"},
+        {NPCType::PROFESSOR, "Professor"},
+        {NPCType::CANTEEN_STAFF, "CanteenStaff"},
+        {NPCType::ROOMMATE, "Roommate"},
+        {NPCType::DORM_MANAGER, "DormManager"},
+        {NPCType::EMPLOYER, "Employer"},
+        {NPCType::LIBRARIAN, "Librarian"},
+        {NPCType::COACH, "Coach"}
+    };
+    return typeMap.at(type);
+}
+
+/**
+ * @brief 构造函数
+ * @param name NPC名称
+ * @param id NPC唯一标识符
+ */
+NPC::NPC(const std::string& name, int id) 
+    : name(name), id(id) {}
+
+/**
+ * @brief 加载交互配置
+ * @param npcType NPC类型
+ * @param configPath 配置文件路径
+ */
+void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) {
+    std::string typeStr = NPCTypeToString(npcType);
+    
+    // 清空旧交互树
+    interactionTree.clear();
+    currentInteractionId.clear();
+
+    std::ifstream file(configPath);
+    if (!file.is_open()) {
+        throw std::runtime_error("无法打开配置文件: " + configPath);
+    }
+
+    try {
+        json config;
+        file >> config;
+
+        // 验证角色配置存在
+        if (!config.contains(typeStr)) {
+            throw std::runtime_error("配置文件缺少" + typeStr + "角色配置");
+        }
+        auto& roleConfig = config[typeStr];
+
+        // 检查initial字段
+        if (!roleConfig.contains("initial")) {
+            throw std::runtime_error("角色配置缺少initial字段");
+        }
+        if (!roleConfig["initial"].is_string()) {
+            throw std::runtime_error("initial字段必须是字符串");
+        }
+        std::string initialNode = roleConfig["initial"].get<std::string>();
+        currentInteractionId = typeStr + "_" + initialNode;
+
+        // 加载交互节点
+        if (!roleConfig.contains("interactions") || !roleConfig["interactions"].is_object()) {
+            throw std::runtime_error("interactions字段缺失或不是对象");
+        }
+        auto& interactions = roleConfig["interactions"];
+        for (auto& [nodeId, nodeData] : interactions.items()) {
+            // 检查prompt字段
+            if (!nodeData.contains("prompt") || !nodeData["prompt"].is_string()) {
+                throw std::runtime_error("节点" + nodeId + "的prompt字段缺失或不是字符串");
+            }
+            std::string prompt = nodeData["prompt"].get<std::string>();
+            InteractionNode node{
+                prompt,
+                {}
+            };
+
+            // 检查options字段
+            if (!nodeData.contains("options") || !nodeData["options"].is_array()) {
+                throw std::runtime_error("节点" + nodeId + "的options字段缺失或不是数组");
+            }
+            auto& options = nodeData["options"];
+            for (auto& option : options) {
+                // 检查text字段
+                if (!option.contains("text") || !option["text"].is_string()) {
+                    throw std::runtime_error("选项缺少text字段或不是字符串");
+                }
+                std::string text = option["text"].get<std::string>();
+
+                std::string nextNode;
+                if (option.contains("next")) {
+                    if (option["next"].is_string()) {
+                        nextNode = option["next"].get<std::string>();
+                    } else if (option["next"].is_null()) {
+                        nextNode = "END"; // 处理null值
+                    } else {
+                        throw std::runtime_error("next字段必须是字符串或null");
+                    }
+                } else {
+                    nextNode = "END";
+                }
+
+                // 生成带前缀的nextNode
+                if (!nextNode.empty()) {
+                    nextNode = typeStr + "_" + nextNode;
+                }
+
+                // if (option.contains("condition")) {
+                //     node.options.back().condition = option["condition"];
+                // }
+                // if (option.contains("effect")) {
+                //     node.options.back().effect = option["effect"];
+                // }
+                node.options.push_back({text, nextNode});
+            }
+
+            std::string prefixedId = typeStr + "_" + nodeId;
+            interactionTree[prefixedId] = node;
+        }
+
+        // 验证初始节点存在
+        if (interactionTree.find(currentInteractionId) == interactionTree.end()) {
+            throw std::runtime_error("初始节点" + currentInteractionId + "不存在");
+        }
+
+    } catch (const json::exception& e) {
+        throw std::runtime_error("JSON解析错误: " + std::string(e.what()));
+    }
+}
+
+/**
+ * @brief 开始交互
+ * @details 从当前交互节点开始，递归处理用户选择，直到遇到结束节点。
+ * @throws std::runtime_error 交互树未初始化、未设置初始交互节点、找不到交互节点
+ */
+void NPC::startInteraction() {
+    
+    if (interactionTree.empty()) {
+        throw std::runtime_error("交互树未初始化");
+    }
+    
+    if (currentInteractionId.empty()) {
+        throw std::runtime_error("未设置初始交互节点");
+    }
+    
+    auto it = interactionTree.find(currentInteractionId);
+    if (it == interactionTree.end()) {
+        throw std::runtime_error("找不到交互节点: " + currentInteractionId);
+    }
+    auto& node = it->second;
+
+    // 显示交互提示和选项
+    if (node.options.empty()) {
+        std::cout << node.prompt << std::endl;
         return;
     }
-       
-    // 显示一级交互选项
-    std::cout << "请选择交互选项：\n";
-    // std::cout << "0. 离开\n";
-    for (size_t i = 0; i < static_cast<int>(interaction_options.size()); ++i) {
-        std::cout << i << ". " << interaction_options[i] << "\n";
+
+    std::cout << node.prompt << std::endl;
+    for (size_t i = 0; i < node.options.size(); ++i) {
+        std::cout << i << ": " << node.options[i].text << std::endl;
     }
-        
-    int choice;
+
+    int choice = -1;
     while (true) {
         std::cout << "请输入你的选择：";
-        std::cin >> choice;
+        std::string input;
+        std::getline(std::cin, input);
+
+        try {
+            size_t pos;
+            choice = std::stoi(input, &pos);
             
-        /**
-        * @brief 处理用户输入
-        * @details 检查用户输入是否为整数，若不是则提示用户重新输入
-        */
-        if (std::cin.fail()) {
-            // 清除错误状态
+            // 检查是否整个输入都是数字
+            if (pos != input.length()) {
+                throw std::invalid_argument("包含非数字字符");
+            }
+
+            // 检查选项范围
+            if (choice >= 0 && choice < static_cast<int>(node.options.size())) {
+
+            //     int my_money = static_cast<int>(Protagonist::getBaseAttrs().at(BasicValue::ProtagonistAttr::MONEY)); // 获取金币数
+            //     std::cout << "你的金币数为：" << my_money << std::endl;
+            //     // 处理选项条件
+            //     if (node.options[choice].condition.contains("MONEY")) {
+            //         int requiredMoney = static_cast<int>(node.options[choice].condition["MONEY"].get<int>());
+            //         if (my_money < requiredMoney) {
+            //             std::cout << "你的金币不足。" << std::endl;
+            //             break; // 退出
+            //         }
+            //     }
+
+
+            // }else if(node.contains("effect")){
+                // 处理选项效果
+                // 假设我们有一个Protagonist对象，例如叫做player（如何获取这个player取决于你的上下文）
+                // 你可能需要将player传递到当前函数中，或者通过其他方式获取
+
+                // if (node.effect->contains("INTEL_ARTS")) {
+                //     int effect = static_cast<int>(node.effect->at("INTEL_ARTS").get<int>());
+                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::INTEL_ARTS, effect, true);
+                // } else if (node.effect->contains("INTEL_SCI")) {
+                //     int effect = static_cast<int>(node.effect->at("INTEL_SCI").get<int>());
+                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::INTEL_SCI, effect, true);
+                // } else if (node.effect->contains("STRENGTH")) {
+                //     int effect = static_cast<int>(node.effect->at("STRENGTH").get<int>());
+                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::STRENGTH, effect, true);
+                // } else if (node.effect->contains("MONEY")) {
+                //     int effect = static_cast<int>(node.effect->at("MONEY").get<int>());
+                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::MONEY, effect, true);
+                // }
+            // }
+                        
+            break;}
+        }
+        catch (const std::exception&) {
+            std::cout << "无效输入，请输入数字选项" << std::endl;
+            // 清除错误状态（针对cin直接读取的情况）
             std::cin.clear();
-            // 忽略错误的输入
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "输入无效，请输入数字选项：\n";
-            continue;
-        }
-            
-        // if (choice == 0) {
-        //     std::cout << "离开。\n";
-        //     return;
-        // }
-            
-        if ( /*choice > 0 &&   */ choice <= static_cast<int>(interaction_options.size())) {
-            handleInteraction(choice/*-1*/);
-            return;
-        } else {
-            std::cout << "无效的选择，请重新选择：\n";
         }
     }
+
+    handleOptionSelection(choice);
 }
-
-/// @brief 处理具体交互选项（可被子类重写）
-void NPC::handleInteraction(int option_index) const {
-    /// @brief 处理具体交互选项（可被子类重写）
-    std::cout << "你选择了：" << interaction_options[option_index] << "\n";
-    // 基类默认处理，子类可以重写实现具体逻辑
-    std::cout << "这个功能还在开发中。\n"; // 正常应该不会显示
-}
-
-/// @brief 获取称呼
-std::string NPC::getTitle() const { return title; }
-/// @brief 获取身份
-std::string NPC::getIdentity() const { return job; }
-/// @brief 获取交互文本
-std::string NPC::getInteractionText() const { return interaction_text; }
-/// @brief 获取交互选项
-std::vector<std::string> NPC::getInteractionOptions() const { return interaction_options; }
-
-/// @brief 设置称呼
-void NPC::setTitle(const std::string& new_title) { title = new_title; }
-/// @brief 设置身份
-void NPC::setIdentity(const std::string& new_identity) { job = new_identity; }
-/// @brief 设置交互文本
-void NPC::setInteractionText(const std::string& text) { interaction_text = text; }
-/// @brief 添加交互选项
-void NPC::addInteractionOption(const std::string& option) { interaction_options.push_back(option); }
-
 /**
-*@brief 学生类构造函数
-* */
-Student::Student(const std::string& title, int intelligence, bool initBase)
-    : NPC(title, "学生"), intelligence(intelligence) {
-    if (initBase) {
-        setInteractionText("你好，我是学生" + title + "，我们一起学习吧！");
-        addInteractionOption("离开");
-        addInteractionOption("请教问题");
-    }
-}
-
-/**
- * @brief 处理具体交互选项
- * @details 处理学生类的具体交互选项，如请教问题
- * @param option_index 交互选项索引
- * */
-void Student::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    } else if (option_index == 1) { // 请教问题
-        std::cout << "你向" << getTitle() << "请教问题。\n";
-        // 需增加提升智力处理代码，需向主角类获取接口
-        Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, 5, true);
-    }
-}
-int Student::getIntelligence() const { return intelligence; } ///< 获取智力
-void Student::setIntelligence(int value) { intelligence = value; } ///< 设置智力
-
-/**
-*@brief 学长类构造函数
-* */
-SeniorStudent::SeniorStudent(const std::string& title, int intelligence , 
-             const std::string& major)
-    : Student(title, intelligence, false), major(major) {
-    setIdentity("学长");
-    setInteractionText("正好我手头有一些项目需要帮忙呢，你现在方便吗？");
-    addInteractionOption("离开");
-    addInteractionOption("帮助处理问题");
-    addInteractionOption("婉拒");
-}
-
-/**
-*@brief 处理具体交互选项
-*@details 处理学长类的具体交互选项，如帮助处理问题
-* */
-void SeniorStudent::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    } else if (option_index == 1) { // 帮助处理问题
-        SeniorStudent::handleHelpRequest();
-    } else if (option_index == 2) { // 婉拒
-        std::cout << getTitle() << "：好吧，那下次有机会再合作吧。\n";
-        return;
-    }
-
-}
-
-/**
- * @brief 处理帮助请求
- * @details 模拟小游戏
- * */
-void SeniorStudent::handleHelpRequest() const {
-    std::cout << getTitle() << "：太好了！我这里有个问题需要帮忙处理。\n";
-        
-    // 模拟小游戏
-    std::cout << "=== 小游戏：解决学长的问题 ===\n";
-    std::cout << "请计算：25 + 17 = ?\n";
-    
-    int answer;
-    std::cin >> answer;
-    
-    // 检查答案
-    if (answer == 42) {
-        std::cout << "恭喜你答对了！学长的问题解决了。\n";
-        // 奖励
-        std::cout << "奖励：智力文理+" << 10 << "\n";
-        // std::cout << "消耗：时间+1小时,体力-15\n";
-        Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, 10, true);
-        Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, 10, true);
-        // Protagonist::updateAttr(BasicValue::ProtagonistAttr::STRENGTH, -15, true);
-            
-        // 这里需要调用主角类的接口来实际修改属性
+ * @brief 处理选项选择
+ * @param optionIndex 选项索引
+ * @details 根据用户选择更新当前交互节点，递归调用startInteraction()处理下一个节点。
+ * @throws std::runtime_error 选项索引超出范围、下一个节点不存在
+ */
+void NPC::handleOptionSelection(int optionIndex) {
+    if (!interactionTree[currentInteractionId].options.empty() 
+        && interactionTree[currentInteractionId].options.size() > optionIndex) {
+        auto& option = interactionTree[currentInteractionId].options[optionIndex];
+        currentInteractionId = option.next;
+        startInteraction();
     } else {
-        std::cout << "答案错误，再仔细想想吧！\n";
-        // 消耗
-        // std::cout << "消耗：时间+0.5小时，体力-5\n";
-        // 这里需要调用主角类的接口来实际修改属性
+        throw std::runtime_error("选项索引超出范围");
     }
 }
-
-/// @brief 获取专业
-std::string SeniorStudent::getMajor() const { return major; }
-/// @brief 设置专业
-void SeniorStudent::setMajor(const std::string& new_major) { major = new_major; }
-
-/**
- * @brief 舍友类构造函数
- * */
-Roommate::Roommate(const std::string& title, int intelligence )
-    : Student(title, intelligence, false) {
-    setIdentity("舍友");
-    setInteractionText("嘿，" + title + "在这里！需要帮忙吗？");
-    addInteractionOption("离开");
-    addInteractionOption("开黑打游戏");
-    addInteractionOption("请室友帮忙带饭");  // 玩家请室友带饭
-    addInteractionOption("帮室友带饭");      // 玩家帮室友带饭
-    // hasHelpedWithMeal = false;
-    // hasBoughtMeal = false;
-    meal_cost = 10; // 带饭费用
-}
-
-/**
- * @brief 完成玩家请室友带饭后交互内容
- * */
-void Roommate::completeMealRequest() { 
-    std::cout << getTitle() << "：这是你的饭！\n";
-}
-    
-/**
- * @brief 完成玩家帮室友带饭后交互内容
- * */
-void Roommate::completeMealProvide() { 
-    std::cout << getTitle() << "：谢谢你帮我带饭！下次再麻烦你！\n";
-}
-
-/**
- * @brief 处理具体交互选项
- * @details 处理舍友类的具体交互选项，如开黑打游戏、请室友帮忙带饭、帮室友带饭
- * @param option_index 交互选项索引
- * */
-void Roommate::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 开黑打游戏
-            std::cout << getTitle() << "：来来来，开黑打游戏！\n";
-            // 需增加打游戏收益处理代码 
-            break;
-            
-        case 2: // 请室友帮忙带饭（玩家请室友带饭）
-            std::cout << getTitle() << "：没问题！帮你带饭需要支付跑腿费" << meal_cost << "金币。确认吗？(y/n)\n";
-            char confirm1;
-            std::cin >> confirm1;
-            if (confirm1 == 'y' || confirm1 == 'Y') {
-                // 需增加带饭成本处理代码
-                Protagonist::updateAttr(BasicValue::ProtagonistAttr::MONEY, meal_cost, true);
-                std::cout << "已支付" << meal_cost << "金币！" << getTitle() << "会去食堂帮你带饭。\n";
-                std::cout << "(转向食堂工作人员选择菜品...)\n";
-                // 需增加带饭收益处理代码
-                // const_cast<Roommate*>(this)->hasBoughtMeal = true;
-            } else {
-                std::cout << "取消带饭请求。\n";
-            }
-            break;
-            
-        case 3: // 帮室友带饭（玩家帮室友带饭）
-            std::cout << getTitle() << "：太好了！你要帮我带饭吗？我会支付你跑腿费" << meal_cost << "金币。确认吗？(y/n)\n";
-            char confirm2;
-            std::cin >> confirm2;
-            if (confirm2 == 'y' || confirm2 == 'Y') {
-                std::cout << getTitle() << "支付了" << meal_cost << "金币！请去食堂帮我带饭吧。\n";
-                // 需增加带饭成本处理代码
-                Protagonist::updateAttr(BasicValue::ProtagonistAttr::MONEY, -meal_cost, true);
-                std::cout << "(转向食堂工作人员选择菜品...)\n";
-                // 需增加带饭收益处理代码
-                // const_cast<Roommate*>(this)->hasHelpedWithMeal = true;
-            } else {
-                std::cout << "取消带饭帮助。\n";
-            }
-            break;
-    }
-}
-
-/**
- * @brief 获取带饭费用
- * @return 带饭费用
- */
-int Roommate::getMealCost() const { return meal_cost; }
-
-/**
- * @brief 宿舍管理员类构造函数
- * */
-DormManager::DormManager(const std::string& title)
-        : NPC(title, "宿舍管理员"), familiarity(0) {
-        setInteractionText("我是宿舍管理员" + title + "，有什么需要帮忙的吗？");
-        addInteractionOption("离开");
-        addInteractionOption("对话");
-        addInteractionOption("帮忙干活");
-    }
-
-/**
- * @brief 处理对话
- * @details 与管理员的交互，增加熟悉度
- */
-void DormManager::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 对话
-            const_cast<DormManager*>(this)->familiarity += 5;
-            std::cout << "与" << getTitle() << "对话，熟悉度提升到：" << familiarity << "\n";
-            DormManager::checkSpecialDialogue();
-            break;
-        case 2: // 帮忙干活
-            const_cast<DormManager*>(this)->familiarity += 10;
-            std::cout << "帮忙干活，熟悉度提升到：" << familiarity << "\n";
-            DormManager::checkSpecialDialogue();
-            break;
-    }
-}
-/**
- * @brief 检查特殊对话
- * @details 当熟悉度超过50时，有30%的概率触发特殊对话
- */
-void DormManager::checkSpecialDialogue() const {
-    if (familiarity >= 50) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(1, 10);
-            
-        if (dis(gen) <= 3) {
-            std::cout << getTitle() << "（神秘地说）：谢谢你一直的帮助，这个限定物品送给你！\n";
-            // 需增加奖励处理代码
-        }
-    }
-}
-
-/**
- * @brief 获取熟悉度
- * @return 熟悉度
- */
-int DormManager::getFamiliarity() const { return familiarity; }
-
-/**
- * @brief 招聘人员类构造函数
- * */
-Employer::Employer(const std::string& title, int money_reward, int stamina_cost, 
-             const std::string& promotion_text)
-        : NPC(title, "招聘人员"), money_reward(money_reward), stamina_cost(stamina_cost) {
-        setInteractionText(promotion_text);
-        addInteractionOption("离开");
-        addInteractionOption("接受工作");
-        addInteractionOption("询问详情");
-    }
-
-/**
- * @brief 处理与招聘人员的交互
- * */
-void Employer::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 接受工作
-            std::cout << "你接受了工作，获得" << money_reward << "金币，消耗" << stamina_cost << "体力。\n";
-            break;
-        case 2: // 询问详情
-            std::cout << "工作详情：奖励" << money_reward << "金币，需要消耗" << stamina_cost << "体力。\n";
-                break;
-    }
-        //应完善
-}
-
-/**
- * @brief 老板类构造函数
- * */
-Boss::Boss(const std::string& title)
-    : NPC(title, "老板"), hasPraised(false), leaveCount(0) {
-    setInteractionText("请进。（依旧保持低头忙，等你先说话）");
-    addInteractionOption("离开");
-    addInteractionOption("主动汇报工作邀功");
-    addInteractionOption("简单交接工作");
-}
-
-/**
- * @brief 处理与老板的交互
- */
-void Boss::handleInteraction(int option_index) const {
-    switch (option_index) {
-        case 0: // 离开
-            leaveCount++;
-            std::cout << "我退出了办公室\n";
-            if (leaveCount >= 2) {
-                std::cout << "\n=== 警告 ===\n";
-                std::cout << "老板：（严肃地）你最近工作态度有问题，多次提前离开。\n";
-                std::cout << "考虑到公司效益，我们不得不做出裁员决定。\n";
-                std::cout << "你被裁员了！\n";
-                // 这里可以添加游戏结束或惩罚逻辑
-            }
-            break;
-            
-        case 1: // 主动汇报工作邀功
-            if (!hasPraised) {
-                std::cout << "我：老板，这次项目我做出了很大贡献……\n";
-                std::cout << "老板：（抬头看了你一眼）嗯，知道了。\n";
-                std::cout << "（邀功成功，工资可能会有所提升，但也有风险）\n";
-                hasPraised = true;
-            } else {
-                std::cout << "老板：（不耐烦地）你已经汇报过了。\n";
-            }
-            break;
-            
-        case 2: // 简单交接工作
-            std::cout << "我：老板，这是项目工作进度报告，已经整理好了\n";
-            std::cout << "老板：（点头）好的。\n";
-            std::cout << "我退出了办公室。\n";
-            leaveCount = 0; // 重置离开计数
-            break;
-            
-    }
-}
-
-/**
- * @brief 图书管理员类构造函数
- * */
-Librarian::Librarian(const std::string& title)
-    : NPC(title, "图书管理员") {
-    setInteractionText("欢迎来到图书馆，我是图书管理员" + title + "，需要帮助吗？");
-    addInteractionOption("离开");
-    addInteractionOption("寻求知识帮助");
-}
-
-/**
- * @brief 处理与图书管理员的交互
- * */
-void Librarian::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    } else if (option_index == 1) {
-        std::cout << "在" << getTitle() << "的帮助下，你的智力得到了提升！\n";
-        // 需增加奖励处理代码
-        Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, 10, true);
-        Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, 10, true);
-    }
-}
-
-/**
- * @brief 食堂工作人员类构造函数
- * */
-CanteenStaff::CanteenStaff(const std::string& title, 
-                const std::vector<std::string>& food_types,
-                const std::vector<int>& stamina_recovery,
-                const std::vector<int>& food_costs)
-        : NPC(title, "食堂工作人员"), food_types(food_types), 
-          stamina_recovery(stamina_recovery), food_costs(food_costs) {
-        setInteractionText("欢迎光临食堂！我是" + title + "，今天想吃点什么？");
-        addInteractionOption("离开");
-        addInteractionOption("查看菜单");
-        addInteractionOption("购买食物");
-        addInteractionOption("为舍友买饭");
-    }
-
-/**
- * @brief 处理与食堂工作人员的交互
- * */
-void CanteenStaff::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 查看菜单
-            CanteenStaff::showMenu();
-            break;
-        case 2: // 购买食物
-            std::cout << "请选择要购买的食物编号：\n";
-            CanteenStaff::showMenu();
-            int food_choice;
-            std::cin >> food_choice;
-            if (food_choice > 0 && food_choice <= static_cast<int>(food_types.size())) {
-                std::cout << "购买了" << food_types[food_choice-1] << "，支付" 
-                          << food_costs[food_choice-1] << "金币！\n";
-                std::cout << "体力恢复：+" << stamina_recovery[food_choice-1] << "\n";
-                // 需增加购买成本处理代码
-                Protagonist::updateAttr(BasicValue::ProtagonistAttr::MONEY, -food_costs[food_choice-1], true);
-                Protagonist::updateAttr(BasicValue::ProtagonistAttr::STRENGTH, stamina_recovery[food_choice-1], true);
-            } else {
-                std::cout << "选择无效！\n";
-            }
-            break;
-        case 3: // 为舍友买饭
-            std::cout << "请选择要为舍友购买的食物：\n";
-            CanteenStaff::showMenu();
-            int roommate_food_choice;
-            std::cin >> roommate_food_choice;
-            if (roommate_food_choice > 0 && roommate_food_choice <= static_cast<int>(food_types.size())) {
-                std::cout << "为舍友购买了" << food_types[roommate_food_choice-1] 
-                          << "，支付" << food_costs[roommate_food_choice-1] << "金币！\n";
-                std::cout << "带饭成功！可以回去交给舍友了。\n";
-            } else {
-                std::cout << "选择无效！\n";
-            }
-            break;
-    }
-}
-    
-/**
- * @brief 显示菜单
- * */
-void CanteenStaff::showMenu() const {
-    std::cout << "=== 今日菜单 ===\n";
-    for (size_t i = 0; i < food_types.size(); ++i) {
-        std::cout << i+1 << ". " << food_types[i] << " - " << food_costs[i] 
-                  << "金币 (+" << stamina_recovery[i] << "体力)\n";
-    }
-}
-
-/**
- * @brief 教师类构造函数
- * */
-Professor::Professor(const std::string& title, const std::string& subject)
-        : NPC(title, "教师"), subject(subject) {
-        setInteractionText("同学们好，我是" + subject + "课教师" + title + "。");
-        addInteractionOption("离开");
-        addInteractionOption("请教问题");
-        addInteractionOption("寻求指导");
-    }
-    
-/**
- * @brief 处理与教师的交互
- * */
-void Professor::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 请教问题
-            std::cout << "向" << getTitle() << "教授请教问题。\n";
-            break;
-        case 2: // 寻求指导
-            std::cout << "在" << getTitle() << "教授的指导下，智力得到了提升！\n";
-            // 需增加奖励处理代码
-            Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, 10, true);
-            Protagonist::updateAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, 10, true);
-            break;
-    }
-    //应完善
-}
-
-/**
- * @brief 文科教师类（大英）构造函数
- */
-LiberalArtsProfessor::LiberalArtsProfessor(const std::string& title)
-    : Professor(title, "大英") {
-    setInteractionText("同学你好，有什么问题吗。");
-    addInteractionOption("离开");
-    addInteractionOption("询问问题");
-    addInteractionOption("询问考试");
-}
-
-/**
- * @brief 处理与文科教师的交互
- */
-void LiberalArtsProfessor::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 询问问题
-            std::cout << "我：老师，Oxymoron是什么修辞手法？\n";
-            std::cout << "老师：这是英文文学中非常常见的矛盾修辞呀，比如说sweet sorrow喜忧参半……\n";
-            std::cout << "老师：这个修辞很少人会用上，看来你学英语很用心呢，加油！告诉我你的课堂序号吧。\n";
-            std::cout << "我：我的课堂序号是25，谢谢老师！\n";
-            break;
-            
-        case 2: // 询问考试
-            std::cout << "我：老师，这个学期的期末考试怎么安排？\n";
-            std::cout << "老师：有平时分和期末考试分，平时好好学就好啦。\n";
-            std::cout << "（Tips：平时分可通过'学习文科'小游戏提高）\n";
-            break;
-    }
-}
-
-/**
- * @brief 理科教师类（高数）构造函数
- */
-ScienceProfessor::ScienceProfessor(const std::string& title)
-    : Professor(title, "高数") {
-    setInteractionText("诶，同学你好，遇到什么问题了吗。");
-    addInteractionOption("离开");
-    addInteractionOption("询问问题");
-    addInteractionOption("询问考试");
-}
-
-/**
- * @brief 处理与理科教师的交互
- */
-void ScienceProfessor::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 询问问题
-            std::cout << "我：老师您好，我刚预习了这节课的微分方程内容。\n";
-            std::cout << "我：这个多元函数求极值这个的推导不太明白，可以再讲解一下吗？\n";
-            std::cout << "老师：我看看，你说的是这个驻点类型判断的式子吧，它……\n";
-            std::cout << "我：谢谢老师，我明白了，我晚上会再去图书馆巩固一下这个知识点。\n";
-            std::cout << "老师：多看几遍就明白了，加油！这个资料给你吧。（获得屠龙宝典）\n";
-            std::cout << "我：谢谢老师，老师再见。\n";
-            break;
-            
-        case 2: // 询问考试
-            std::cout << "老师：期末考试主要参考笔试，但是平时分也很重要。\n";
-            std::cout << "我：好的，谢谢老师。\n";
-            std::cout << "（Tips：平时分可通过'学习理科'提高）\n";
-            break;
-            
-    }
-}
-
-/**
- * @brief 教练员类构造函数
- * */
-Coach::Coach(const std::string& title, const std::string& sport_type)
-        : Professor(title, "体育"), sport_type(sport_type) {
-    setInteractionText("同学好，我是体育老师。");
-    addInteractionOption("离开");
-    addInteractionOption("参加训练");
-        
-    // 初始化运动项目数据
-    Coach::initializeSportsData();
-}
-   
-/**
- * @brief 处理与教练员的交互
- * */
-void Coach::handleInteraction(int option_index) const {
-    if (option_index == 0) { // 离开
-        std::cout << "你选择了离开。\n";
-        return;
-    }
-    switch (option_index) {
-        case 1: // 参加训练
-            Coach::handleTrainingOptions();
-            break;
-    }
-}
-    
-/**
- * @brief 处理训练项目选择
- */
-void Coach::handleTrainingOptions() const {
-    std::cout << "=== 训练项目 ===\n";
-    for (const auto& sport : sports_data) {
-        std::cout << sport.name << " - " << sport.time_cost << "小时，花费：";
-        if (sport.cost == 0) {
-            std::cout << "免费";
-        } else {
-            std::cout << sport.cost << "金币";
-        }
-        std::cout << "，体力+" << sport.stamina_gain << "\n";
-    }
-        
-    std::cout << "请选择训练项目：\n";
-    std::string choice;
-    std::cin >> choice;
-    
-    for (const auto& sport : sports_data) {
-        if (sport.name == choice) {
-            // 检查金币是否足够（这里需要从主角类获取金币数量）
-            int player_gold = 100; // 假设从主角类获取金币数量，这里用100作为示例
-            
-            std::cout << "您选择了" << choice << "训练！\n";
-            std::cout << "将花费：" << sport.cost << "金币\n";
-            std::cout << "将获得：体力+" << sport.stamina_gain << "\n";
-            std::cout << "将消耗时间：" << sport.time_cost << "小时\n";
-            
-            if (player_gold >= sport.cost) {
-                std::cout << "金币足够，训练成功！\n";
-
-                handleTrainingReward(sport);
-            } else {
-                std::cout << "金币不足！需要" << sport.cost << "金币，但您只有" << player_gold << "金币。训练失败！\n";
-            }
-            return;
-        }
-    }
-    std::cout << "无效的训练项目！\n";
-}
-
-/**
- * @brief 处理训练奖励
- * */
-void Coach::handleTrainingReward(const SportData& sport) const {
-    //从主角类中获取接口
-    Protagonist::updateAttr(BasicValue::ProtagonistAttr::STRENGTH, sport.stamina_gain, true);
-    Protagonist::updateAttr(BasicValue::ProtagonistAttr::MONEY, -sport.cost, true);
-
-    // 更新JSON文件中的器材拥有状态
-    std::ifstream fileIn("SportsParam.json");
-    if (!fileIn.is_open()) {
-        std::cerr << "无法打开SportsParam.json文件进行读取" << std::endl;
-        return;
-    }
-    
-    try {
-        json sports_json;
-        fileIn >> sports_json;
-        fileIn.close();
-        
-        // 根据运动类型更新器材拥有状态
-        if (sport.name == "篮球" && sports_json.contains("basketball")) {
-            sports_json["basketball"]["if_have_ball"] = true;
-        } else if (sport.name == "足球" && sports_json.contains("football")) {
-            sports_json["football"]["if_have_ball"] = true;
-        } else if (sport.name == "羽毛球" && sports_json.contains("badminton")) {
-            sports_json["badminton"]["if_have_bat"] = true;
-        }
-        
-        // 写回JSON文件
-        std::ofstream fileOut("SportsParam.json");
-        if (!fileOut.is_open()) {
-            std::cerr << "无法打开SportsParam.json文件进行写入" << std::endl;
-            return;
-        }
-        
-        fileOut << sports_json.dump(4); // 使用4个空格进行格式化
-        fileOut.close();
-        
-        std::cout << "已成功获得" << sport.name << "器材！" << std::endl;
-        
-    } catch (const std::exception& e) {
-        std::cerr << "JSON处理错误: " << e.what() << std::endl;
-    }
-}
-    
-/**
- * @brief 初始化运动项目数据
- * */
-void Coach::initializeSportsData() {
-    // 从JSON文件读取运动数据
-    std::ifstream file("SportsParam.json");
-    if (!file.is_open()) {
-        std::cerr << "无法打开SportsParam.json文件, 使用默认数据" << std::endl;
-        // 使用默认数据作为后备
-        sports_data.push_back({"篮球", 0.5, 15, 5});
-        sports_data.push_back({"足球", 1.0, 15, 8});
-        sports_data.push_back({"跑步", 1.0, 0, 5});
-        sports_data.push_back({"羽毛球", 0.5, 35, 10});
-        return;
-    }
-
-    try {
-        json sports_json;
-        file >> sports_json;
-
-        // 解析篮球数据
-        if (sports_json.contains("basketball")) {
-            auto& basketball = sports_json["basketball"];
-            bool has_basketball = basketball["if_have_ball"].get<bool>();
-            int cost = has_basketball ? 
-                basketball["sum_money"]["if_have_ball"].get<int>() : 
-                basketball["sum_money"]["if_not_have_ball"].get<int>();
-            sports_data.push_back({"篮球", 
-                                basketball["time"].get<float>(),
-                                basketball["base_energy"].get<int>(),
-                                cost});
-        }
-
-        // 解析足球数据
-        if (sports_json.contains("football")) {
-            auto& football = sports_json["football"];
-            bool has_football = football["if_have_ball"].get<bool>();
-            int cost = has_football ? 
-                football["sum_money"]["if_have_ball"].get<int>() : 
-                football["sum_money"]["if_not_have_ball"].get<int>();
-            sports_data.push_back({"足球",
-                                football["time"].get<float>(),
-                                football["base_energy"].get<int>(),
-                                cost});
-        }
-
-        // 解析跑步数据
-        if (sports_json.contains("running")) {
-            auto& running = sports_json["running"];
-            sports_data.push_back({"跑步",
-                                running["time"].get<float>(),   
-                                running["base_energy"].get<int>(),
-                                running["money"].get<int>()});
-        }
-
-        // 解析羽毛球数据
-        if (sports_json.contains("badminton")) {
-            auto& badminton = sports_json["badminton"];
-            bool has_badminton_bat = badminton["if_have_bat"].get<bool>();
-            int cost = has_badminton_bat ? 
-                badminton["sum_money"]["if_have_bat"].get<int>() : 
-                badminton["sum_money"]["if_not_have_bat"].get<int>();
-            sports_data.push_back({"羽毛球",
-                                badminton["time"].get<float>(),
-                                badminton["base_energy"].get<int>(),
-                                cost});
-        }
-
-    } catch (const std::exception& e) {
-        std::cerr << "JSON解析错误: " << e.what() << "，使用默认数据" << std::endl;
-        // 使用默认数据作为后备
-        sports_data.push_back({"篮球", 0.5, 15, 5});
-        sports_data.push_back({"足球", 1.0, 15, 8});
-        sports_data.push_back({"跑步", 1.0, 0, 5});
-        sports_data.push_back({"羽毛球", 0.5, 35, 10});
-    }
-}
-
-/**
- * @brief 获取运动项目类型
- * @return 运动项目类型
- * */
-std::string Coach::getSportType() const { return sport_type; }

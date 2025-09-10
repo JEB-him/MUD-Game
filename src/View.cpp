@@ -170,6 +170,18 @@ bool View::reDraw() {
         }
         std::cout << "\r" << std::endl << rCols(LEFT_MARGIN + 1 + LEFT_PADDING);
     }
+    while(!in_positions.empty()) {
+        auto& pos = in_positions.front();
+        std::cout << gotoXY(pos.x, pos.y) << "\x1b[48;2;126;192;12m \x1b[0m";
+        std::cout << gotoXY(pos.x + 1, pos.y) << "\x1b[48;2;126;192;12m \x1b[0m";
+        in_positions.pop();
+    }
+    while(!out_positions.empty()) {
+        auto& pos = out_positions.front();
+        std::cout << gotoXY(pos.x, pos.y) << "\x1b[48;2;51;102;255m \x1b[0m";
+        std::cout << gotoXY(pos.x + 1, pos.y) << "\x1b[48;2;51;102;255m \x1b[0m";
+        out_positions.pop();
+    }
     std::cout << LOADCUS;
     // log 和 game output 使用剩下的，需要保证不低于一定的宽度
     return true;
@@ -326,7 +338,7 @@ std::string View::charToSpecial(const int& x, const int& y, int& tx, int& ty) {
             ty = y + 3;
             return "\x1b[48;2;51;102;255m    \x1b[0m";
         }
-        if (x >= 1 && x + 2 < Map::MAX_HEIGHT && map[x-1][y] == '#' && map[y][y + 2] == '#') {
+        if (x >= 1 && x + 2 < Map::MAX_HEIGHT && map[x-1][y] == '#' && map[x + 2][y] == '#') {
             int oldx, oldy;
             get_cursor_position(oldx, oldy);
             out_positions.push({oldx, oldy});
@@ -338,7 +350,7 @@ std::string View::charToSpecial(const int& x, const int& y, int& tx, int& ty) {
             return "\x1b[48;2;126;192;12m    \x1b[0m";
         }
         
-        if (x >= 1 && x + 2 < Map::MAX_HEIGHT && map[x-1][y] == '#' && map[y][y + 2] == '#') {
+        if (x >= 1 && x + 2 < Map::MAX_HEIGHT && map[x-1][y] == '#' && map[x + 2][y] == '#') {
             int oldx, oldy;
             get_cursor_position(oldx, oldy);
             in_positions.push({oldx, oldy});

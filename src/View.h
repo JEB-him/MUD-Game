@@ -6,8 +6,9 @@
  */
 #include <vector>
 #include <deque>
+#include <queue>
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include "json.hpp"
 #include "tools.h"
 #include "Controller.h"
@@ -18,11 +19,6 @@
  * @param col 指定列
  * @return a ANSI Escape string
  */
-#define GOTO_XY(line, col) "\x1b[" #line ";" #col "H"
-#define U_LINES(lines) "\x1b[" #lines "A"
-#define D_LINES(lines) "\x1b[" #lines "B"
-#define R_COLS(cols) "\x1b[" #cols "C"
-#define L_COLS(cols) "\x1b[" #cols "D"
 
 /**
  * @brief 渲染类
@@ -103,6 +99,17 @@ private:
     const int MIN_WIN_WIDTH;
     const int MIN_WIN_HEIGHT;
 
+    // 设置日志和游戏输出的最大行数
+    static constexpr int TOP_MARGIN    = 0;
+    static constexpr int BOTTOM_MARGIN = 3;
+    static constexpr int LEFT_MARGIN   = 1;
+    static constexpr int RIGHT_MARGIN  = 1;
+    // PADDING 仅对地图窗口生效
+    static constexpr int TOP_PADDING    = 0;
+    static constexpr int BOTTOM_PADDING = 0;
+    static constexpr int LEFT_PADDING   = 1;
+    static constexpr int RIGHT_PADDING  = 1;
+
     constexpr static std::string BV  = "\U00002502";
     constexpr static std::string BH  = "\U00002500";
     constexpr static std::string BLM = "\U0000251C";
@@ -121,6 +128,12 @@ private:
     constexpr static std::string LOADCUS = "\x1b[u";
     constexpr static std::string REASE_S = "\x1b[2J";
 
+    std::string uLines(const int& lines) const;
+    std::string dLines(const int& lines) const;
+    std::string rCols(const int& cols) const;
+    std::string lCols(const int& cols) const;
+    std::string gotoXY(const int& x, const int& y) const;
+
     // 日志队列
     std::deque<std::string> logs;
     int logs_height = 0;
@@ -129,6 +142,11 @@ private:
     std::deque<std::string> game_outputs;
     int puts_height = 0;
     int puts_width = 0;
+
+
+    // 出口和入口队列
+    std::queue<Position> in_positions;
+    std::queue<Position> out_positions;
 
     // 控制器智能指针
     std::shared_ptr<Controller> controller;
@@ -148,6 +166,12 @@ private:
 
     // 更新输出
     void invalidate();
+
+    // 中英字符串截断
+    size_t cutUTFString(const string& utf8_str, size_t& index, const int& width);
+
+    // 特殊字符输出
+    std::string charToSpecial(const int& x, const int& y, int& tx, int& ty);
 };
 
 /*

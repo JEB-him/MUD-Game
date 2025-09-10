@@ -159,7 +159,7 @@ Map::LineType Map::classifyLine(const std::string& line) {
         const auto& ch = line[i];
         if (ch == '#') {
             ++ num;
-            max_width = i;
+            max_width = i + 1;
         } else if (ch == '\r') {
             /* Maybe some bad chars were typed in Windows. */
             return LineType::INVAILD_LINE;
@@ -224,7 +224,14 @@ Message Map::loadMap(const std::string& filename) {
         if (rows > MAX_HEIGHT)
             return {"尺寸超出最大限制", -1};
     }
-    max_height = rows;
+    max_height = 0;
+    for (int i = rows - 1; i >= 0 && !max_height; --i) {
+        for (int j = 0; j < MAX_WIDTH; ++j) {
+            if (map[i][j] == '#') {
+                max_height = i + 1;
+            }
+        }
+    }
     if (is_empty)
         return {"无效地图", -1};
     if (map_file.fail() && !map_file.eof())

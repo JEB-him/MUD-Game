@@ -9,13 +9,15 @@ RGB::RGB(std::uint8_t r, std::uint8_t g, std::uint8_t b): r(r), g(g), b(b) {}
 SpecialChar::SpecialChar(
     const std::string& special_char,
     const int& width,
+    const bool& need_empty,
     const std::string& simple_color,
     const RGB& rgb_color):
     special_char(special_char),
     width(width),
+    need_empty(need_empty),
     simple_color(simple_color),
     rgb_color(rgb_color) {
     // 构造函数体
 }
 
-SpecialChar::SpecialChar() : width(-1) {}
+SpecialChar::SpecialChar() : need_empty(false), width(-1) {}

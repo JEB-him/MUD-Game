@@ -83,7 +83,10 @@ private:
 
     //
     // Model 的智能指针
-    std::shared_ptr<Map> map;
+    // =================
+    // 测试用代码  ####
+    // =================
+    std::shared_ptr<Map> map = std::shared_ptr<Map>(new Map("tmp_map.txt"));
     std::shared_ptr<Protagonist> protagonist;
     // std::shared_ptr<Backpack> backpack;
     // TODO 补充自己的智能指针

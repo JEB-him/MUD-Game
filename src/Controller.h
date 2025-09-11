@@ -19,6 +19,14 @@ class Controller {
 public:
     friend class View;
 
+    // Model 的智能指针
+    std::shared_ptr<Map> map = nullptr;
+    // TODO 记得改回去
+    std::shared_ptr<Protagonist> protagonist = std::make_shared<Protagonist>("Protagonist", "testuser");
+    // std::shared_ptr<Backpack> backpack;
+    // TODO 补充自己的智能指针
+    // 要求： 若该类唯一，则可使用智能指针管理,否则需要一个数组
+
     /**
      * @brief 消息等级，DEBUG 最详细，ERROR 最简洁
      * @note 日志消息会按照等级被输出到日志文件中，同时控制台会打印设定等级
@@ -96,15 +104,6 @@ private:
     std::filesystem::path log_dir;
     // 日志等级
     LogLevel level;
-
-    //
-    // Model 的智能指针
-    // =================
-    std::shared_ptr<Map> map = nullptr;
-    std::shared_ptr<Protagonist> protagonist = nullptr;
-    // std::shared_ptr<Backpack> backpack;
-    // TODO 补充自己的智能指针
-    // 要求： 若该类唯一，则可使用智能指针管理,否则需要一个数组
 
     // 构造函数
     Controller(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path root_dir);

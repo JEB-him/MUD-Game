@@ -12,6 +12,8 @@
 #include <limits>
 #include <sstream>
 #include <vector>
+#include <memory>
+#include <unordered_map>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -177,7 +179,6 @@ void NPC::startInteraction() {
     //         ss.str("");
     //     }
     // }
-
     if (interactionTree.empty()) {
         throw std::runtime_error("交互树未初始化");
     }
@@ -198,7 +199,12 @@ void NPC::startInteraction() {
         return;
     }
 
-    std::cout << "**" << node.prompt << std::endl;
+    auto controller = Controller::getInstance(Controller::LogLevel::INFO, "logs/", "config/");
+    auto playerMoney00 = controller -> protagonist -> getBaseAttrs();
+    int playerMoney0 = playerMoney00[BasicValue::ProtagonistAttr::MONEY];
+    std::cout << "当前金钱: " << playerMoney0 << std::endl;
+
+    std::cout << "*-*" << node.prompt << std::endl;
 
     if (node.effect.size() > 0) {
         // 执行效果
@@ -206,9 +212,17 @@ void NPC::startInteraction() {
             int changeValue = std::stoi(value);
 
             if (type == "STRENGTH") {
+                controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::STRENGTH, changeValue, true);
                 std::cout << "体力" << (changeValue > 0 ? "增加" : "减少") << std::abs(changeValue) << "点" << std::endl;
             } else if (type == "MONEY") {
+                controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::MONEY, changeValue, true);
                 std::cout << "金钱" << (changeValue > 0 ? "获得" : "消耗") << std::abs(changeValue) << "元" << std::endl;
+            } else if (type == "INTEL_ARTS") {
+                controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, changeValue, true);
+                std::cout << "文科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点" << std::endl;
+            } else if (type == "INTEL_SCI") {
+                controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, changeValue, true);
+                std::cout << "理科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点" << std::endl;
             }
         }
     }
@@ -238,13 +252,15 @@ void NPC::startInteraction() {
                 if (node.options[choice].conditions.size() > 0) {
                     if (node.options[choice].conditions[0].type == "MONEY") {
                         int requiredMoney = std::stoi(node.options[choice].conditions[0].value);
-                        std::cout << "需要 " << requiredMoney << " 金钱, 当前金钱: " << playerMoney << std::endl;
-                        if (playerMoney < requiredMoney) {
+                        std::cout << "需要 " << requiredMoney << " 金钱, 当前金钱: " << playerMoney0 << std::endl;
+                        if (playerMoney0 < requiredMoney) {
 
                             std::cout << "金钱不足，无法完成交易，请重新选择！" << std::endl;
                             continue; // 有效输入但条件不满足，重新选择
                         } else {
-                            std::cout << "交易成功，当前金钱: " << playerMoney << std::endl; 
+                            playerMoney00 = controller -> protagonist -> getBaseAttrs();
+                            playerMoney0 = playerMoney00[BasicValue::ProtagonistAttr::MONEY];
+                            std::cout << "交易成功，剩余金钱: " << playerMoney0 << std::endl; 
                         }
                     }
                 }

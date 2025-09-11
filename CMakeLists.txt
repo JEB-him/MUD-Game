@@ -17,12 +17,13 @@ endif()
 option(TEST "是否编译测试用例" True)
 option(DEBUG "调试版本" True)
 
-# 主要代码所在目录，将会生成游戏运行时的可执行文件
-add_subdirectory(src)
-
 if (TEST)
     # 测试文件所在目录，将会生成测试用的可执行文件
     add_subdirectory(tests)
 elseif (DEBUG)
     message(WARGING "不编译测试用例，测试结果不针对最新版本")
 endif()
+
+# 主要代码所在目录，将会生成游戏运行时的可执行文件
+add_subdirectory(src)
+

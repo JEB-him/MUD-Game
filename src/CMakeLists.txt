@@ -7,7 +7,6 @@ file(GLOB SOURCES "*.cpp")
 # 需要排除的文件（多个文件写在一个 list 里）
 set(EXCLUDED_FILES
     "${PROJECT_SOURCE_DIR}/src/main.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Item.cpp"
 )
 
 # 从 SOURCES 中移除
@@ -24,6 +23,12 @@ target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 # 将 OUC, Test 静态库链接到 game
 target_link_libraries(game PRIVATE OUCSurvSim)
 target_sources(game PRIVATE $<TARGET_OBJECTS:Test>)
+
+# Curses
+find_package(Curses REQUIRED)
+include_directories(${CURSES_INCLUDE_DIR})
+target_link_libraries(OUCSurvSim PRIVATE ${CURSES_LIBRARIES})
+target_link_libraries(game PRIVATE ${CURSES_LIBRARIES})
 
 # 检测是否为 Visual Studio 生成器
 if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))

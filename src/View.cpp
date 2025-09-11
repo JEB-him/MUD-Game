@@ -130,11 +130,11 @@ bool View::reDraw()
     puts_width = width - logs_width - 3 - LEFT_MARGIN - RIGHT_MARGIN;
     puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN;
     // 清屏
-    cout << REASE_S;
+    std::cout << REASE_S;
     // 首先绘制所有框架
     // 为了避免 Windows 和 Linux 的行为差别，统一多加一个 \r
     // 顶部
-    cout << gotoXY(TOP_MARGIN + 1, LEFT_MARGIN + 1);
+    std::cout << gotoXY(TOP_MARGIN + 1, LEFT_MARGIN + 1);
     std::cout << BLT;
     for (int i = 0; i < map_width + LEFT_PADDING + RIGHT_PADDING; ++i)
         std::cout << BH;

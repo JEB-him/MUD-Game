@@ -1,5 +1,6 @@
 #include "Controller.h"
 #include <iostream>
+#include <fstream>
 
 Controller::Controller(
     const LogLevel &level,
@@ -20,7 +21,7 @@ std::shared_ptr<Controller> Controller::getInstance(const LogLevel &level, const
 void Controller::log(const LogLevel &level, const std::string &msg)
 {
     // 临时实现
-    cout << msg << std::endl;
+    std::cout << msg << std::endl;
 }
 
 Message Controller::init()

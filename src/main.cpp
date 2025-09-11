@@ -1,9 +1,9 @@
 #define CATCH_CONFIG_RUNNER
+#include "catch.hpp"
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
 #include "Controller.h"
-#include "catch.hpp"
 #include <filesystem>
 #if defined(_WIN32) && !defined(__linux__)
 #   include <windows.h>

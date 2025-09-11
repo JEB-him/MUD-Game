@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file tools.h
  * @details 这是一个工具文件，用于存放常用的工具类
  * @author Jie Jiang

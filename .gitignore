@@ -3,13 +3,19 @@ cmake-build-debug/
 .cache/
 docs/
 .idea/
+.vs/
 .vscode/
 .idea/
+out/
 
 build.bat
 compile_commands.json
+
+CMakeSettings.json
+.editorconfig
 
 game
 test
 
 *.exe
+.vscode/settings.json

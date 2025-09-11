@@ -8,10 +8,13 @@
 #include "tools.h"
 #include <string>
 #include <unordered_map>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/cereal.hpp>
+//9月9日更改：添加默认构造函数，类内基础属性初始化，移除const限定符，添加隐藏属性
 
 
-// 前置声明：仅用于交互接口，避免依赖具体实现（Controller负责中转）
-class Item;
 
 /**
  * @brief 主角属性枚举及健康状态枚举
@@ -40,7 +43,6 @@ namespace BasicValue {
         LEARNING_TIME_REDUCTION_RATE,///< 学习时间消耗减少比率
         LEARNING_HEALTH_PRESERVATION_RATE,///< 学习健康保留率
         IS_INJURED           ///< 受伤状态标志
-
     };
 
      /**
@@ -65,7 +67,17 @@ public:
      */
     Protagonist(const std::string& protagonistId, const std::string& name);
 
-    ~Protagonist() = default; // 析构函数：无动态内存，默认即可
+    /**
+     * @brief 默认构造函数（仅供序列化/反序列化使用）
+    * @note 使用默认构造函数后，需通过反序列化接口恢复数据
+    */
+    Protagonist() = default;
+
+    /**
+     * @brief 默认析构函数
+     * @note 无需手动释放资源，使用默认析构函数
+     */
+    ~Protagonist() = default; 
 
     /**
      * @brief 获取主角唯一ID
@@ -84,7 +96,6 @@ public:
      * @return std::unordered_map 键值对：key=BasicValue::ProtagonistAttr，value=当前值
      */
     std::unordered_map<BasicValue::ProtagonistAttr, float> getBaseAttrs() const;
-
 
 
 
@@ -133,6 +144,33 @@ public:
      */
     Message deserialize(const std::string& data);
 
+
+    /**
+     * @brief Cereal序列化支持
+     * @tparam Archive Cereal归档类型 以binary形式存储
+     */
+    template<class Archive>
+   void serialize(Archive &arch)
+   {
+       arch(cereal::MAKE_UP(m_protagonistId),
+            cereal::MAKE_UP(m_name),
+            cereal::MAKE_UP(m_intelSci),
+            cereal::MAKE_UP(m_intelArts),
+            cereal::MAKE_UP(m_strength),
+            cereal::MAKE_UP(m_money),
+            cereal::MAKE_UP(m_health),
+            cereal::MAKE_UP(intelSci_boost),
+            cereal::MAKE_UP(intelArts_boost),
+            cereal::MAKE_UP(intelSci_boost_rate),
+            cereal::MAKE_UP(intelArts_boost_rate),
+            cereal::MAKE_UP(learning_time_reduction_rate),
+            cereal::MAKE_UP(learning_health_preservation_rate),
+            cereal::MAKE_UP(isInjured));
+   }
+
+
+
+
     /**
      * @brief 测试打印当前主角数据（供调试）
      */
@@ -144,15 +182,16 @@ public:
 
     
 private:
+   
     // -------------------------- 核心成员变量 --------------------------
-    const std::string m_protagonistId;  ///< 主角唯一ID（不可修改）
-    const std::string m_name;           ///< 主角姓名（不可修改）
+    const  std::string m_protagonistId="";  ///< 主角唯一ID（不可修改）已经移除const
+    const  std::string m_name="";           ///< 主角姓名（不可修改） 已经移除const
     // 基础属性（需求定义，初始值按需求设定）
-    int m_intelSci ;                ///< 智力-理（影响工作效率）
-    int m_intelArts ;               ///< 智力-文（影响NPC交流）
-    int m_strength ;                ///< 体力（0~100）
-    int m_money ;                  ///< 金币（≥0）
-    int m_health ;                 ///< 健康状态（0~100，关联HealthState）
+    int m_intelSci=0 ;                ///< 智力-理（影响工作效率）
+    int m_intelArts =0;               ///< 智力-文（影响NPC交流）
+    int m_strength =100;                ///< 体力（0~100）
+    int m_money =0;                  ///< 金币（≥0）
+    int m_health =100;                 ///< 健康状态（0~100，关联HealthState）
     //隐藏属性
 
     float intelSci_boost = 0.0;		            	///< 理科智力基础增确保大于等于0
@@ -181,6 +220,12 @@ private:
      */
     BasicValue::HealthState syncHealthState() const;
 
+    /**
+     * @brief 校验姓名是否包含非法字符
+     * @param name 待校验的姓名
+     * @return bool true=合法，false=包含非法字符
+     */
+    bool isValidName(const std::string& name) ;
 
 };
 

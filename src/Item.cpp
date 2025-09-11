@@ -13,6 +13,7 @@
 
 #pragma once
 #include"Item.h"
+#include<filesystem>
 
   /**
    * @brief 六个细分种类的枚举类（学习资料、运动器材、学习辅助工具、食品、学习辅助食品、健康类物品）
@@ -313,7 +314,11 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
   * @param file_name 包含所有物品参数信息的json文件的名字（字符串）
   */
  ItemCreator::ItemCreator(string file_name) {
-     config_file_item.open(file_name);
+     // TODO need update
+     std::filesystem::path file_path(ROOT_DIR);
+     file_path = file_path / file_name;
+
+     config_file_item.open(file_path);
      if (!config_file_item.is_open()) {
          throw std::runtime_error("无法打开物品配置文件");
      }
@@ -330,6 +335,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
      /**
      * @note 读取该物品所属类，并将string类型的类名转化为enum类型
      */
+     item_name;
      ItemType item_class = getItemType((string)config_item[item_name]["class"]);
 
      /**

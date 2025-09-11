@@ -12,7 +12,7 @@
  * @note item_creator默认打开存储物品数据的json文件
  * @note 初始容量设定为10（，vector的push方法自动扩容）
  */
-Backpack::Backpack():item_creator("Item.json"), backpack_items(10){ }
+Backpack::Backpack():item_creator(".config/Item.json"), backpack_items(10){ }
 
 /**
  * @brief 获取背包管理物品智能指针的vector数组
@@ -28,6 +28,7 @@ vector<unique_ptr<Item>>& Backpack::getBackpack‌Items() {
  * @details 逻辑：利用ItemCreator的方法创造目标物品对象，存入backpack_items中
  */
 void Backpack::addItem(string item_name) {
+    cout<< item_name <<endl;
     backpack_items.push_back(item_creator.createItem(item_name));
 }
  

@@ -1,4 +1,6 @@
 /**
+* * @file backpack‌.h
+* @author Xiaotian Wu(Cheongfan)
 * @brief 背包类实现
 */
 

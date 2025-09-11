@@ -18,11 +18,11 @@
         ]
       },
       "Student_teach_result": {
-        "prompt": "通过请教，你的文科智力提升了5点。\n",
+        "prompt": "通过请教，你的文科智力提升了5点。",
         "options": [ ],
         "next": "END",
         "effect": {
-          "INTEL_ARTS": 5
+          "INTEL_ARTS": "5"
         }
       },
       "END": {
@@ -36,7 +36,7 @@
     "initial": "Roommate_initial",
     "interactions": {
       "Roommate_initial": {
-        "prompt": "你的舍友正在宿舍。\n",
+        "prompt": "你的舍友正在宿舍。",
         "options": [
           {
             "id": "Roommate_play_game",
@@ -51,12 +51,12 @@
         ]
       },
       "Roommate_play_game_result": {
-        "prompt": "你们痛快地玩了2小时游戏，体力+10，理科智力-10。\n",
+        "prompt": "你们痛快地玩了2小时游戏，体力+10，理科智力-10。",
         "options": [ ],
         "next": "END",
         "effect": {
-          "INTEL_SCI": -10,
-          "STRENGTH": 10
+          "INTEL_SCI": "-10",
+          "STRENGTH": "10"
         }
       },
       "END": {
@@ -70,7 +70,7 @@
     "initial": "DormManager_initial",
     "interactions": {
       "DormManager_initial": {
-        "prompt": "你遇到了宿舍管理员。\n",
+        "prompt": "你遇到了宿舍管理员。",
         "options": [
           {
             "id": "DormManager_chat",
@@ -90,7 +90,7 @@
         ]
       },
       "DormManager_chat_result": {
-        "prompt": "你和管理员聊得很愉快，熟悉度+10。\n",
+        "prompt": "你和管理员聊得很愉快，熟悉度+10。",
         "private_effect": {
           "DORMfamiliarity": 10
         },
@@ -108,7 +108,7 @@
         ]
       },
       "DormManager_help_result": {
-        "prompt": "你帮忙打扫了宿舍楼，熟悉度+25。\n",
+        "prompt": "你帮忙打扫了宿舍楼，熟悉度+25。",
         "options": [
           {
             "id": "DormManager_leave_help",
@@ -131,7 +131,7 @@
     "initial": "Employer_initial",
     "interactions": {
       "Employer_initial": {
-        "prompt": "招聘人员正在招兼职。\n",
+        "prompt": "招聘人员正在招兼职。",
         "options": [
           {
             "id": "Employer_flyer",
@@ -151,7 +151,7 @@
         ]
       },
       "Employer_flyer_result": {
-        "prompt": "你完成了传单派发，获得10元。\n",
+        "prompt": "你完成了传单派发，获得10元。",
         "options": [
           {
             "id": "Employer_leave_work",
@@ -160,11 +160,11 @@
           }
         ],
         "effect": {
-          "MONEY": 10
+          "MONEY": "10"
         }
       },
       "Employer_survey_result": {
-        "prompt": "你完成了问卷调查，获得5元。\n",
+        "prompt": "你完成了问卷调查，获得5元。",
         "options": [
           {
             "id": "Employer_leave_work",
@@ -173,7 +173,7 @@
           }
         ],
         "effect": {
-          "MONEY": 5
+          "MONEY": "5"
         }
       },
       "END": {
@@ -187,7 +187,7 @@
     "initial": "Librarian_counter",
     "interactions": {
       "Librarian_counter": {
-        "prompt": "图书管理员在服务台。\n",
+        "prompt": "图书管理员在服务台。",
         "options": [
           {
             "id": "Librarian_read",
@@ -202,7 +202,7 @@
         ]
       },
         "Librarian_read_options": {
-            "prompt": "请选择你想阅读的书籍：\n",
+            "prompt": "请选择你想阅读的书籍：",
             "options": [
                 {
                     "id": "Librarian_read_cpp",
@@ -232,17 +232,17 @@
             ]
         },
       "Librarian_read_result_SCI": {
-        "prompt": "成功阅读理科书籍，理科智力+10。\n",
+        "prompt": "成功阅读理科书籍，理科智力+10。",
         "options": [],
         "effect": {
-            "INTEL_SCI": 10
+            "INTEL_SCI": "10"
         }
       },
       "Librarian_read_result_ARTS": {
-        "prompt": "成功阅读文科书籍，文科智力+10。\n",
+        "prompt": "成功阅读文科书籍，文科智力+10。",
         "options": [],
         "effect": {
-            "INTEL_ARTS": 10
+            "INTEL_ARTS": "10"
         }
       },
       "END": {
@@ -256,7 +256,7 @@
     "initial": "CanteenStaff_counter",
     "interactions": {
       "CanteenStaff_counter": {
-        "prompt": "食堂员工在窗口后。\n",
+        "prompt": "食堂员工在窗口后。",
         "options": [
           {
             "id": "CanteenStaff_buy",
@@ -276,7 +276,7 @@
         ]
       },
       "CanteenStaff_buy_result": {
-        "prompt": "你购买了套餐，获得30体力，花费15元。\n",
+        "prompt": "你购买了套餐，获得30体力，花费15元",
         "options": [
           {
             "id": "CanteenStaff_leave_work",
@@ -332,7 +332,7 @@
           }
         ],
         "effect": {
-          "INTEL_SCI": 15
+          "INTEL_SCI": "15"
         }
       },
       "END": {
@@ -361,7 +361,7 @@
         ]
       },
       "Coach_train_options": {
-        "prompt": "请选择你想参加的运动：\n",
+        "prompt": "请选择你想参加的运动：",
         "options": [
           {
             "id": "Coach_train_football",
@@ -469,8 +469,8 @@
           }
         ],
         "effect": {
-          "STRENGTH": 10,
-          "MONEY": -10
+          "STRENGTH": "10",
+          "MONEY": "-10"
         }
       },
       "Coach_train_basketball_result": {
@@ -483,8 +483,8 @@
           }
         ],
         "effect": {
-          "STRENGTH": 15,
-          "MONEY": -15
+          "STRENGTH": "15",
+          "MONEY": "-15"
         }
       },
       "Coach_train_run_result": {
@@ -497,7 +497,8 @@
           }
         ],
         "effect": {
-          "STRENGTH": 10
+          "STRENGTH": "10",
+          "MONEY": "0"
         }
       },
       "Coach_train_badminton_result": {
@@ -510,8 +511,8 @@
           }
         ],
         "effect": {
-          "STRENGTH": 10,
-          "MONEY": -20
+          "STRENGTH": "15",
+          "MONEY": "-20"
         }
       },
       "END": {

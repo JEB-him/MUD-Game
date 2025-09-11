@@ -52,6 +52,6 @@ private:
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;
     std::unordered_map<std::string, std::function<void()>> interactionCallbacks;
-    int playerMoney = 20; // 假设主角当前金钱为10，实际应从Protagonist对象获取
+    int playerMoney = 19; // 假设主角当前金钱为10，实际应从Protagonist对象获取
 };
 

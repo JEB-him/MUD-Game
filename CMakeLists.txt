@@ -18,7 +18,6 @@ add_executable(game src/main.cpp)
 file(GLOB SOURCES "src/*.cpp")
 # 需要排除的文件（多个文件写在一个 list 里）
 set(EXCLUDED_FILES
-    "src/item.cpp"
 )
 
 # 从 SOURCES 中移除

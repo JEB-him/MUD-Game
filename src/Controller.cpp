@@ -50,7 +50,9 @@ Message Controller::load(std::string username)
     // 使用cereal进行反序列化
     {
         cereal::BinaryInputArchive iarchive(ifile);
-        iarchive(protagonist, backpack, map);
+        iarchive(CEREAL_NVP(*protagonist),
+                 CEREAL_NVP(*backpack),
+                 CEREAL_NVP(*map));
         ifile.close();
     }
 
@@ -76,7 +78,9 @@ Message Controller::save()
     // 使用cereal进行序列化
     {
         cereal::BinaryOutputArchive oarchive(ofile);
-        oarchive(protagonist, backpack, map);
+        oarchive(CEREAL_NVP(map),
+                 CEREAL_NVP(protagonist));
+        //  CEREAL_NVP(backpack));
         ofile.close();
     }
 

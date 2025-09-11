@@ -10,7 +10,8 @@
 #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
-#include "backpack.h"
+#include "InputHandler.h"
+// #include "backpack.h"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -94,11 +95,18 @@ public:
     std::shared_ptr<Map> map;
     std::shared_ptr<Protagonist> protagonist;
     std::shared_ptr<NPC> npc;
-    std::shared_ptr<Backpack> backpack;
+    // std::shared_ptr<Backpack> backpack;
     std::shared_ptr<InputHandler> input;
 
-    // TODO 补充自己的智能指针
-    // 要求： 若该类唯一，则可使用智能指针管理
+    template <class Archive>
+    void serialize(Archive &archive)
+    {
+        archive(CEREAL_NVP(map),
+                CEREAL_NVP(protagonist),
+                CEREAL_NVP(npc)
+                // CEREAL_NVP(backpack),
+        );
+    }
 
 private:
     // 项目根目录
@@ -133,6 +141,8 @@ private:
      * @return 初始化结果信息
      */
     Message init();
+
+    Message Controller::load(std::string username);
 
     /**
      * @brief 保存游戏

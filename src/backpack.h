@@ -4,7 +4,10 @@
 * @brief 背包类
 * @details 实现功能：物品的获得、读取与使用。 \n
 * 对应接口：addItem、getBackpack‌Items、useFunctionOfItem
-* @note 与物品相关的一切操作与背包类交互即可，无需关注物品类。
+* @note 物品个数、使用物品的方法， \n
+*		通过vector.size()和getBackpack‌Items()[order - 1].get()-> <物品方法>  获取 ， \n
+*		其中order为物品序号。
+* @note 与物品相关的一切操作需要先与背包类进行交互。
 * */
 
 #pragma once
@@ -59,7 +62,7 @@ public:
 	 * @param order 操作的物品的序号(从1开始)
 	 * @param protagonist 传入主角对象名
 	 * @details 逻辑：区分好物品类型和装备状态，然后调用Item正确的接口(use、equipAndUnequip二选一)
-	 * @details 逻辑：消耗品在调用此方法后，指针释放，num_items--，然后序号在此物品之后的物品指针均前移一个位置
+	 * @details 逻辑：消耗品在调用此方法后，释放指针，然后序号在此物品之后的物品指针均前移一个位置
 	 */
 	void useFunctionOfItem(int order, Protagonist& protagonist);
 

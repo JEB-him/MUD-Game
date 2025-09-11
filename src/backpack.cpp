@@ -34,7 +34,7 @@ void Backpack::addItem(string item_name) {
  * @param order 操作的物品的序号(从1开始)
  * @param protagonist 传入主角对象名
  * @details 逻辑：区分好物品类型和装备状态，然后调用Item正确的接口(use、equipAndUnequip二选一)
- * @details 逻辑：消耗品在调用此方法后，指针释放然后序号在此物品之后的物品指针均前移一个位置
+ * @details 逻辑：消耗品在调用此方法后，释放指针，然后序号在此物品之后的物品指针均前移一个位置
  */
 void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
     if (order > backpack_items.size()) {

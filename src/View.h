@@ -173,7 +173,7 @@ private:
     void invalidate();
 
     // 中英字符串截断
-    size_t cutUTFString(const string& utf8_str, size_t& index, const int& width);
+    size_t cutUTFString(const std::string& utf8_str, size_t& index, const int& width);
 
     // 特殊字符输出
     std::string charToSpecial(const int& x, const int& y, int& tx, int& ty);

@@ -259,7 +259,7 @@ std::string View::gotoXY(const int& x, const int& y) const {
     return ss.str();
 }
 
-size_t View::cutUTFString(const string& utf8_str, size_t& index, const int& width) {
+size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int& width) {
     // 该函数适用于绝大多数常用字符，但对一些偏僻字符可能会出错
     size_t length = 0;
     for (; index < utf8_str.length() && length <= width; ) {

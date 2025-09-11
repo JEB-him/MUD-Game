@@ -34,7 +34,7 @@ void envCheck() {
     SetConsoleMode(hConsole, dwMode);
     // 双重保险
     system("chcp 65001");
-    std::cout << View::MOVU;
+    // std::cout << View::MOVU;
 #endif
 }
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
         {"DEBUG", Controller::LogLevel::DEBUG},
         {"INFO", Controller::LogLevel::INFO},
         {"WARN", Controller::LogLevel::WARN},
-        {"ERROR", Controller::LogLevel::ERROR}
+        {"ERR", Controller::LogLevel::ERR}
     };
 
     std::string root_str="./", level="INFO", log_str = "logs/", program = "";

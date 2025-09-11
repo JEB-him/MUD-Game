@@ -12,6 +12,7 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/cereal.hpp>
+#include   <cereal/types/string.hpp>
 // 9月9日更改：添加默认构造函数，类内基础属性初始化，移除const限定符，添加隐藏属性
 
 /**
@@ -94,13 +95,13 @@ public:
      * @brief 获取主角唯一ID
      * @return const std::string& 不可修改的ID
      */
-    const std::string &getProtagonistId() const;
+    const std::string &getProtagonistId() ;
 
     /**
      * @brief 获取主角姓名
      * @return const std::string& 不可修改的姓名
      */
-    const std::string &getName() const;
+    const std::string &getName() ;
 
     /**
      * @brief 获取所有基础属性（供Controller同步UI/存档）
@@ -187,15 +188,15 @@ public:
     /**
      * @brief 序列化主角数据（供Controller写入存档文件）
      * @return std::string 序列化字符串，包含所有基础属性（id/name）和健康状态
-     */
-    std::string serialize() const;
+    //  */
+    // std::string serialize() const;
 
-    /**
-     * @brief 反序列化主角数据（供Controller从存档文件恢复）
-     * @param data 序列化字符串（需与serialize()输出格式一致）
-     * @return Message 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
-     */
-    Message deserialize(const std::string &data);
+    // /**
+    //  * @brief 反序列化主角数据（供Controller从存档文件恢复）
+    //  * @param data 序列化字符串（需与serialize()输出格式一致）
+    //  * @return Message 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+    //  */
+    // Message deserialize(const std::string &data);
 
     /**
      * @brief Cereal序列化支持
@@ -219,7 +220,7 @@ public:
              CEREAL_NVP(learning_health_preservation_rate),
              CEREAL_NVP(isInjured),
              CEREAL_NVP(game_time),
-             CEREAL_NVP(pos),
+            CEREAL_NVP(pos),
              CEREAL_NVP(current_scene));
     }
   

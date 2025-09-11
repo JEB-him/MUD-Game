@@ -1,9 +1,8 @@
-#pragma once
 #include"backpack.h"
 
 Backpack::Backpack():item_creator("Item.json"), backpack_items(10){ }
 
-vector<unique_ptr<Item>>& Backpack::getBackpack‌Items() {
+vector<unique_ptr<Item>>& Backpack::getBackpackItems() {
     return backpack_items;
 }
 

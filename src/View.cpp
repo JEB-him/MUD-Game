@@ -206,7 +206,7 @@ bool View::reDraw()
 void View::colorPrint(
     const std::string &text,
     const std::string &simple_color,
-    const RGB &rgb_color,
+    const  Rgb & Rgb_color,
     std::deque<std::string> &outputs,
     const int &width)
 {
@@ -217,7 +217,7 @@ void View::colorPrint(
         std::stringstream ss;
         if (simple_color == "")
         {
-            ss << "\x1b[" << "38;2;" << rgb_color.r << ";" << rgb_color.g << ";" << rgb_color.b << "m";
+            ss << "\x1b[" << "38;2;" <<  Rgb_color.r << ";" <<  Rgb_color.g << ";" <<  Rgb_color.b << "m";
         }
         else
         {
@@ -227,7 +227,7 @@ void View::colorPrint(
         size_t insert_len = cutUTFString(text, index, width);
         if (insert_len == -1)
         {
-            controller->log(Controller::LogLevel::ERROR, "消息打印错误");
+            controller->log(Controller::LogLevel::ERR, "消息打印错误");
             return;
         }
         ss << text;

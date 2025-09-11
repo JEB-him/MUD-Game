@@ -72,21 +72,21 @@ public:
      * @brief 打印一条日志
      * @details 提供一个[速查表](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes)\n
      * @param msg 一条 string 文本
-     * @param rgb_color 一个 RGB 类型的颜色参数，RGB 定义见上
-     * @param simple_color 颜色，参见 ANSI Escape 表, rgb_color 不为空时该参数被忽略
+     * @param  Rgb_color 一个  Rgb 类型的颜色参数， Rgb 定义见上
+     * @param simple_color 颜色，参见 ANSI Escape 表,  Rgb_color 不为空时该参数被忽略
      * @return bool success
      */
-    bool printLog(const std::string &msg, const std::string &simple_color, const RGB &rgb_color = RGB(-1, -1, -1));
+    bool printLog(const std::string &msg, const std::string &simple_color, const  Rgb & Rgb_color =  Rgb(-1, -1, -1));
 
     /**
      * @brief 输出一个问题格式的消息到操作界面
      * @param 询问的人，置空则不显示
      * @param text 消息
-     * @param rgb_color 颜色
-     * @param simple_color 颜色，参见 ANSI Escape 表, 该参数传递空值时使用 rgb_color
+     * @param  Rgb_color 颜色
+     * @param simple_color 颜色，参见 ANSI Escape 表, 该参数传递空值时使用  Rgb_color
      * @return Message 消息
      */
-    Message printQuestion(const std::string &person, const std::string &msg, const std::string &simple_color, const RGB &rgb_color = RGB(-1, -1, -1));
+    Message printQuestion(const std::string &person, const std::string &msg, const std::string &simple_color, const  Rgb & Rgb_color =  Rgb(-1, -1, -1));
 
     /**
      * @brief 输出选项
@@ -164,7 +164,7 @@ private:
     void colorPrint(
         const std::string &text,
         const std::string &simple_color,
-        const RGB &rgb_color,
+        const  Rgb & Rgb_color,
         std::deque<std::string> &outputs,
         const int &width);
 

@@ -10,6 +10,7 @@
 #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
+#include "InputHandler.h"
 // #include "backpack.h"
 
 #include <cereal/archives/binary.hpp>
@@ -36,7 +37,7 @@ public:
         DEBUG, ///< 消息只应当在调试时被看到
         INFO,  ///< 程序正常运行时可以输出的消息
         WARN,  ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERROR  ///< 严重的错误，该事件发生时程序会 Crash
+        ERR  ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**
@@ -52,7 +53,8 @@ public:
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
         TP,        ///< 传送到 NPC 附近
-        QUIT       ///< 退出游戏
+        QUIT  ,     ///< 退出游戏
+ NONE  
     };
 
     /**
@@ -97,8 +99,15 @@ public:
     // std::shared_ptr<Backpack> backpack;
     std::shared_ptr<InputHandler> input;
 
-    // TODO 补充自己的智能指针
-    // 要求： 若该类唯一，则可使用智能指针管理
+    template <class Archive>
+    void serialize(Archive &archive)
+    {
+        archive(CEREAL_NVP(map),
+                CEREAL_NVP(protagonist),
+                CEREAL_NVP(npc)
+                // CEREAL_NVP(backpack),
+        );
+    }
 
 private:
     // 项目根目录
@@ -118,7 +127,7 @@ private:
     LogLevel level;
 
     // 构造函数
-    Controller(const LogLevel &level, const std::string &log_dir, const std::string root_dir);
+    Controller(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
 
     /**
      * @brief 初始化函数
@@ -134,6 +143,8 @@ private:
      */
     Message init();
 
+    Message load(std::string username);
+
     /**
      * @brief 保存游戏
      * @details 保存游戏的逻辑，包括：\n
@@ -141,11 +152,9 @@ private:
      * @param pro 角色信息
      * @param backpack 背包信息
      */
-    Message Controller::save();
+    Message save();
 
-    std::filesystem::path log_dir;
-    // 日志等级
-    LogLevel level;
+ 
 
     /**
      * TODO
@@ -178,4 +187,6 @@ private:
      * @details 遍历跳转场景的入口，拿到传送到哪个入口
      * @param[in] exit_id
      */
+    Message handleCmd(std::string cmd);
+
 };

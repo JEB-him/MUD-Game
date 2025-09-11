@@ -239,7 +239,7 @@ private:
 class ItemCreator
 {
 public:
-    ItemCreator(file_name);
+    ItemCreator(std::string file_name);
     ~ItemCreator();
     unique_ptr<Item> createItem(string item_name);
 

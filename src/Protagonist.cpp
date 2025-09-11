@@ -129,13 +129,13 @@ Message Protagonist::testPrint() const
     return msg;
 }
 // 获取主角唯一ID
-const std::string &Protagonist::getProtagonistId() const
+const std::string &Protagonist::getProtagonistId() 
 {
     return m_protagonistId;
 }
 
 // 获取姓名
-const std::string &Protagonist::getName() const
+const std::string &Protagonist::getName() 
 {
     return m_name;
 }

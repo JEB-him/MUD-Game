@@ -223,77 +223,77 @@ int InputHandler::waitKeyDown()
 }
 #endif
 
-int main()
-{
-    InputHandler inputHandler;
-    // int key = -1;
-    // std::cout << "Press a key (0-9, a-z, Esc to quit): ";
-    // while (1)
-    // {
-    //     key = inputHandler.waitKeyDown();
-    //     if (key != -1)
-    //     {
-    //         std::cout << "\nYou pressed: " << std::setw(2) << key << " (ASCII: " << std::setw(3) << key << ")\n";
-    //     }
-    //     else if (key == 27)
-    //     {
-    //         std::cout << "\nExiting...\n";
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         std::cout << "\nFailed to get key press.\n";
-    //     }
-    // }
-    // std::string cmd = inputHandler.getCmd();
+// int main()
+// {
+//     InputHandler inputHandler;
+//     // int key = -1;
+//     // std::cout << "Press a key (0-9, a-z, Esc to quit): ";
+//     // while (1)
+//     // {
+//     //     key = inputHandler.waitKeyDown();
+//     //     if (key != -1)
+//     //     {
+//     //         std::cout << "\nYou pressed: " << std::setw(2) << key << " (ASCII: " << std::setw(3) << key << ")\n";
+//     //     }
+//     //     else if (key == 27)
+//     //     {
+//     //         std::cout << "\nExiting...\n";
+//     //         break;
+//     //     }
+//     //     else
+//     //     {
+//     //         std::cout << "\nFailed to get key press.\n";
+//     //     }
+//     // }
+//     // std::string cmd = inputHandler.getCmd();
 
-    std::stringstream ss;
-    ss.str("");
-    ss.clear();
-    std::string cmd = "";
-    int ch = -1;
+//     std::stringstream ss;
+//     ss.str("");
+//     ss.clear();
+//     std::string cmd = "";
+//     int ch = -1;
 
-    while (1)
-    {
-        ch = inputHandler.waitKeyDown();
-        std::cout << "ch= " << ch << std::endl;
-        // Enter
-        if (ch == 10)
-        {
-            cmd = ss.str();
-            break;
-        }
+//     while (1)
+//     {
+//         ch = inputHandler.waitKeyDown();
+//         std::cout << "ch= " << ch << std::endl;
+//         // Enter
+//         if (ch == 10)
+//         {
+//             cmd = ss.str();
+//             break;
+//         }
 
-        // Backspace
-        else if (ch == 8)
-        {
-            std::string content = ss.str();
-            if (content.size() > 0)
-            {
-                content.pop_back();
-            }
-            ss.str("");
-            ss.clear();
-            ss << content;
-            std::cout << ss.str() << std::endl;
-            continue;
-        }
+//         // Backspace
+//         else if (ch == 8)
+//         {
+//             std::string content = ss.str();
+//             if (content.size() > 0)
+//             {
+//                 content.pop_back();
+//             }
+//             ss.str("");
+//             ss.clear();
+//             ss << content;
+//             std::cout << ss.str() << std::endl;
+//             continue;
+//         }
 
-        // Unexpect input
-        else if (ch == 0)
-        {
-            continue;
-        }
+//         // Unexpect input
+//         else if (ch == 0)
+//         {
+//             continue;
+//         }
 
-        else
-        {
-            ss << char(ch);
-        }
-        // 这里将处理好的ss传给View
-        std::cout << ss.str() << std::endl;
-    }
-    // 处理cmd
+//         else
+//         {
+//             ss << char(ch);
+//         }
+//         // 这里将处理好的ss传给View
+//         std::cout << ss.str() << std::endl;
+//     }
+//     // 处理cmd
 
-    std::cout << "You entered: " << cmd << std::endl;
-    return 0;
-}
+//     std::cout << "You entered: " << cmd << std::endl;
+//     return 0;
+// }

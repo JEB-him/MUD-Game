@@ -26,7 +26,7 @@ using std::vector;
  */
 class Backpack {
 public:
-	Backpack() : capacity(10), num_items(0), backpack_space() {};
+	
 	/**
 	 * @brief 背包类构造函数
 	 * @param capacity 设置最大容量
@@ -40,7 +40,7 @@ public:
 	 */
 	~Backpack() = default;
 
-	vector<unique_ptr<Item>>& getBackpack‌Items();
+	vector<unique_ptr<Item>>& getBackpackItems();
 
 	/**
 	 * @brief  
@@ -61,10 +61,7 @@ public:
 	template <class Archive>
 	void serialize(Archive &ar)
 	{
-		ar(CEREAL_NVP(capacity),
-		   CEREAL_NVP(num_items),
-		   CEREAL_NVP(backpack_space), );
-		item_creator = ItemCreator();
+		ar(CEREAL_NVP(backpack_items));
 	}
 
 private:

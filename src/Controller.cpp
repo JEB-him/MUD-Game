@@ -4,7 +4,7 @@
 Controller::Controller(
     const LogLevel &level,
     const std::filesystem::path &log_dir,
-    const std::filesystem::path root_dir) : level(level),
+    const std::filesystem::path &root_dir) : level(level),
                                             log_dir(log_dir),
                                             root_dir(root_dir)
 {
@@ -26,7 +26,7 @@ void Controller::log(const LogLevel &level, const std::string &msg)
 Message Controller::init()
 {
     protagonist = std::make_shared<Protagonist>();
-    backpack = std::make_shared<Backpack>();
+    // backpack = std::make_shared<Backpack>();
     map = std::make_shared<Map>();
     input = std::make_shared<InputHandler>();
 
@@ -44,15 +44,19 @@ Message Controller::load(std::string username)
     {
         Message msg = Message("Create a new accout", 0);
 
+
         log(LogLevel::INFO, msg.msg);
         return msg;
     }
     // 使用cereal进行反序列化
     {
         cereal::BinaryInputArchive iarchive(ifile);
-        iarchive(protagonist, backpack, map);
+        iarchive(CEREAL_NVP(*protagonist));
+                //  CEREAL_NVP(*backpack),
+                 //CEREAL_NVP(*map));
         ifile.close();
     }
+    map=std::make_shared<Map>();
 
     ifile.close();
     Message msg = Message("Load Success!", 0);
@@ -63,30 +67,32 @@ Message Controller::load(std::string username)
 Message Controller::save()
 {
     // 游戏退出时保存文件，名称格式为 username.bin
-    std::string username = protagonist.getName();
+    std::string username = protagonist->getName();
     std::string file_name = username + ".bin";
     std::ofstream ofile(file_name, std::ios::binary);
     if (!ofile.is_open())
     {
         Message msg = Message("Save Failed!", -1);
         std::cerr << msg.msg << std::endl;
-        log(LogLevel::ERROR, msg.msg);
+        log(LogLevel::ERR, msg.msg);
         return msg;
     }
     // 使用cereal进行序列化
     {
         cereal::BinaryOutputArchive oarchive(ofile);
-        oarchive(protagonist, backpack, map);
+        oarchive(
+                 CEREAL_NVP(*protagonist));
+        
         ofile.close();
     }
-
+    map->save();
     ofile.close();
     Message msg = Message("Save Success!", 0);
     log(LogLevel::INFO, msg.msg);
     return msg;
 }
 
-Message getEvent(EventType &event_type)
+Message Controller::getEvent(EventType &event_type)
 {
     std::stringstream ss;
     ss.str("");
@@ -95,7 +101,7 @@ Message getEvent(EventType &event_type)
 
     while (1)
     {
-        ch = input.waitKeyDown();
+        int ch = input->waitKeyDown();
         // Enter
         if (ch == 10)
         {
@@ -127,75 +133,76 @@ Message getEvent(EventType &event_type)
         // 这里将处理好的ss传给View
     }
     // 处理cmd
-    switch (cmd)
-    {
-    case "move":
-        event_type = EventType::MOVE;
-        break;
-    case "ac_npc", case "ac npc":
-        event_type = EventType::AC_NPC;
-        break;
-    case "ac_inst", case "ac inst":
-        event_type = EventType::AC_INST;
-        break;
-    case "open pack", case "open_pack":
-        event_type = EventType::OPEN_PACK;
-        break;
-    case "refresh":
-        event_type = EventType::REFRESH;
-        break;
-    case "status":
-        event_type = EventType::STATUS;
-        break;
-    case "jump":
-        event_type = EventType::JUMP;
-        break;
-    case "tp":
-        event_type = EventType::TP;
-        break;
-    }
+    // switch (cmd)
+    // {
+    // case "move":
+    //     event_type = EventType::MOVE;
+    //     break;
+    // case "ac_npc", case "ac npc":
+    //     event_type = EventType::AC_NPC;
+    //     break;
+    // case "ac_inst", case "ac inst":
+    //     event_type = EventType::AC_INST;
+    //     break;
+    // case "open pack", case "open_pack":
+    //     event_type = EventType::OPEN_PACK;
+    //     break;
+    // case "refresh":
+    //     event_type = EventType::REFRESH;
+    //     break;
+    // case "status":
+    //     event_type = EventType::STATUS;
+    //     break;
+    // case "jump":
+    //     event_type = EventType::JUMP;
+    //     break;
+    // case "tp":
+    //     event_type = EventType::TP;
+    //     break;
+    // }
 
     Message msg("Command: " + cmd, 0);
     return msg;
 }
 
-Message handleCmd(std::string cmd)
-{
-    switch (cmd)
-    {
-    case "help":
-        /* code */
-        break;
+// Message challenge::handleCmd(std::string cmd)
+// {
+//     switch (cmd)
+//     {
+//     case "help":
+//         /* code */
+//         break;
 
-    case "quit":
-        save();
-        break;
+//     case "quit":
+//         save();
+//         break;
 
-    case "status":
-        /* code */
-        break;
+//     case "status":
+//         /* code */
+//         break;
 
-    case "backpack":
-        /* code */
-        break;
+//     case "backpack":
+//         /* code */
+//         break;
 
-    default:
-        break;
-    }
-}
+//     default:
+//         break;
+//     }
+// }
 
 Message Controller::playerLogin()
 {
     const std::string invalidChars = ";:\"'\\/<>*?|";
+    std::string user_name = "";
     do
     {
-        std::string user_name = "";
+        
         std::cout << "Enter username: ";
         std::cin >> user_name;
         if (user_name.find_first_of(invalidChars) != std::string::npos)
         {
             std::cout << "Invalid username. Please avoid using special characters: " << invalidChars << std::endl;
-            log = (LogLevel::WARN, "Invalid username attempt: " + user_name);
+            log (LogLevel::WARN, "Invalid username attempt: " + user_name);
             continue;
         }
     } while (1);
@@ -204,11 +211,6 @@ Message Controller::playerLogin()
     return Message("Login Success!", 0);
 }
 
-void Controller::log(const LogLevel &level, const std::string &msg)
-{
-    // 临时实现
-    std::cout << msg << std::endl;
-}
 
 int Controller::run()
 {

@@ -135,16 +135,6 @@ private:
     Message init();
 
     /**
-     * @brief 登录
-     * @details 实现登录逻辑
-     */
-
-    /**
-     * @brief 注册
-     * @note 要求注册完立即调用保存游戏
-     */
-
-    /**
      * @brief 保存游戏
      * @details 保存游戏的逻辑，包括：\n
      *          1. 保存所有数据到文件中
@@ -162,15 +152,9 @@ private:
      * @brief 登录
      * @details 实现登录逻辑
      */
-    Message playerLogin(const std::string username);
+    Message playerLogin();
 
-    /**
-     * TODO
-     * @brief 注册
-     * @details 应当用户进行一系列对话，在函数内部调用 View 的函数实现角色属性的设置
-     * @note 要求注册完立即调用保存游戏（或者可以稍微延后一点）
-     */
-    Message playerRegister(const std::string username);
+
 
     /**
      * TODO

@@ -183,3 +183,22 @@ Message handleCmd(std::string cmd)
         break;
     }
 }
+
+Message Controller::playerLogin()
+{
+    const std::string invalidChars = ";:\"'\\/<>*?|";
+    do{
+        std::string user_name="";
+        std::cout << "Enter username: ";
+        std::cin >> user_name;
+        if (user_name.find_first_of(invalidChars) != std::string::npos) {
+            std::cout << "Invalid username. Please avoid using special characters: " << invalidChars << std::endl;
+            log=(LogLevel::WARN, "Invalid username attempt: " + user_name);
+            continue;
+        }
+    } while (1);
+    log(LogLevel::INFO, "Username accepted: " + user_name);
+    // 登录逻辑
+    return Message("Login Success!", 0);
+}
+

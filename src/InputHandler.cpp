@@ -6,10 +6,12 @@
  * 函数会阻塞直到有符合条件的按键被按下。
  *
  * @return int 返回数字的原始值/字母和ESC的ASCII码值
- * @retval 0-9 数字键0-9
+ * @retval '0'-'9' 数字键0-9
  * @retval 10 回车键(Enter)
  * @retval 27 Esc键
+ * @retval 8 退格键
  * @retval 'a'-'z' 字母键a-z(小写)
+ * @retval "wsad" 对应 "上下左右"
  * @retval -1 获取按键失败
  *
  * @note 此函数跨平台支持Windows和Linux系统
@@ -17,9 +19,11 @@
  *
  * @see vkToAscii()
  */
+
 #include "InputHandler.h"
-#include "Controller.h"
+// #include "Controller.h"
 #include <iostream>
+// #include <functional>
 
 #include <atomic>
 #include <iomanip>
@@ -32,16 +36,16 @@ std::atomic<bool> keyCaptured(false);
 #include <map>
 
 std::map<int, char> vkToAsciiMap = {
-    {0x30, 0},
-    {0x31, 1},
-    {0x32, 2},
-    {0x33, 3},
-    {0x34, 4},
-    {0x35, 5},
-    {0x36, 6},
-    {0x37, 7},
-    {0x38, 8},
-    {0x39, 9},
+    {0x30, '0'},
+    {0x31, '1'},
+    {0x32, '2'},
+    {0x33, '3'},
+    {0x34, '4'},
+    {0x35, '5'},
+    {0x36, '6'},
+    {0x37, '7'},
+    {0x38, '8'},
+    {0x39, '9'},
     {0x41, 'a'},
     {0x42, 'b'},
     {0x43, 'c'},
@@ -70,7 +74,12 @@ std::map<int, char> vkToAsciiMap = {
     {0x5A, 'z'},
     {VK_SPACE, ' '},   // 32
     {VK_RETURN, '\n'}, // 10
-    {VK_ESCAPE, 27}};
+    {VK_ESCAPE, 27},
+    {VK_BACK, '\b'}, // 8
+    {VK_UP, 'w'},
+    {VK_DOWN, 's'},
+    {VK_LEFT, 'a'},
+    {VK_RIGHT, 'd'}};
 
 int vkToAscii(int vkCode)
 {
@@ -94,7 +103,6 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
             KBDLLHOOKSTRUCT *pKeyBoard = (KBDLLHOOKSTRUCT *)lParam;
             capturedKey = vkToAscii(pKeyBoard->vkCode);
             keyCaptured = true;
-            // std::cout << "Key pressed: " << (char)capturedKey << std::endl;
         }
     }
 
@@ -125,7 +133,7 @@ int InputHandler::waitKeyDown()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        Sleep(50);
+        Sleep(10);
     }
 
     // 清理钩子
@@ -134,6 +142,7 @@ int InputHandler::waitKeyDown()
         UnhookWindowsHookEx(hKeyboardHook);
         hKeyboardHook = nullptr;
     }
+
     return capturedKey;
 }
 
@@ -144,8 +153,22 @@ int InputHandler::waitKeyDown()
 
 int vkToAscii(int keyCode)
 {
-    // Linux下直接返回按键值，因为我们已经从getch()获得了ASCII字符
-    return keyCode;
+    // 处理特殊功能键
+    switch (keyCode)
+    {
+    case KEY_UP:
+        return 'w';
+    case KEY_DOWN:
+        return 's';
+    case KEY_LEFT:
+        return 'a';
+    case KEY_RIGHT:
+        return 'd';
+    case 127: // 在某些终端中Backspace是127
+        return 8;
+    default:
+        return keyCode;
+    }
 }
 
 int InputHandler::waitKeyDown()
@@ -167,6 +190,15 @@ int InputHandler::waitKeyDown()
     {
         ch = getch(); // 获取按键
 
+        // 处理所有支持的按键类型
+        if (ch == KEY_UP || ch == KEY_DOWN ||
+            ch == KEY_LEFT || ch == KEY_RIGHT || ch == 127)
+        {
+            capturedKey = vkToAscii(ch);
+            keyCaptured = true;
+            break;
+        }
+
         if (ch == 27 || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z')) // 如果有按键按下
         {
             capturedKey = ch;
@@ -174,55 +206,137 @@ int InputHandler::waitKeyDown()
             break;
         }
 
-        usleep(50000); // 睡50ms，减少CPU占用
+        usleep(10000); // 睡10ms，减少CPU占用
     }
 
     // 清理ncurses
     endwin();
 
-    // 0-9返回原始值
-    if (capturedKey >= '0' && capturedKey <= '9')
-    {
-        return capturedKey - '0';
-    }
     // 返回小写字母
-    else if (capturedKey >= 'A' && capturedKey <= 'Z')
+    if (capturedKey >= 'A' && capturedKey <= 'Z')
     {
         return capturedKey - 'A' + 'a';
-    }
-    else if (capturedKey == 27)
-    {
-        quitGame();
-        return -1;
     }
 
     return capturedKey;
 }
 #endif
 
-void InputHandler::quitGame()
-{
-    Controller controller;
-    controller.save();
-}
-
-// // 测试代码
-// int main()
+// std::string InputHandler::getCmd()
 // {
+//     std::stringstream ss;
+//     ss.str("");
+//     ss.clear();
+
 //     while (1)
 //     {
-//         int key = waitKeyDown();
-//         if (key == 27)
+//         int ch = waitKeyDown();
+//         // Enter
+//         if (ch == 10)
 //         {
-//             std::cout << " ESC pressed.";
-//             break;
+//             std::string cmd = ss.str();
+//             return cmd;
 //         }
-//         // 检查输出
-//         if (key != -1)
+
+//         // Backspace
+//         else if (ch == 8)
 //         {
-//             std::cout << "Captured key code: " << std::dec << key << " " << (char)key << std::endl;
+//             std::string content = ss.str();
+//             content.pop_back();
+//             ss.str(content);
+//             ss.clear();
+//             ss << content;
+//             continue;
 //         }
+
+//         // Unexpect input
+//         else if (ch == 0)
+//         {
+//             continue;
+//         }
+
+//         else
+//             // 将ss实时显示在屏幕上
+//             // 需要确定接口...
+//             ss << char(ch);
 //     }
-//     std::cout << " Exit executnihaoion." << std::endl;
-//     return 0;
 // }
+
+std::string InputHandler::getCmd()
+{
+    std::string currentInput;
+
+    std::cout << "Enter command: ";
+    std::cout.flush();
+
+    while (true)
+    {
+        int ch = waitKeyDown();
+
+        // Enter - 确认输入
+        if (ch == 10)
+        {
+            std::cout << std::endl; // 换行
+            return currentInput;
+        }
+        // Backspace
+        else if (ch == 8)
+        {
+            if (!currentInput.empty())
+            {
+                currentInput.pop_back();
+                // 退格：移动光标，输出空格，再退格
+                std::cout << "\b \b";
+                std::cout.flush();
+            }
+        }
+        // ESC - 取消输入
+        else if (ch == 27)
+        {
+            std::cout << "^[Cancelled" << std::endl;
+            return "";
+        }
+        // 普通可打印字符
+        else if (ch >= 32 && ch <= 126)
+        {
+            char character = static_cast<char>(ch);
+            currentInput += character;
+            std::cout << character;
+            std::cout.flush();
+        }
+        // 方向键（wsad）也作为可输入字符
+        else if (ch == 'w' || ch == 'a' || ch == 's' || ch == 'd')
+        {
+            currentInput += static_cast<char>(ch);
+            std::cout << static_cast<char>(ch);
+            std::cout.flush();
+        }
+    }
+}
+
+int main()
+{
+    InputHandler inputHandler;
+    int key = -1;
+    std::cout << "Press a key (0-9, a-z, Esc to quit): ";
+    // while (1)
+    // {
+    //     key = inputHandler.waitKeyDown();
+    //     if (key != -1)
+    //     {
+    //         std::cout << "\nYou pressed: " << std::setw(2) << key << " (ASCII: " << std::setw(3) << key << ")\n";
+    //     }
+    //     else if (key == 27)
+    //     {
+    //         std::cout << "\nExiting...\n";
+    //         break;
+    //     }
+    //     else
+    //     {
+    //         std::cout << "\nFailed to get key press.\n";
+    //     }
+    // }
+    std::string cmd = inputHandler.getCmd();
+    std::cout << "You entered: " << cmd << std::endl;
+    return 0;
+}

@@ -2,82 +2,154 @@
 #include <iostream>
 
 Controller::Controller(
-    const LogLevel& level,
-    const std::filesystem::path& log_dir,
-    const std::filesystem::path root_dir):
-    level(level),
-    log_dir(log_dir),
-    root_dir(root_dir) {
+    const LogLevel &level,
+    const std::filesystem::path &log_dir,
+    const std::filesystem::path root_dir) : level(level),
+                                            log_dir(log_dir),
+                                            root_dir(root_dir)
+{
     // 构造函数
 }
 
-std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path& root_dir) {
+std::shared_ptr<Controller> Controller::getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir)
+{
     static auto instance = std::shared_ptr<Controller>(new Controller(level, log_dir, root_dir));
     return instance;
 }
 
-void Controller::log(const LogLevel& level, const std::string& msg) {
+void Controller::log(const LogLevel &level, const std::string &msg)
+{
     // 临时实现
     cout << msg << std::endl;
 }
 
-Message Controller::init(std::string username, Protagonist &pro, Backpack &backpack)
+Message Controller::init()
 {
-    // 初始化 Protagonist 和 Backpack
-    Protagonist pro;
-    pro.setName(username);
-    Backpack backpack;
+    protagonist = std::make_shared<Protagonist>();
+    backpack = std::make_shared<Backpack>();
+    map = std::make_shared<Map>();
+
+    Message msg("Init Success!", 0);
+    log(LogLevel::INFO, msg.msg);
+    return msg;
 }
 
-Message Controller::save(Protagonist &pro, Backpack &backpack)
+Message Controller::load(std::string username)
+{
+    // 游戏开始时加载文件，名称格式为 username.bin
+    std::string file_name = username + ".bin";
+    std::ifstream ifile(file_name, std::ios::binary);
+    if (!ifile.is_open())
+    {
+        Message msg = Message("Create a new accout", 0);
+
+        log(LogLevel::INFO, msg.msg);
+        return msg;
+    }
+    // 使用cereal进行反序列化
+    {
+        cereal::BinaryInputArchive iarchive(ifile);
+        iarchive(protagonist, backpack, map);
+        ifile.close();
+    }
+
+    ifile.close();
+    Message msg = Message("Load Success!", 0);
+    log(LogLevel::INFO, msg.msg);
+    return msg;
+}
+
+Message Controller::save()
 {
     // 游戏退出时保存文件，名称格式为 username.bin
-    std::string username = pro.getName();
+    std::string username = protagonist.getName();
     std::string file_name = username + ".bin";
     std::ofstream ofile(file_name, std::ios::binary);
     if (!ofile.is_open())
     {
-        std::cerr << "Error: Cannot open file! " << file_name << std::endl;
-        return Message("Save Failed!", -1);
+        Message msg = Message("Save Failed!", -1);
+        std::cerr << msg.msg << std::endl;
+        log(LogLevel::ERROR, msg.msg);
+        return msg;
     }
     // 使用cereal进行序列化
     {
         cereal::BinaryOutputArchive oarchive(ofile);
-        oarchive(pro, backpack);
+        oarchive(protagonist, backpack, map);
         ofile.close();
     }
 
     ofile.close();
-    return Message("Save Success!", 0);
+    Message msg = Message("Save Success!", 0);
+    log(LogLevel::INFO, msg.msg);
+    return msg;
 }
 
-void InputHandler()
+Message Controller::getCmd()
 {
-    int k = waitkeydown(); // 获取键盘操作
-}
-int Controller::run() {
-    std::cout << "登录/注册..." << std::endl;
-    std::cout << "初始化游戏..." << std::endl;
-    std::cout << "运行游戏..." << std::endl;
-    // TODO 修改此状态开启循环
-    bool running = false;
-    EventType event_type = EventType::NONE;
-    Message msg;
-    while (running) {
-        std::cout << "获取事件..." << std::endl;
-        msg = getEvent(event_type);
+    std::stringstream ss;
+    ss.str("");
+    ss.clear();
 
-        switch(event_type) {
-            case EventType::MOVE:
-                std::cout << "移动主角..." << std::endl;
-                break;
-            case EventType::QUIT:
-                std::cout << "退出游戏..." << std::endl;
-                running = false;
-                break;
-            case EventType::NONE:
-                break;
+    while (1)
+    {
+        ch = input.waitKeyDown();
+        // Enter
+        if (ch == 10)
+        {
+            std::string cmd = ss.str();
+            handleCmd(cmd);
+            return ("Successfully sent and handled command: " + cmd, 0);
         }
+
+        // Backspace
+        else if (ch == 8)
+        {
+            std::string content = ss.str();
+            content.pop_back();
+            ss.str(content);
+            ss.clear();
+            ss << content;
+            // 将ss实时显示在屏幕上
+            // 需要确定接口...
+            continue;
+        }
+
+        // Unexpect input
+        else if (ch == 0)
+        {
+            continue;
+        }
+
+        else
+            // 将ss实时显示在屏幕上
+            // 需要确定接口...
+            ss << ch;
     }
-    return 0;
+    return Message("No command input!", -1);
+}
+
+Message handleCmd(std::string cmd)
+{
+    switch (cmd)
+    {
+    case "help":
+        /* code */
+        break;
+
+    case "quit":
+        save();
+        break;
+
+    case "status":
+        /* code */
+        break;
+
+    case "backpack":
+        /* code */
+        break;
+
+    default:
+        break;
+    }
 }

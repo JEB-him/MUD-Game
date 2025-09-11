@@ -10,15 +10,7 @@
 #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
-
-#include <iostream>
-#include <memory>
-#include "tools.h"
-#include "Map.h"
-#include "Item.h"
-#include "Protagonist.h"
-#include "NPC.h"
-#include "Backpack.h"
+#include "backpack.h"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -39,25 +31,27 @@ public:
      * @note 日志消息会按照等级被输出到日志文件中，同时控制台会打印设定等级
      * 的消息，详见 README 日志输出
      */
-    enum class LogLevel {
-        DEBUG,      ///< 消息只应当在调试时被看到
-        INFO,       ///< 程序正常运行时可以输出的消息
-        WARN,       ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERROR       ///< 严重的错误，该事件发生时程序会 Crash
+    enum class LogLevel
+    {
+        DEBUG, ///< 消息只应当在调试时被看到
+        INFO,  ///< 程序正常运行时可以输出的消息
+        WARN,  ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
+        ERROR  ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**
      * @brief 事件类型
      */
-    enum class EventType {
-        MOVE,       ///< 移动主角
-        AC_NPC,     ///< 与NPC互动
-        AC_INST,    ///< 与器械互动
-        OPEN_PACK,  ///< 打开背包
-        REFRESH,    ///< 刷新地图
-        JUMP,       ///< 跳转场景
-        TP,         ///< 传送到 NPC 附近
-        QUIT,       ///< 退出游戏
+    enum class EventType
+    {
+        MOVE,      ///< 移动主角
+        AC_NPC,    ///< 与NPC互动
+        AC_INST,   ///< 与器械互动
+        OPEN_PACK, ///< 打开背包
+        REFRESH,   ///< 刷新地图
+        JUMP,      ///< 跳转场景
+        TP,        ///< 传送到 NPC 附近
+        QUIT,      ///< 退出游戏
         NONE
     };
 
@@ -67,8 +61,8 @@ public:
      */
 
     // 禁用拷贝构造函数和赋值运算符
-    Controller(const Controller&) = delete;
-    Controller& operator=(const Controller&) = delete;
+    Controller(const Controller &) = delete;
+    Controller &operator=(const Controller &) = delete;
 
     /**
      * @brief 单例模式创建实例
@@ -76,14 +70,14 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path& root_dir);
+    static std::shared_ptr<Controller> getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
 
     /**
      * @brief 日志函数
      * @param level 日志等级
      * @param msg 日志消息
      */
-    void log(const LogLevel& level, const std::string& msg);
+    void log(const LogLevel &level, const std::string &msg);
 
     /**
      * @brief 游戏入口函数
@@ -95,6 +89,7 @@ public:
      * @return 一个状态码，供游戏 exit 使用
      */
     int run();
+
 private:
     // 项目根目录
     std::filesystem::path root_dir;
@@ -132,7 +127,7 @@ private:
      * @note 使用 Protagonist 和 Backpack 的默认值，主函数需要提前创建 角色 和 背包 对象
      * @return 初始化结果信息
      */
-    Message init(std::string username, Protagonist &pro, Backpack &backpack);
+    Message init();
 
     /**
      * @brief 登录
@@ -151,7 +146,7 @@ private:
      * @param pro 角色信息
      * @param backpack 背包信息
      */
-    Message Controller::save(Protagonist &pro, Backpack &backpack);
+    Message Controller::save();
 
     /**
      * @brief 获取按键响应，并设置当前游戏状态
@@ -162,16 +157,13 @@ private:
     // 日志等级
     LogLevel level;
 
- 
- 
-
     /**
      * TODO
      * @brief 登录
      * @details 实现登录逻辑
      */
     Message playerLogin(const std::string username);
-    
+
     /**
      * TODO
      * @brief 注册
@@ -180,15 +172,13 @@ private:
      */
     Message playerRegister(const std::string username);
 
-
-
     /**
      * TODO
      * @brief 获得用户操作事件
      * @param[out] event_type 事件类型
      * @return 返回消息
      */
-    Message getEvent(EventType& event_type);
+    Message getEvent(EventType &event_type);
 
     /**TODO
      * @brief 与 NPC 碰撞的 handler
@@ -200,10 +190,10 @@ private:
     /**
      * @brief 与器械交互
      */
-    
+
     /**
      * @brief 跳转场景
      * @details 遍历跳转场景的入口，拿到传送到哪个入口
-     * @param[in] exit_id 
+     * @param[in] exit_id
      */
 };

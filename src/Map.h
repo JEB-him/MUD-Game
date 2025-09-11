@@ -6,6 +6,7 @@
 #include <string>
 #include "tools.h"
 
+class View;
 /**
  * @brief Map 类，用于读取 map 文件
  * @details 关于地图文件的一些规定：\n
@@ -22,6 +23,7 @@
  */
 class Map {
 public:
+    friend class View;
     inline const static std::string BASE_DIR = ROOT_DIR "maps/";
     /**
      * @brief 地图最大宽度
@@ -42,7 +44,7 @@ public:
      */
     inline const static SpecialChar SPECIAL_CHARS[CHAR_MAXN] = {
         SpecialChar("\U000f1302", 2),
-        SpecialChar("\U0000c6c3", 2),
+        SpecialChar("\U0000c6c3", 2, false),
         SpecialChar("\U000f0c3c", 2),
         SpecialChar("\U00002554", 1),
         SpecialChar("\U0000255a", 1),
@@ -50,22 +52,23 @@ public:
         SpecialChar("\U0000255d", 1),
         SpecialChar("\U00002550", 1),
         SpecialChar("\U00002551", 1),
-        SpecialChar("\U0000c6c3", 2, "blue"),
+        SpecialChar("\U0000c6c3", 2, false, "blue"),
+        SpecialChar("\U00002566", 1),
+        SpecialChar("\U00002569", 1),
+        SpecialChar("\U00002560", 1),
+        SpecialChar("\U00002563", 1),
+        SpecialChar("\U0000256c", 1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar("", -1),
+        SpecialChar(" ", 4),    ///< 入口
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", 4),    ///< 入口
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", 4),    ///< 出口
+        SpecialChar(" ", 4),    ///< 出口
     };
 
     Map() = default;
@@ -101,6 +104,18 @@ public:
      * @return a Position.
      */
     Position getPos() const;
+
+    /**
+     * @brief 获取地图最大宽度
+     * @return a int
+     */
+    int getMaxWidth() const;
+
+    /**
+     * @brief 获取地图最大高度
+     * @return a int
+     */
+    int getMaxHeight() const;
 
     /**
      * @brief 移动主角
@@ -153,6 +168,13 @@ public:
      * @return a char index of SPECIAL_CHARS value, -1 表示未碰撞 -2 表示空间狭小/墙壁
      */
     char detectCollision(const Position& pos) const;
+
+    /**
+     * @brief 获取字符的 index
+     * @param ch 字符
+     * @return 若在列表中返回列表索引，否则返回 -1
+     */
+    static int char2index(const char& ch);
 private:
     enum class LineType {
         WALL,                  // 墙壁
@@ -170,6 +192,8 @@ private:
     bool        is_valid;                    // 该地图类是否有效
     std::string valid_msg;                   // 关于地图是否有效的消息
     char        map[MAX_HEIGHT][MAX_WIDTH];  // 地图数组
+    int         max_width;                   // 地图最大宽度
+    int         max_height;                  // 地图最大高度
     // 方向数组
     inline static int DIRECTIONS[4][2] = {
         {-1, 0},
@@ -237,11 +261,6 @@ private:
      * @brief 获取NPC ID
      */
     int getNPCId(const Position& pos);
-
-    /**
-     * @brief 获取字符的 index
-     */
-    static int char2index(const char& ch);
 
     /**
      * @brief 储存行到地图中，并检查是否含有非法字符

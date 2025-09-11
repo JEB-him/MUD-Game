@@ -10,6 +10,7 @@ out/
 
 build.bat
 compile_commands.json
+
 CMakeSettings.json
 .editorconfig
 
@@ -17,3 +18,4 @@ game
 test
 
 *.exe
+.vscode/settings.json

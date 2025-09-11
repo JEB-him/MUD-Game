@@ -71,24 +71,6 @@
     "intel_boost_rate": 999.0,
     "class": "study_material"
   },
-  "basketball": {
-    "name": "篮球",
-    "description": "进行篮球锻炼",
-    "value": 20,
-    "class": "sports_equipment"
-  },
-  "soccer": {
-    "name": "足球",
-    "description": "进行足球锻炼",
-    "value": 25,
-    "class": "sports_equipment"
-  },
-  "badminton_racket": {
-    "name": "羽毛球拍",
-    "description": "进行羽毛球锻炼",
-    "value": 30,
-    "class": "sports_equipment"
-  },
   "alarm_clock": {
     "name": "闹钟",
     "description": "减少学习时间消耗",

@@ -130,15 +130,6 @@ private:
     float intel_boost_rate;
 };
 
-/**
- * @brief 体育器材类（用具）：篮球、足球、羽毛球拍
- * @note 该类物品不作增益设计，直接将参与体育运动的收益写在活动的基础获得量里。
- * */
-class SportsEquipment : public Equippable {
-public:
-    SportsEquipment(const string& name, const string& description, float value);
-    void equipAndUnequip(Protagonist& protagonist) override;
-};
 
 /**
  * @brief 学习辅助工具类(用具)：闹钟、护眼台灯

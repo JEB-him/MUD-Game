@@ -20,7 +20,6 @@
    */
  enum class ItemType {
      study_material,
-     sports_equipment,
      study_aid,
      food,
      learning_aid,
@@ -36,7 +35,6 @@
  ItemType getItemType(const string& item_class) {
      static const map<string, ItemType> stringToEnum = {
          {"study_material", ItemType::study_material},
-         {"sports_equipment", ItemType::sports_equipment},
          {"study_aid", ItemType::study_aid},
          {"food", ItemType::food},
          {"learning_aid", ItemType::learning_aid},
@@ -151,42 +149,6 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
       //}
   }
 
- /**
- * @brief 体育器材类构造函数
- */
- SportsEquipment::SportsEquipment(const string& name, const string& description, float value) :
-     Equippable(name, description, value) { }
-
- /**
- * @brief 装备体育器材，允许参加特定需要器材的运动
- * @note  item.getIsConsumable() == false时存在该接口
- */
-  void SportsEquipment::equipAndUnequip(Protagonist& protagonist) {
-
-      /**
-      * @brief 装备前判断是否未装备
-      */
-      //if (!equip_state) {
-
-      //    /**
-      //    * @brief 装备状态：已装备
-      //    */
-      //    equip_state = true;
-
-      //    /**
-      //    * @brief feedback，后续可用View的方法替换
-      //    */
-      //    cout << "\"" << name << "\"" << "已装备。" << endl;
-      //}
-      //else {
-
-      //    /**
-      //    * @brief 与上一个scope相反
-      //    */
-      //    equip_state = false;
-      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
-      //}
-  }
 
  /**
  * @brief 学习辅助工具类构造函数
@@ -356,22 +318,6 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
          * @brief 创建物品对象并返回
          */
          unique_ptr<Item> item_ptr = make_unique<StudyMaterial>(name,description, value, is_science, intel_boost_rate);
-         return item_ptr;
-
-         break;
-     }
-     case ItemType::sports_equipment: {
-         /**
-         * @brief 读取物品参数
-         */
-         string name = (string)config_item[item_name]["name"];
-         string description = (string)config_item[item_name]["description"];
-         float value = (float)config_item[item_name]["value"];
-
-         /**
-         * @brief 创建物品对象并返回
-         */
-         unique_ptr<Item> item_ptr = make_unique<SportsEquipment>(name,description, value);
          return item_ptr;
 
          break;

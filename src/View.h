@@ -4,6 +4,7 @@
  *          部分渲染实现考虑下发给 Model
  * @author Jie Jiang
  */
+#pragma once
 #include <vector>
 #include <deque>
 #include <queue>
@@ -12,7 +13,6 @@
 #include "json.hpp"
 #include "tools.h"
 #include "Controller.h"
-
 /**
  * @brief 光标移动到指定坐标
  * @param line 指定行
@@ -94,6 +94,11 @@ public:
      * @return Message
      */
     Message printOptions(const std::vector<std::string>& options);
+    
+    /**
+     * @brief 清空屏幕
+     */
+    static void clear() { std::cout << "\x1b[2J"; }
 
 private:
     const int MIN_WIN_WIDTH;

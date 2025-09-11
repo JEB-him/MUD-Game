@@ -1,8 +1,9 @@
 /**
  * @file Controller.h
  */
-
+#pragma once
 #include <iostream>
+#include <filesystem>
 #include <memory>
 #include "tools.h"
 #include "Map.h"
@@ -31,6 +32,21 @@ public:
     };
 
     /**
+     * @brief 事件类型
+     */
+    enum class EventType {
+        MOVE,       ///< 移动主角
+        AC_NPC,     ///< 与NPC互动
+        AC_INST,    ///< 与器械互动
+        OPEN_PACK,  ///< 打开背包
+        REFRESH,    ///< 刷新地图
+        JUMP,       ///< 跳转场景
+        TP,         ///< 传送到 NPC 附近
+        QUIT,       ///< 退出游戏
+        NONE
+    };
+
+    /**
      * @brief 游戏状态
      * @details
      */
@@ -45,7 +61,7 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel& level=LogLevel::INFO, const std::string& log_dir="logs/", const std::string root_dir="");
+    static std::shared_ptr<Controller> getInstance(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path& root_dir);
 
     /**
      * @brief 日志函数
@@ -66,7 +82,7 @@ public:
     int run();
 private:
     // 项目根目录
-    std::string root_dir;
+    std::filesystem::path root_dir;
 
     // 该文件永远需要被写入，且会写入所有消息，囊括了 info, warn and error
     inline static const std::string DEBUG_FILE = "Debug.log";
@@ -77,23 +93,21 @@ private:
     // 永远写入
     inline static const std::string ERROR_FILE = "Error.log";
     // 日志目录
-    std::string log_dir;
+    std::filesystem::path log_dir;
     // 日志等级
     LogLevel level;
 
     //
     // Model 的智能指针
     // =================
-    // 测试用代码  ####
-    // =================
-    std::shared_ptr<Map> map = std::shared_ptr<Map>(new Map("tmp_map.txt"));
-    std::shared_ptr<Protagonist> protagonist;
+    std::shared_ptr<Map> map = nullptr;
+    std::shared_ptr<Protagonist> protagonist = nullptr;
     // std::shared_ptr<Backpack> backpack;
     // TODO 补充自己的智能指针
-    // 要求： 若该类唯一，则可使用智能指针管理
+    // 要求： 若该类唯一，则可使用智能指针管理,否则需要一个数组
 
     // 构造函数
-    Controller(const LogLevel& level, const std::string& log_dir, const std::string root_dir);
+    Controller(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path root_dir);
 
     /**
      * @brief 初始化函数
@@ -131,12 +145,11 @@ private:
 
     /**
      * TODO
-     * @brief 获得用户操作
-     * @details 这个按键响应的逻辑可能会有点复杂
-     * @param[out] cmd 用户命令(包括选项)
-     * @param[out] move_dir 移动方向
+     * @brief 获得用户操作事件
+     * @param[out] event_type 事件类型
+     * @return 返回消息
      */
-    Message getCmd();
+    Message getEvent(EventType& event_type);
 
     /**TODO
      * @brief 与 NPC 碰撞的 handler

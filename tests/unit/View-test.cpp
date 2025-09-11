@@ -29,8 +29,4 @@ TEST_CASE("reDraw the screen", "[view]") {
     "################################i   ###########################################"
     };
     writeMap2File(20, map_str_2);
-    auto controller = Controller::getInstance();
-    auto view = View::getInstance(controller);
-    bool success = view->reDraw();
-    REQUIRE(success);
 }

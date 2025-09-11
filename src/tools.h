@@ -9,6 +9,17 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
+
+// 定义 RGB 颜色类
+class RGB {
+public:
+    std::uint8_t r;  // 红色分量
+    std::uint8_t g;  // 绿色分量
+    std::uint8_t b;  // 蓝色分量
+
+    RGB(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
+};
 
 /**
  * @brief 一个通用的坐标类，建议都使用该类来储存坐标
@@ -31,12 +42,13 @@ public:
 /**
  * @brief 一个通用的消息类，用于在调用中返回消息,
  * @details 建议使用该类来返回调用是否成功
- * @note 只有初始化的时候能够对 Message 赋值，以后就不允许更改了
+ * @note 只有初始化的时候能够对 Message 赋值，以后就不允许更改了\n
+ *       **remove the const specifier**
  */
 class Message {
 public:
-    const std::string msg;    ///< 消息体 !const
-    const int status;         ///< 状态码 !const
+    std::string msg;    ///< 消息体
+    int status;         ///< 状态码
 
     /**
      * @brief 初始化一条消息
@@ -47,7 +59,7 @@ public:
      *         0 正常退出\n
      *        >0 正常退出，但有部分警告或不恰当参数，不影响程序正常运行
      */
-    Message(const std::string& msg, const int& status);
+    Message(const std::string& msg="", const int& status=0);
 private:
     // private 块中的注释也不会被识别到，无论使用什么形式的注释
 };
@@ -61,12 +73,23 @@ private:
  */
 class SpecialChar {
 public:
-    const std::string special_char;     ///< 因为这些符号一般都占 3 字节，所以需要使用string
-    const int width;                    ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string special_char;    ///< 因为这些符号一般都占 3 字节，所以需要使用string
+    const int width;                   ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string simple_color;    ///< ANSI 普通颜色
+    const RGB rgb_color;               ///< ANSI RGB 颜色
+    const bool need_empty;             ///< 是否需有手动添加空格
     /**
-     * @brief 构造函数，参数意义见上
+     * @brief 构造函数，有特殊意义的参数见下
+     * @param simple_color 默认为 "white"
+     * @param rgb_color 当 simple_color 为空时启用
      */
-    SpecialChar(const std::string& specail_char, const int& width);
+    SpecialChar(
+        const std::string& special_char,
+        const int& width,
+        const bool& need_empty=true,
+        const std::string& simple_color="white",
+        const RGB& rgb_color=RGB(0, 0, 0)
+    );
 
     /**
      * @brief 默认构造函数

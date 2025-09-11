@@ -15,7 +15,6 @@
 #include <string>
 #include <stdio.h>
 #include <locale>     // 确保正确计算中英文字符串长度
-
 void View::get_cursor_position(int& x, int& y) {
 #ifdef __linux__
     struct termios oldt, newt;
@@ -205,7 +204,7 @@ void View::colorPrint(
         // 插入文本
         size_t insert_len = cutUTFString(text, index, width);
         if (insert_len == -1) {
-            controller->log(Controller::LogLevel::ERROR, "消息打印错误");
+            controller->log(Controller::LogLevel::ERR, "消息打印错误");
             return;
         }
         ss << text;

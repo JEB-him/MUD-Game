@@ -7,7 +7,7 @@
 #include <memory>
 #include "tools.h"
 #include "Map.h"
-#include "Item.h"
+// #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
 
@@ -28,7 +28,7 @@ public:
         DEBUG,      ///< 消息只应当在调试时被看到
         INFO,       ///< 程序正常运行时可以输出的消息
         WARN,       ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERROR       ///< 严重的错误，该事件发生时程序会 Crash
+        ERR       ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**

@@ -18,7 +18,7 @@ std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const
 
 void Controller::log(const LogLevel& level, const std::string& msg) {
     // 临时实现
-    cout << msg << std::endl;
+    std::cout << msg << std::endl;
 }
 
 int Controller::run() {
@@ -31,7 +31,7 @@ int Controller::run() {
     Message msg;
     while (running) {
         std::cout << "获取事件..." << std::endl;
-        msg = getEvent(event_type);
+        // msg = getEvent(event_type);
 
         switch(event_type) {
             case EventType::MOVE:

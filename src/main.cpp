@@ -3,6 +3,7 @@
 #include <fstream>
 #include <unordered_map>
 #include "Controller.h"
+#include "View.h"
 #include "catch.hpp"
 #include <filesystem>
 #if defined(_WIN32) && !defined(__linux__)
@@ -34,7 +35,7 @@ void envCheck() {
     SetConsoleMode(hConsole, dwMode);
     // 双重保险
     system("chcp 65001");
-    std::cout << View::MOVU;
+    std::cout << "\x1bM";
 #endif
 }
 
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
         {"DEBUG", Controller::LogLevel::DEBUG},
         {"INFO", Controller::LogLevel::INFO},
         {"WARN", Controller::LogLevel::WARN},
-        {"ERROR", Controller::LogLevel::ERROR}
+        {"ERR", Controller::LogLevel::ERR}
     };
 
     std::string root_str="./", level="INFO", log_str = "logs/", program = "";
@@ -63,7 +64,7 @@ int main(int argc, char* argv[]) {
         std::cout << "文件打开失败，请检查项目是否完整";
     }
     while(std::getline(welcome_file, line)) {
-        std::cout << line << endl;
+        std::cout << line << std::endl;
     }
 
     auto cli = Opt(root_str, "root directory")["-r"]["--root"]("所有配置文件的根目录(使用/)") |

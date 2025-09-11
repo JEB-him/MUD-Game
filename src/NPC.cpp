@@ -3,6 +3,7 @@
 * */
 #include "NPC.h"
 #include "Protagonist.h"
+#include "Controller.h"
 #include <fstream>
 #include <algorithm>
 #include <string>

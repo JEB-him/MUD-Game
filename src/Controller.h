@@ -113,7 +113,7 @@ private:
     // 永远写入
     inline static const std::string ERROR_FILE = "Error.log";
     // 日志目录
-    std::string log_dir;
+    std::filesystem::path log_dir;
     // 日志等级
     LogLevel level;
 
@@ -153,8 +153,6 @@ private:
      * @details 实现登录逻辑
      */
     Message playerLogin();
-
-
 
     /**
      * TODO

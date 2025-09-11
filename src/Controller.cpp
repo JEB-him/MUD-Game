@@ -187,13 +187,15 @@ Message handleCmd(std::string cmd)
 Message Controller::playerLogin()
 {
     const std::string invalidChars = ";:\"'\\/<>*?|";
-    do{
-        std::string user_name="";
+    do
+    {
+        std::string user_name = "";
         std::cout << "Enter username: ";
         std::cin >> user_name;
-        if (user_name.find_first_of(invalidChars) != std::string::npos) {
+        if (user_name.find_first_of(invalidChars) != std::string::npos)
+        {
             std::cout << "Invalid username. Please avoid using special characters: " << invalidChars << std::endl;
-            log=(LogLevel::WARN, "Invalid username attempt: " + user_name);
+            log = (LogLevel::WARN, "Invalid username attempt: " + user_name);
             continue;
         }
     } while (1);
@@ -202,3 +204,38 @@ Message Controller::playerLogin()
     return Message("Login Success!", 0);
 }
 
+void Controller::log(const LogLevel &level, const std::string &msg)
+{
+    // 临时实现
+    std::cout << msg << std::endl;
+}
+
+int Controller::run()
+{
+    std::cout << "登录/注册..." << std::endl;
+    std::cout << "初始化游戏..." << std::endl;
+    std::cout << "运行游戏..." << std::endl;
+    // TODO 修改此状态开启循环
+    bool running = false;
+    EventType event_type = EventType::NONE;
+    Message msg;
+    while (running)
+    {
+        std::cout << "获取事件..." << std::endl;
+        // msg = getEvent(event_type);
+
+        switch (event_type)
+        {
+        case EventType::MOVE:
+            std::cout << "移动主角..." << std::endl;
+            break;
+        case EventType::QUIT:
+            std::cout << "退出游戏..." << std::endl;
+            running = false;
+            break;
+        case EventType::NONE:
+            break;
+        }
+    }
+    return 0;
+}

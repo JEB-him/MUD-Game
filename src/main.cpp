@@ -63,7 +63,11 @@ int main(int argc, char* argv[]) {
         std::cout << "文件打开失败，请检查项目是否完整";
     }
     while(std::getline(welcome_file, line)) {
+<<<<<<< HEAD
         std::cout << line << endl;
+=======
+        std::cout << line << std::endl;
+>>>>>>> origin/feature-controller
     }
 
     auto cli = Opt(root_str, "root directory")["-r"]["--root"]("所有配置文件的根目录(使用/)") |

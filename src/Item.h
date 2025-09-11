@@ -137,17 +137,6 @@ private:
 };
 
 /**
- * @brief 体育器材类（用具）：篮球、足球、羽毛球拍
- * @note 该类物品不作增益设计，直接将参与体育运动的收益写在活动的基础获得量里。
- * */
-class SportsEquipment : public Equippable
-{
-public:
-    SportsEquipment(const string &name, const string &description, float value);
-    void equipAndUnequip(Protagonist &protagonist) override;
-};
-
-/**
  * @brief 学习辅助工具类(用具)：闹钟、护眼台灯
  * @note 作用：降低学习损耗
  * @param time_reduction_rate 时间消耗减少比率(闹钟)
@@ -239,8 +228,8 @@ private:
 class ItemCreator
 {
 public:
-    ItemCreator(std::string file_name);
-    ~ItemCreator();
+    ItemCreator();
+    ~ItemCreator() = default;
     unique_ptr<Item> createItem(string item_name);
 
 private:

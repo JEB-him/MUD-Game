@@ -21,12 +21,9 @@ string(REPLACE "\\" "/" ROOT_DIR "${ROOT_DIR}/")
 target_compile_definitions(OUCSurvSim PRIVATE OUCSurvSim_VERSION="${OUCSurvSim_VERSION}" PUBLIC ROOT_DIR="${ROOT_DIR}")
 # 包含第三方头文件
 target_include_directories(OUCSurvSim PUBLIC "${PROJECT_SOURCE_DIR}/Third")
-# 将 OUCSurvSim 静态库链接到 game
-target_link_libraries(game PUBLIC OUCSurvSim)
-# 将 Test 静态库链接到 game
-if (TEST)
-    target_link_libraries(game PUBLIC Test)
-endif()
+# 将 OUC, Test 静态库链接到 game
+target_link_libraries(game PRIVATE OUCSurvSim)
+target_sources(game PRIVATE $<TARGET_OBJECTS:Test>)
 
 # 检测是否为 Visual Studio 生成器
 if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
@@ -34,16 +31,9 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" 
 else()
     message(STATUS "平台检测:${CMAKE_GENERATOR}")
     # 编译模式下开启警告和调试信息
-    if (CACHE{DEBUG})
-        target_compile_options(game
-            PRIVATE -g -Wall -Wextra
-        )
-    else()
-        # release 启用编译优化
-        target_compile_options(game
-            PRIVATE -O3
-        )
-    endif()
+    target_compile_options(game
+        PRIVATE -g -Wall -Wextra
+    )
 endif()
 
 install(TARGETS game

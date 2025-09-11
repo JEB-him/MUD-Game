@@ -133,6 +133,9 @@ int main(int argc, char* argv[]) {
     std::cout << "\n项目运行时目录设置为: " << log_dir << "..."<< std::endl;
     // 如果是测试
     if (program == "test") {
+        for (int i = 0;i < argc; ++i) {
+            std::cout << argv[i] << std::endl;
+        }
         return session.run();
     } else if (program == "run") {
         auto controller = Controller::getInstance(levels[level], log_dir, root_dir);

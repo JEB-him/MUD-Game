@@ -7,7 +7,6 @@
 #include <filesystem>
 
 const std::string TMP_FILE = "tmp_map.txt";
-
 void writeMap2File(int n, const char map[][Map::MAX_WIDTH], const std::string& filename=TMP_FILE) {
     const auto path = Map::BASE_DIR + filename;
     std::ofstream file(path.c_str());

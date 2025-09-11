@@ -10,7 +10,7 @@
 #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
-#include "backpack.h"
+// #include "backpack.h"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -94,7 +94,7 @@ public:
     std::shared_ptr<Map> map;
     std::shared_ptr<Protagonist> protagonist;
     std::shared_ptr<NPC> npc;
-    std::shared_ptr<Backpack> backpack;
+    // std::shared_ptr<Backpack> backpack;
     std::shared_ptr<InputHandler> input;
 
     // TODO 补充自己的智能指针

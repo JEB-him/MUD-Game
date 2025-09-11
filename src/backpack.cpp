@@ -45,14 +45,28 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
     else{
         int index = order - 1;
             if (backpack_items[index].get()->getIsConsumable()) {
-                //TODO
-                /* backpack_items[index].get()->use(protagonist); */
+                /**
+                * @note feedback    TODO view
+                */
+                ss << "消耗品" << "\"" << backpack_items[index].get()->getName() << "\"" << "已被使用。";
+                //view->gameoutput(ss.str());
+                ss.str("");
+
+                backpack_items[index].get()->use(protagonist); 
                 backpack_items[index].reset();
                 backpack_items.erase(backpack_items.begin() + index);
             }
             else {
-                //TODO 
-               // backpack_items[index].get()->equipAndUnequip(protagonist);
+                /**
+                * @note feedback    TODO view
+                */
+                ss << "用具" << "\"" << backpack_items[index].get()->getName() << "\"" << "已装备。";
+                //view->gameoutput(ss.str());
+                ss.str("");
+
+                backpack_items[index].get()->equipAndUnequip(protagonist);
+
+
             }
     }
 }

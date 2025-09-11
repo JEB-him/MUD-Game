@@ -69,4 +69,5 @@ public:
 private:
 	ItemCreator item_creator;
 	vector<unique_ptr<Item>> backpack_items;
+	stringstream ss;
 };

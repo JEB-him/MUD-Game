@@ -143,7 +143,7 @@
     "name": "维生素",
     "description": "一段时间内健康不会下降",
     "value": 25,
-    "health_restore": 10,
+    "health_restore": 0,
     "duration": 24,
     "class": "health_item"
   }

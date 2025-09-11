@@ -34,6 +34,7 @@
 #include<memory>
 #include <fstream>
 #include <map>
+#include<sstream>
 #include "json.hpp"
 #include"Protagonist.h"
 
@@ -46,6 +47,7 @@ using std::move;
 using nlohmann::json;
 using std::ifstream;
 using std::map;
+using std::stringstream;
 
 /**
  * @brief 物品类
@@ -75,6 +77,7 @@ protected:
     string description;
     float value;
     bool is_consumable;
+    stringstream ss;
 };
 
 /**

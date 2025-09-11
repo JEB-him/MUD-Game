@@ -135,9 +135,6 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 }
 
                 node.options.push_back(InteractionOption{text, nextNode, conditions});
-
-                
-                
             }
 
             // 解析effect字段
@@ -196,11 +193,11 @@ void NPC::startInteraction() {
 
     // 显示交互提示和选项
     if (node.options.empty()) {
-        std::cout << "***" << node.prompt << "***" << std::endl;
+        std::cout << "***" << node.prompt << std::endl;
         return;
     }
 
-    std::cout << "***" << node.prompt << "***" << std::endl;
+    std::cout << "**" << node.prompt << std::endl;
 
     if (node.effect.size() > 0) {
         // 执行效果
@@ -208,14 +205,11 @@ void NPC::startInteraction() {
             int changeValue = std::stoi(value);
 
             if (type == "STRENGTH") {
-                std::cout << "体力" << (changeValue > 0 ? "增加" : "减少") 
-                            << std::abs(changeValue) << "点" << std::endl;
+                std::cout << "体力" << (changeValue > 0 ? "增加" : "减少") << std::abs(changeValue) << "点" << std::endl;
             } else if (type == "MONEY") {
-                std::cout << "金钱" << (changeValue > 0 ? "获得" : "消耗") 
-                            << std::abs(changeValue) << "元" << std::endl;
+                std::cout << "金钱" << (changeValue > 0 ? "获得" : "消耗") << std::abs(changeValue) << "元" << std::endl;
             }
         }
-        std::cout << "体力" << node.effect[1].value << std::endl;
     }
 
     for (size_t i = 0; i < node.options.size(); ++i) {
@@ -224,7 +218,6 @@ void NPC::startInteraction() {
 
     int choice = -1;
 
-    // next0:
     while (true) {
         std::cout << "请输入你的选择：";
         std::string input;
@@ -248,15 +241,9 @@ void NPC::startInteraction() {
                         if (playerMoney < requiredMoney) {
 
                             std::cout << "金钱不足，无法完成交易，请重新选择！" << std::endl;
-                            // goto next0;
                             continue; // 有效输入但条件不满足，重新选择
                         } else {
-                            // playerMoney -= requiredMoney;
-                            std::cout << "交易成功，当前金钱: " << playerMoney << std::endl;
-                            // std::cout << node.effect[0].type << std::endl;
-
-                            // std::cout << node.effect[0].value << std::endl;
-                            
+                            std::cout << "交易成功，当前金钱: " << playerMoney << std::endl; 
                         }
                     }
                 }
@@ -272,28 +259,6 @@ void NPC::startInteraction() {
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
-
-    // if (node.options[choice].conditions.size() > 0) {
-    //     if (node.options[choice].conditions[0].type == "MONEY") {
-    //         int requiredMoney = std::stoi(node.options[choice].conditions[0].value);
-    //         std::cout << "需要 " << requiredMoney << " 金钱, 当前金钱: " << playerMoney << std::endl;
-    //         if (playerMoney < requiredMoney) {
-
-    //             std::cout << "金钱不足，无法完成交易，请重新选择！" << std::endl;
-    //             goto next0;
-    //             return;
-    //         } else {
-    //             // playerMoney -= requiredMoney;
-    //             std::cout << "交易成功，当前金钱: " << playerMoney << std::endl;
-    //             // std::cout << node.effect[0].type << std::endl;
-
-    //             // std::cout << node.effect[0].value << std::endl;
-                
-    //         }
-    //     }
-    // }
-
-    
 
     handleOptionSelection(choice);
 }

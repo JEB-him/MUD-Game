@@ -11,6 +11,3 @@ enum class NPCType {
     LIBRARIAN,
     COACH
 };
-
-// std::string to_string(NPCType type);
-// NPCType npc_type_from_string(const std::string& typeStr);

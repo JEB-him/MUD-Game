@@ -29,23 +29,23 @@
  * */
 
 #pragma once
-#include<iostream>
-#include<string>
-#include<memory>
+#include <iostream>
+#include <string>
+#include <memory>
 #include <fstream>
 #include <map>
 #include "json.hpp"
-#include"Protagonist.h"
+#include "Protagonist.h"
 
-using std::string;
+using nlohmann::json;
 using std::cout;
 using std::endl;
-using std::unique_ptr;
-using std::make_unique;
-using std::move;
-using nlohmann::json;
 using std::ifstream;
+using std::make_unique;
 using std::map;
+using std::move;
+using std::string;
+using std::unique_ptr;
 
 /**
  * @brief 物品类
@@ -54,14 +54,15 @@ using std::map;
  * @param value 物品价格
  * @param is_consumable 是否为消耗品
  * */
-class Item {
+class Item
+{
 public:
-    Item(const string& name, const string& description, float value, bool is_consumable);
+    Item(const string &name, const string &description, float value, bool is_consumable);
     virtual ~Item() = default;
 
     /**
-    * @brief 获取物品信息
-    */
+     * @brief 获取物品信息
+     */
     string getName() const;
     string getDescription() const;
     int getValue() const;
@@ -77,25 +78,27 @@ protected:
 /**
  * @brief 消耗品类
  */
-class Consumable : public Item {
+class Consumable : public Item
+{
 public:
-    Consumable(const string& name, const string& description, float value);
+    Consumable(const string &name, const string &description, float value);
     virtual ~Consumable() = default;
 
     /**
-    * @brief 使用消耗品
-    * @note Controller通过指向物品对象的智能指针调用该方法使用“消耗品”，并改变主角属性
-    */
-    virtual void use(Protagonist& protagonist) = 0;
+     * @brief 使用消耗品
+     * @note Controller通过指向物品对象的智能指针调用该方法使用“消耗品”，并改变主角属性
+     */
+    virtual void use(Protagonist &protagonist) = 0;
 };
 
 /**
  * @brief 用具类
  * @param equip_state 装备状态
  */
-class Equippable : public Item {
+class Equippable : public Item
+{
 public:
-    Equippable(const string& name, const string& description, float value);
+    Equippable(const string &name, const string &description, float value);
     virtual ~Equippable() = default;
 
     /**
@@ -104,10 +107,11 @@ public:
     bool getEquipState();
 
     /**
-    * @brief 装备用具
-    * @note Controller通过指向物品对象的智能指针调用该方法装备“用品”(，并改变主角属性)
-    */
-    virtual void equipAndUnequip(Protagonist& protagonist) = 0;
+     * @brief 装备用具
+     * @note Controller通过指向物品对象的智能指针调用该方法装备“用品”(，并改变主角属性)
+     */
+    virtual void equipAndUnequip(Protagonist &protagonist) = 0;
+
 protected:
     bool equip_state;
 };
@@ -118,10 +122,12 @@ protected:
  * @param is_science true为理科，false为文科
  * @param intel_boost_rate 使用者提高的智力(文or理)比例增量
  * */
-class StudyMaterial : public Equippable {
+class StudyMaterial : public Equippable
+{
 public:
-    StudyMaterial(const string& name, const string& description, float value, bool is_science, float intel_boost_rate);
-    void equipAndUnequip(Protagonist& protagonist) override;
+    StudyMaterial(const string &name, const string &description, float value, bool is_science, float intel_boost_rate);
+    void equipAndUnequip(Protagonist &protagonist) override;
+
 private:
     bool is_science;
     float intel_boost_rate;
@@ -131,10 +137,11 @@ private:
  * @brief 体育器材类（用具）：篮球、足球、羽毛球拍
  * @note 该类物品不作增益设计，直接将参与体育运动的收益写在活动的基础获得量里。
  * */
-class SportsEquipment : public Equippable {
+class SportsEquipment : public Equippable
+{
 public:
-    SportsEquipment(const string& name, const string& description, float value);
-    void equipAndUnequip(Protagonist& protagonist) override;
+    SportsEquipment(const string &name, const string &description, float value);
+    void equipAndUnequip(Protagonist &protagonist) override;
 };
 
 /**
@@ -143,10 +150,12 @@ public:
  * @param time_reduction_rate 时间消耗减少比率(闹钟)
  * @param health_preservation_rate 健康保护比率(护眼台灯)
  * */
-class StudyAid : public Equippable {
+class StudyAid : public Equippable
+{
 public:
-    StudyAid(const string& name, const string& description, float value, float time_reduction_rate, float health_preservation_rate);
-    void equipAndUnequip(Protagonist& protagonist) override;
+    StudyAid(const string &name, const string &description, float value, float time_reduction_rate, float health_preservation_rate);
+    void equipAndUnequip(Protagonist &protagonist) override;
+
 private:
     float time_reduction_rate;
     float health_preservation_rate;
@@ -160,15 +169,17 @@ private:
  * @param time_last_used 上次使用时间（压缩饼干）
  * @note time_last_used的变量类型需要和游戏的时间流逝设计对齐
  * */
-class Food : public Consumable {
+class Food : public Consumable
+{
 public:
-    Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used);
-    void use(Protagonist& protagonist) override;
+    Food(const string &name, const string &description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used);
+    void use(Protagonist &protagonist) override;
 
     /**
-    * @brief 检查是否在冷却中
-    */
+     * @brief 检查是否在冷却中
+     */
     bool isOnCooldown() const;
+
 private:
     float strength_restore;
     float health_restore;
@@ -185,10 +196,12 @@ private:
  * @param is_used_today 今天是否使用过（能量饮料）
  * @param health_reduce 健康降低值（能量饮料）
  * */
-class LearningAid : public Consumable {
+class LearningAid : public Consumable
+{
 public:
-    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, bool is_used_today, float health_reduce);
-    void use(Protagonist& protagonist) override;
+    LearningAid(const string &name, const string &description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, bool is_used_today, float health_reduce);
+    void use(Protagonist &protagonist) override;
+
 private:
     float intel_boost;
     float intel_boost_rate;
@@ -203,26 +216,30 @@ private:
  * @param health_restore 健康恢复值(急救包)
  * @param duration 保护持续时间(维生素)
  * */
-class HealthItem : public Consumable {
+class HealthItem : public Consumable
+{
 public:
-    HealthItem(const string& name, const string& description, float value, float health_restore, float duration);
-    void use(Protagonist& protagonist) override;
+    HealthItem(const string &name, const string &description, float value, float health_restore, float duration);
+    void use(Protagonist &protagonist) override;
+
 private:
     float health_restore;
     float duration;
 };
 
 /**
-* @brief 用于管理物品对象的创建
-* @note 推荐用法：主角获得物品时，用智能指针创建对应的物品对象（格式见开头），并让背包的vector管理这个指针。
-* @param config_file_item 存储所有物品参数的json文件，方便物品参数读取和修改
-* @param config_item 读取json具体数据的对象
-*/
-class ItemCreator {
+ * @brief 用于管理物品对象的创建
+ * @note 推荐用法：主角获得物品时，用智能指针创建对应的物品对象（格式见开头），并让背包的vector管理这个指针。
+ * @param config_file_item 存储所有物品参数的json文件，方便物品参数读取和修改
+ * @param config_item 读取json具体数据的对象
+ */
+class ItemCreator
+{
 public:
-    ItemCreator(string file_name);
+    ItemCreator(file_name);
     ~ItemCreator();
     unique_ptr<Item> createItem(string item_name);
+
 private:
     ifstream config_file_item;
     json config_item;

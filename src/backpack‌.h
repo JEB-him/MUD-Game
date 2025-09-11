@@ -94,7 +94,8 @@ public:
 	{
 		ar(CEREAL_NVP(capacity),
 		   CEREAL_NVP(num_items),
-		   CEREAL_NVP(backpack_space));
+		   CEREAL_NVP(backpack_space), );
+		item_creator = ItemCreator();
 	}
 
 private:

@@ -1,11 +1,4 @@
 #pragma once
-#include <iostream>
-#include <atomic>
-#include <iomanip>
-#include <sstream>
-
-#include "tools.h"
-// #include <functional>
 
 class InputHandler
 {
@@ -20,9 +13,4 @@ public:
      * @return int ascii码
      */
     int waitKeyDown();
-
-    std::string getCmd();
-
-private:
-    std::stringstream ss;
 };

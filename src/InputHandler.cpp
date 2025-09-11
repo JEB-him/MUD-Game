@@ -72,8 +72,9 @@ std::map<int, char> vkToAsciiMap = {
     {0x58, 'x'},
     {0x59, 'y'},
     {0x5A, 'z'},
-    {VK_SPACE, ' '},   // 32
-    {VK_RETURN, '\n'}, // 10
+    {VK_OEM_MINUS, '_'}, // 45
+    {VK_SPACE, ' '},     // 32
+    {VK_RETURN, '\n'},   // 10
     {VK_ESCAPE, 27},
     {VK_BACK, '\b'}, // 8
     {VK_UP, 'w'},
@@ -222,103 +223,11 @@ int InputHandler::waitKeyDown()
 }
 #endif
 
-// std::string InputHandler::getCmd()
-// {
-//     std::stringstream ss;
-//     ss.str("");
-//     ss.clear();
-
-//     while (1)
-//     {
-//         int ch = waitKeyDown();
-//         // Enter
-//         if (ch == 10)
-//         {
-//             std::string cmd = ss.str();
-//             return cmd;
-//         }
-
-//         // Backspace
-//         else if (ch == 8)
-//         {
-//             std::string content = ss.str();
-//             content.pop_back();
-//             ss.str(content);
-//             ss.clear();
-//             ss << content;
-//             continue;
-//         }
-
-//         // Unexpect input
-//         else if (ch == 0)
-//         {
-//             continue;
-//         }
-
-//         else
-//             // 将ss实时显示在屏幕上
-//             // 需要确定接口...
-//             ss << char(ch);
-//     }
-// }
-
-std::string InputHandler::getCmd()
-{
-    std::string currentInput;
-
-    std::cout << "Enter command: ";
-    std::cout.flush();
-
-    while (true)
-    {
-        int ch = waitKeyDown();
-
-        // Enter - 确认输入
-        if (ch == 10)
-        {
-            std::cout << std::endl; // 换行
-            return currentInput;
-        }
-        // Backspace
-        else if (ch == 8)
-        {
-            if (!currentInput.empty())
-            {
-                currentInput.pop_back();
-                // 退格：移动光标，输出空格，再退格
-                std::cout << "\b \b";
-                std::cout.flush();
-            }
-        }
-        // ESC - 取消输入
-        else if (ch == 27)
-        {
-            std::cout << "^[Cancelled" << std::endl;
-            return "";
-        }
-        // 普通可打印字符
-        else if (ch >= 32 && ch <= 126)
-        {
-            char character = static_cast<char>(ch);
-            currentInput += character;
-            std::cout << character;
-            std::cout.flush();
-        }
-        // 方向键（wsad）也作为可输入字符
-        else if (ch == 'w' || ch == 'a' || ch == 's' || ch == 'd')
-        {
-            currentInput += static_cast<char>(ch);
-            std::cout << static_cast<char>(ch);
-            std::cout.flush();
-        }
-    }
-}
-
 int main()
 {
     InputHandler inputHandler;
-    int key = -1;
-    std::cout << "Press a key (0-9, a-z, Esc to quit): ";
+    // int key = -1;
+    // std::cout << "Press a key (0-9, a-z, Esc to quit): ";
     // while (1)
     // {
     //     key = inputHandler.waitKeyDown();
@@ -336,7 +245,55 @@ int main()
     //         std::cout << "\nFailed to get key press.\n";
     //     }
     // }
-    std::string cmd = inputHandler.getCmd();
+    // std::string cmd = inputHandler.getCmd();
+
+    std::stringstream ss;
+    ss.str("");
+    ss.clear();
+    std::string cmd = "";
+    int ch = -1;
+
+    while (1)
+    {
+        ch = inputHandler.waitKeyDown();
+        std::cout << "ch= " << ch << std::endl;
+        // Enter
+        if (ch == 10)
+        {
+            cmd = ss.str();
+            break;
+        }
+
+        // Backspace
+        else if (ch == 8)
+        {
+            std::string content = ss.str();
+            if (content.size() > 0)
+            {
+                content.pop_back();
+            }
+            ss.str("");
+            ss.clear();
+            ss << content;
+            std::cout << ss.str() << std::endl;
+            continue;
+        }
+
+        // Unexpect input
+        else if (ch == 0)
+        {
+            continue;
+        }
+
+        else
+        {
+            ss << char(ch);
+        }
+        // 这里将处理好的ss传给View
+        std::cout << ss.str() << std::endl;
+    }
+    // 处理cmd
+
     std::cout << "You entered: " << cmd << std::endl;
     return 0;
 }

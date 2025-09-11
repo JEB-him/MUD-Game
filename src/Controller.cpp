@@ -28,6 +28,7 @@ Message Controller::init()
     protagonist = std::make_shared<Protagonist>();
     backpack = std::make_shared<Backpack>();
     map = std::make_shared<Map>();
+    input = std::make_shared<InputHandler>();
 
     Message msg("Init Success!", 0);
     log(LogLevel::INFO, msg.msg);
@@ -85,11 +86,12 @@ Message Controller::save()
     return msg;
 }
 
-Message Controller::getCmd()
+Message getEvent(EventType &event_type)
 {
     std::stringstream ss;
     ss.str("");
     ss.clear();
+    std::string cmd = "";
 
     while (1)
     {
@@ -97,9 +99,8 @@ Message Controller::getCmd()
         // Enter
         if (ch == 10)
         {
-            std::string cmd = ss.str();
-            handleCmd(cmd);
-            return ("Successfully sent and handled command: " + cmd, 0);
+            cmd = ss.str();
+            break;
         }
 
         // Backspace
@@ -110,8 +111,6 @@ Message Controller::getCmd()
             ss.str(content);
             ss.clear();
             ss << content;
-            // 将ss实时显示在屏幕上
-            // 需要确定接口...
             continue;
         }
 
@@ -122,11 +121,42 @@ Message Controller::getCmd()
         }
 
         else
-            // 将ss实时显示在屏幕上
-            // 需要确定接口...
-            ss << ch;
+        {
+            ss << char(ch);
+        }
+        // 这里将处理好的ss传给View
     }
-    return Message("No command input!", -1);
+    // 处理cmd
+    switch (cmd)
+    {
+    case "move":
+        event_type = EventType::MOVE;
+        break;
+    case "ac_npc", case "ac npc":
+        event_type = EventType::AC_NPC;
+        break;
+    case "ac_inst", case "ac inst":
+        event_type = EventType::AC_INST;
+        break;
+    case "open pack", case "open_pack":
+        event_type = EventType::OPEN_PACK;
+        break;
+    case "refresh":
+        event_type = EventType::REFRESH;
+        break;
+    case "status":
+        event_type = EventType::STATUS;
+        break;
+    case "jump":
+        event_type = EventType::JUMP;
+        break;
+    case "tp":
+        event_type = EventType::TP;
+        break;
+    }
+
+    Message msg("Command: " + cmd, 0);
+    return msg;
 }
 
 Message handleCmd(std::string cmd)

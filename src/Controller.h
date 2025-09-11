@@ -49,10 +49,10 @@ public:
         AC_INST,   ///< 与器械互动
         OPEN_PACK, ///< 打开背包
         REFRESH,   ///< 刷新地图
+        STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
         TP,        ///< 传送到 NPC 附近
-        QUIT,      ///< 退出游戏
-        NONE
+        QUIT       ///< 退出游戏
     };
 
     /**
@@ -90,6 +90,16 @@ public:
      */
     int run();
 
+    // Model 类的智能指针
+    std::shared_ptr<Map> map;
+    std::shared_ptr<Protagonist> protagonist;
+    std::shared_ptr<NPC> npc;
+    std::shared_ptr<Backpack> backpack;
+    std::shared_ptr<InputHandler> input;
+
+    // TODO 补充自己的智能指针
+    // 要求： 若该类唯一，则可使用智能指针管理
+
 private:
     // 项目根目录
     std::filesystem::path root_dir;
@@ -106,11 +116,6 @@ private:
     std::string log_dir;
     // 日志等级
     LogLevel level;
-
-    // Model 类的智能指针
-    std::shared_ptr<Map> map;
-    // TODO 补充自己的智能指针
-    // 要求： 若该类唯一，则可使用智能指针管理
 
     // 构造函数
     Controller(const LogLevel &level, const std::string &log_dir, const std::string root_dir);
@@ -147,11 +152,6 @@ private:
      * @param backpack 背包信息
      */
     Message Controller::save();
-
-    /**
-     * @brief 获取按键响应，并设置当前游戏状态
-     */
-    void InputHandler();
 
     std::filesystem::path log_dir;
     // 日志等级

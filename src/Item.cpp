@@ -71,6 +71,13 @@
  }
 
  /**
+ * @brief Item类的使用虚函数、装备/卸下虚函数，抛出异常
+ * TODO 抛出异常
+ */
+void Item::use(Protagonist& protagonist){ }
+void Item::equipAndUnequip(Protagonist& protagonist){ }
+
+ /**
  * @brief Consumable类构造函数
  */
  Consumable::Consumable(const string& name, const string& description, float value) :
@@ -292,7 +299,7 @@
   void HealthItem::use(Protagonist& protagonist) {
      // protagonist.resetHealth(protagonist.getHealth() + health_restore);
       /**
-      * TODO:此处需要暂停健康值损耗一段时间，具体实现需要考虑健康值损耗逻辑和时间（计时）逻辑
+      * TODO:此处需要暂停健康值损耗一段时间，具体实现需要考虑健康值损耗逻辑和时间（计时）逻辑 \n
       *       待上述逻辑完备后再写
       */
   }

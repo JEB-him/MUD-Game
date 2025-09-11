@@ -189,6 +189,18 @@ BasicValue::HealthState Protagonist::getHealthState(std::string &outStateDesc) c
     }
 }
 
+// 获取当前场景
+BasicValue::Scene Protagonist::getCurrentScene() const
+{
+    return current_scene;
+}
+
+// 获取当前位置
+Position Protagonist::getPosition() const
+{
+    return pos;
+}
+
 // 通用属性修改接口
 Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd)
 {
@@ -248,38 +260,21 @@ Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool 
     }
 }
 
-// 序列化主角数据
-std::string Protagonist::serialize() const
+// 设置主角的当前位置
+Message Protagonist::setPosition(const Position &position)
 {
-    std::stringstream os;
-    {
-        cereal::BinaryOutputArchive oarchive(os);
-        const_cast<Protagonist *>(this)->serialize(oarchive);
-    }
-    return os.str();
+    pos = position;
+    return Message("位置设置成功", 0);
 }
 
-// 反序列化主角数据 (供Controller从存档文件恢复)
-Message Protagonist::deserialize(const std::string &data)
+// 设置主角的当前场景
+Message Protagonist::setCurrentScene(BasicValue::Scene scene)
 {
-    try
-    {
-        std::stringstream is(data);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            const_cast<Protagonist *>(this)->serialize(iarchive);
-        }
-        return Message("反序列化成功", 0);
-    }
-    catch (const std::exception &e)
-    {
-        return Message(std::string("反序列化失败: ") + e.what(), -1);
-    }
-    catch (...)
-    {
-        return Message("反序列化时发生未知错误", -1);
-    }
+    current_scene = scene;
+    return Message("场景设置成功", 0);
 }
+
+
 
 bool Protagonist::isValidAttr(BasicValue::ProtagonistAttr attr, int val) const
 {
@@ -327,7 +322,6 @@ BasicValue::HealthState Protagonist::syncHealthState() const
         return BasicValue::HealthState::DEAD;
     }
 }
-
 // 校验姓名是否合法
 bool Protagonist::isValidName(const std::string &name)
 {
@@ -336,9 +330,41 @@ bool Protagonist::isValidName(const std::string &name)
     // 检查是否包含任何非法字符
     return name.find_first_of(invalidChars) == std::string::npos;
 };
-
-Message Protagonist::setName(std::string name)
+// 设置主角的姓名，仅供初始化
+Message Protagonist::setName(std::string &name)
 {
+    if (!isValidName(name))
+    {
+        return Message("姓名包含非法字符", -1);
+    }
     m_name = name;
     return Message("姓名修改成功", 0);
+}
+
+// 获取当前游戏内时间
+int Protagonist::getGameTime() const
+{
+    return game_time;
+}
+
+// 增加游戏内时间,仅用于初始化
+Message Protagonist::setGameTime(int time)
+{
+    if (time < 0)
+    {
+        return Message("游戏内时间不能为负", -1);
+    }
+    game_time = time;
+    return Message("游戏内时间设置成功", 0);
+}
+
+// 增加游戏内时间
+Message Protagonist::addGameTime(int time)
+{
+    if (time <= 0)
+    {
+        return Message("增加的时间必须为正数", -1);
+    }
+    game_time += time;
+    return Message("游戏内时间增加成功", 0);
 }

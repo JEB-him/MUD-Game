@@ -15,7 +15,7 @@ Protagonist::Protagonist(const std::string &protagonistId, const std::string &na
 {
     if (!isValidName(name))
     {
-        return Message("姓名包含非法字符", -1);
+        throw std::invalid_argument("姓名包含非法字符");
     }
     if (jsonReader().status == 0)
         ; ///< 读取成功
@@ -362,7 +362,7 @@ bool Protagonist::isValidName(const std::string &name)
     return name.find_first_of(invalidChars) == std::string::npos;
 };
 // 设置主角的姓名，仅供初始化
-Message Protagonist::setName(std::string name)
+Message Protagonist::setName(std::string &name)
 {
     if (!isValidName(name))
     {

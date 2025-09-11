@@ -153,10 +153,10 @@ public:
     Message updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd = true);
 
     /**
-     * @brief 设置主角姓名（仅供初始化）
+     * @brief 设置主角姓名
      * @param name 新姓名
      */
-    Message setName(const std::string &name);
+    Message setName( std::string &name);
 
     /**
      * @brief 设置主角游戏内时间（仅供初始化）
@@ -170,6 +170,18 @@ public:
      * @return Message 操作结果：status=0（成功）/-1（time非正数）；msg=结果描述
      */
     Message addGameTime(int time);
+
+    /**
+     * @brief 设置主角的当前位置
+     * @param position 新的位置坐标
+     */
+    Message setPosition(const Position &position);
+
+    /**
+     * @brief 设置主角的当前场景
+     * @param scene 新的场景
+     */
+    Message setCurrentScene(BasicValue::Scene scene);
 
     // -------------------------- 3. 序列化/反序列化接口（供存档系统） --------------------------
     /**
@@ -205,7 +217,10 @@ public:
              CEREAL_NVP(intelArts_boost_rate),
              CEREAL_NVP(learning_time_reduction_rate),
              CEREAL_NVP(learning_health_preservation_rate),
-             CEREAL_NVP(isInjured));
+             CEREAL_NVP(isInjured),
+             CEREAL_NVP(game_time),
+             CEREAL_NVP(pos),
+             CEREAL_NVP(current_scene));
     }
 
     /**
@@ -219,8 +234,8 @@ public:
 
 private:
     // -------------------------- 核心成员变量 --------------------------
-    const std::string m_protagonistId = ""; ///< 主角唯一ID（不可修改）已经移除const
-    const std::string m_name = "";          ///< 主角姓名（不可修改） 已经移除const
+    std::string m_protagonistId = ""; ///< 主角唯一ID（不可修改）已经移除const
+    std::string m_name = "";          ///< 主角姓名（不可修改） 已经移除const
     // 基础属性（需求定义，初始值按需求设定）
     int m_intelSci = 0;   ///< 智力-理（影响工作效率）
     int m_intelArts = 0;  ///< 智力-文（影响NPC交流）

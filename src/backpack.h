@@ -35,7 +35,7 @@ public:
 
 	/**
 	 * @brief 背包类构造函数
-	 * @details vector初始容量设定为10，容量超限则扩容10倍
+	 * @details vector初始容量设定为0，容量超限则扩容10倍
 	 */
 	Backpack();
 

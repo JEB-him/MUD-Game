@@ -10,9 +10,9 @@
 /**
  * @brief 背包类构造函数
  * @note item_creator默认打开存储物品数据的json文件
- * @note 初始容量设定为10（，vector的push方法自动扩容）
+ * @note 初始容量设定为0（，vector的push方法自动扩容）
  */
-Backpack::Backpack():item_creator(".config/Item.json"), backpack_items(10){ }
+Backpack::Backpack():item_creator(), backpack_items(0){ }
 
 /**
  * @brief 获取背包管理物品智能指针的vector数组
@@ -28,7 +28,6 @@ vector<unique_ptr<Item>>& Backpack::getBackpack‌Items() {
  * @details 逻辑：利用ItemCreator的方法创造目标物品对象，存入backpack_items中
  */
 void Backpack::addItem(string item_name) {
-    cout<< item_name <<endl;
     backpack_items.push_back(item_creator.createItem(item_name));
 }
  
@@ -46,12 +45,14 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
     else{
         int index = order - 1;
             if (backpack_items[index].get()->getIsConsumable()) {
-                backpack_items[index].get()->use(protagonist);
+                //TODO
+                /* backpack_items[index].get()->use(protagonist); */
                 backpack_items[index].reset();
                 backpack_items.erase(backpack_items.begin() + index);
             }
             else {
-                backpack_items[index].get()->equipAndUnequip(protagonist);
+                //TODO 
+               // backpack_items[index].get()->equipAndUnequip(protagonist);
             }
     }
 }

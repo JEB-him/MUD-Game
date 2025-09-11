@@ -10,15 +10,24 @@
 TEST_CASE("Backpack Construction", "[backpack]") {
     Protagonist protagonist("114514", "小王");
     Backpack backpack;
-    backpack.addItem("高等数学");
-    backpack.addItem("篮球");
-    backpack.addItem("护眼台灯");
-    backpack.addItem("营养餐");
-    backpack.addItem("牛奶");
-    backpack.addItem("维生素");
+    backpack.addItem("advanced_mathematics");
 
     SECTION("Default constructor creates empty backpack") {
-        REQUIRE(backpack.getBackpack‌Items().size() == 6);
-        REQUIRE(backpack.getBackpack‌Items()[0].get()->getName() == "高等数学");
+        backpack.addItem("eye_protector_lamps");
+        CHECK(backpack.getBackpack‌Items().size() == 2);
+        backpack.addItem("nutritious_meals");
+        CHECK(backpack.getBackpack‌Items().size() == 3);
+        backpack.addItem("milk");
+        CHECK(backpack.getBackpack‌Items().size() == 4);
+        backpack.addItem("vitamins");
+        REQUIRE(backpack.getBackpack‌Items().size() == 5);
+        cout << backpack.getBackpack‌Items()[0].get()->getName();
+        cout << backpack.getBackpack‌Items()[0].get()->getDescription();
+        CHECK(backpack.getBackpack‌Items()[0].get()->getValue() == 30);
+        REQUIRE(backpack.getBackpack‌Items()[0].get()->getValue() == 30);   
+        REQUIRE(backpack.getBackpack‌Items()[0].get()->getIsConsumable() == false);
+
+        backpack.useFunctionOfItem(4, protagonist);
+        CHECK(backpack.getBackpack‌Items().size() == 4);
     }
 }

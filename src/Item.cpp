@@ -275,10 +275,10 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
   * @brief 初始化json文件读取
   * @param file_name 包含所有物品参数信息的json文件的名字（字符串）
   */
- ItemCreator::ItemCreator(string file_name) {
+ ItemCreator::ItemCreator() {
      // TODO need update
      std::filesystem::path file_path(ROOT_DIR);
-     file_path = file_path / file_name;
+     file_path = file_path / ".config/Item.json";
 
      config_file_item.open(file_path);
      if (!config_file_item.is_open()) {

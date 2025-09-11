@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <iomanip>
+#include <vector>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -91,6 +93,8 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 {}
             };
 
+
+
             // 检查options字段
             if (!nodeData.contains("options") || !nodeData["options"].is_array()) {
                 throw std::runtime_error("节点" + nodeId + "的options字段缺失或不是数组");
@@ -121,13 +125,24 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                     nextNode = typeStr + "_" + nextNode;
                 }
 
-                // if (option.contains("condition")) {
-                //     node.options.back().condition = option["condition"];
-                // }
-                // if (option.contains("effect")) {
-                //     node.options.back().effect = option["effect"];
-                // }
-                node.options.push_back({text, nextNode});
+                // 解析condition字段
+                std::vector<Condition> conditions;
+                if (option.contains("condition") && option["condition"].is_object()) {
+                    for (auto& [key, value] : option["condition"].items()) {
+                        conditions.push_back({key, value.get<std::string>()});
+                    }
+                }
+
+                node.options.push_back(InteractionOption{text, nextNode, conditions});
+
+                // 解析effect字段
+                if (nodeData.contains("effect") && nodeData["effect"].is_object()) {
+                    for (auto& [key, value] : nodeData["effect"].items()) {
+                        node.effect.push_back({key, value.get<std::string>()});
+                    }
+                }
+
+                
             }
 
             std::string prefixedId = typeStr + "_" + nodeId;
@@ -150,6 +165,8 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
  * @throws std::runtime_error 交互树未初始化、未设置初始交互节点、找不到交互节点
  */
 void NPC::startInteraction() {
+
+    // int playerMoney = 10; //Protagonist::getInstance().getMoney();  假设主角当前金钱为10，实际应从Protagonist对象获取 
     
     if (interactionTree.empty()) {
         throw std::runtime_error("交互树未初始化");
@@ -172,11 +189,65 @@ void NPC::startInteraction() {
     }
 
     std::cout << node.prompt << std::endl;
+
+//     // 过滤并显示可用选项
+//     std::vector<int> availableOptions;
+//     for (size_t i = 0; i < node.options.size(); ++i) {
+//         auto& option = node.options[i];
+        
+//         // 检查条件是否满足
+//         bool conditionMet = true;
+//         if (!option.condition.empty()) {
+//             // 检查金钱条件
+//             if (option.condition.contains("MONEY")) {
+//                 int requiredMoney = option.condition["MONEY"];
+//                 if (playerMoney < requiredMoney) {
+//                     conditionMet = false;
+//                 }
+//             }
+//             // 可以添加其他条件检查，如物品等
+//         }
+        
+//         if (conditionMet) {
+//             std::cout << availableOptions.size() << ": " << option.text << std::endl;
+//             availableOptions.push_back(i);
+//         } else {
+//             // 显示不可用的选项（灰色或带条件提示）
+//             std::cout << availableOptions.size() << ": [条件不足] " << option.text;
+// // 显示具体条件要求
+//             if (option.condition.contains("MONEY")) {
+//                 int requiredMoney = option.condition["MONEY"];
+//                 std::cout << " (需要 " << requiredMoney << " 金钱)";
+//             }
+            
+//             std::cout << std::endl;
+//             availableOptions.push_back(-1); // 使用-1标记不可用选项
+//         }
+//     }
+    
+//     if (availableOptions.empty()) {
+//         std::cout << "没有可用的选项。" << std::endl;
+//         return;
+//     }
+
     for (size_t i = 0; i < node.options.size(); ++i) {
         std::cout << i << ": " << node.options[i].text << std::endl;
+        // if (node.options[i].conditions.size() > 0) {
+        //     std::cout << "需要 " << node.options[i].conditions[0].value << " 金钱" << std::endl;
+        // }
+        // 解析condition字段
+        // if (optionData.contains("condition")) {
+        //     for (auto& [key, value] : optionData["condition"].items()) {
+        //         option.condition[key] = std::stoi(value.get<std::string>()); // 字符串转int
+        //     }
+        // }
     }
 
+    // std::cout << node.options[0].condition["MONEY"] << std::endl;
+
     int choice = -1;
+
+    next0:
     while (true) {
         std::cout << "请输入你的选择：";
         std::string input;
@@ -193,40 +264,12 @@ void NPC::startInteraction() {
 
             // 检查选项范围
             if (choice >= 0 && choice < static_cast<int>(node.options.size())) {
+                
 
-            //     int my_money = static_cast<int>(Protagonist::getBaseAttrs().at(BasicValue::ProtagonistAttr::MONEY)); // 获取金币数
-            //     std::cout << "你的金币数为：" << my_money << std::endl;
-            //     // 处理选项条件
-            //     if (node.options[choice].condition.contains("MONEY")) {
-            //         int requiredMoney = static_cast<int>(node.options[choice].condition["MONEY"].get<int>());
-            //         if (my_money < requiredMoney) {
-            //             std::cout << "你的金币不足。" << std::endl;
-            //             break; // 退出
-            //         }
-            //     }
-
-
-            // }else if(node.contains("effect")){
-                // 处理选项效果
-                // 假设我们有一个Protagonist对象，例如叫做player（如何获取这个player取决于你的上下文）
-                // 你可能需要将player传递到当前函数中，或者通过其他方式获取
-
-                // if (node.effect->contains("INTEL_ARTS")) {
-                //     int effect = static_cast<int>(node.effect->at("INTEL_ARTS").get<int>());
-                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::INTEL_ARTS, effect, true);
-                // } else if (node.effect->contains("INTEL_SCI")) {
-                //     int effect = static_cast<int>(node.effect->at("INTEL_SCI").get<int>());
-                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::INTEL_SCI, effect, true);
-                // } else if (node.effect->contains("STRENGTH")) {
-                //     int effect = static_cast<int>(node.effect->at("STRENGTH").get<int>());
-                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::STRENGTH, effect, true);
-                // } else if (node.effect->contains("MONEY")) {
-                //     int effect = static_cast<int>(node.effect->at("MONEY").get<int>());
-                //     m_player.updateAttr()(BasicValue::ProtagonistAttr::MONEY, effect, true);
-                // }
-            // }
-                        
-            break;}
+                break; // 有效输入，退出循环
+            } else {
+                std::cout << "选择超出范围，请输入有效选项编号" << std::endl;
+            }
         }
         catch (const std::exception&) {
             std::cout << "无效输入，请输入数字选项" << std::endl;
@@ -235,6 +278,37 @@ void NPC::startInteraction() {
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
+
+    if (node.options[choice].conditions.size() > 0) {
+        if (node.options[choice].conditions[0].type == "MONEY") {
+            int requiredMoney = std::stoi(node.options[choice].conditions[0].value);
+            std::cout << "需要 " << requiredMoney << " 金钱, 当前金钱: " << playerMoney << std::endl;
+            if (playerMoney < requiredMoney) {
+                std::cout << "金钱不足，无法完成交易" << std::endl;
+                goto next0;
+                return;
+            } else {
+                // playerMoney -= requiredMoney;
+                std::cout << "交易成功，当前金钱: " << playerMoney << std::endl;
+                if (node.effect.size() > 0) {
+                    // 执行效果
+                    for (auto& [type, value] : node.effect) {
+                        int changeValue = std::stoi(value);
+    
+                        if (type == "STRENGTH") {
+                            std::cout << "体力" << (changeValue > 0 ? "增加" : "减少") 
+                                      << std::abs(changeValue) << "点" << std::endl;
+                        } else if (type == "MONEY") {
+                            std::cout << "金钱" << (changeValue > 0 ? "获得" : "消耗") 
+                                      << std::abs(changeValue) << "元" << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    
 
     handleOptionSelection(choice);
 }
@@ -253,4 +327,6 @@ void NPC::handleOptionSelection(int optionIndex) {
     } else {
         throw std::runtime_error("选项索引超出范围");
     }
+
+    
 }

@@ -29,17 +29,17 @@ TEST_CASE("npc test", "[npc][test]") {
     // Librarian.loadInteractionConfig(NPCType::LIBRARIAN, "tests/unit/NPCs.json");
     // Librarian.startInteraction();
 
-    // NPC CanteenStaff("食堂工作人员", 1007);
-    // CanteenStaff.loadInteractionConfig(NPCType::CANTEEN_STAFF, "tests/unit/NPCs.json");
-    // CanteenStaff.startInteraction();
+    NPC CanteenStaff("食堂工作人员", 1007);
+    CanteenStaff.loadInteractionConfig(NPCType::CANTEEN_STAFF, "tests/unit/NPCs.json");
+    CanteenStaff.startInteraction();
 
     // NPC Professor("教授", 1008);
     // Professor.loadInteractionConfig(NPCType::PROFESSOR, "tests/unit/NPCs.json");
     // Professor.startInteraction();
 
-    NPC Coach("教练", 1009);
-    Coach.loadInteractionConfig(NPCType::COACH, "tests/unit/NPCs.json");
-    Coach.startInteraction();
+    // NPC Coach("教练", 1009);
+    // Coach.loadInteractionConfig(NPCType::COACH, "tests/unit/NPCs.json");
+    // Coach.startInteraction();
 
     // // Important!!! 这种表达式必须使用一个大括号括起来
     // REQUIRE((SeniorStudent.getTitle() == "aaa"));

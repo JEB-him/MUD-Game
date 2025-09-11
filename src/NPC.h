@@ -24,17 +24,27 @@ public:
     void handleOptionSelection(int optionIndex);
 
 private:
+
+    struct Effect {
+        std::string type;
+        std::string value;
+    };
+
+    struct Condition {
+        std::string type;
+        std::string value;
+    };
     
     struct InteractionOption {
         std::string text;
         std::string next;
-        std::unordered_map<std::string, nlohmann::json> condition;
-        std::unordered_map<std::string, nlohmann::json> effect;
+        std::vector<Condition> conditions;
     };
 
     struct InteractionNode {
         std::string prompt;
         std::vector<InteractionOption> options;
+        std::vector<Effect> effect;
     };
 
     std::string name;
@@ -42,4 +52,6 @@ private:
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;
     std::unordered_map<std::string, std::function<void()>> interactionCallbacks;
+    int playerMoney = 20; // 假设主角当前金钱为10，实际应从Protagonist对象获取
 };
+

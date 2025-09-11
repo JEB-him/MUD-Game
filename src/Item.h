@@ -224,7 +224,7 @@ private:
 class ItemCreator {
 public:
     ItemCreator(string file_name);
-    ~ItemCreator();
+    ~ItemCreator() = default;
     unique_ptr<Item> createItem(string item_name);
 private:
     ifstream config_file_item;

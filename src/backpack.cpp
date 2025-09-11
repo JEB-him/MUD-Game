@@ -39,8 +39,8 @@ void Backpack::addItem(string item_name) {
  * @details 逻辑：消耗品在调用此方法后，释放指针，然后序号在此物品之后的物品指针均前移一个位置
  */
 void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
-    if (order > backpack_items.size()) {
-        /* TODO 抛出异常*/
+    if (order > backpack_items.size() || order < 1) {
+        throw std::runtime_error("输入了无效序号。");
     }
     else{
         int index = order - 1;

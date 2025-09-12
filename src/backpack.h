@@ -17,8 +17,10 @@
 #include<vector>
 #include"Item.h"
 
+using std::string;
 using std::cout;
 using std::endl;
+using std::unique_ptr;
 using std::make_unique;
 using std::move;
 using std::vector;
@@ -30,7 +32,6 @@ using std::vector;
  */
 class Backpack {
 public:
-	
 	/**
 	 * @brief 背包类构造函数
 	 * @details vector初始容量设定为0，容量超限则扩容10倍
@@ -64,16 +65,8 @@ public:
 	 */
 	void useFunctionOfItem(int order, Protagonist& protagonist);
 
-	/**
-	 * @brief 背包-序列化函数
-	 */
-	template <class Archive>
-	void serialize(Archive &ar)
-	{
-		ar(CEREAL_NVP(backpack_items));
-	}
-
 private:
 	ItemCreator item_creator;
 	vector<unique_ptr<Item>> backpack_items;
+	stringstream ss;
 };

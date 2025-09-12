@@ -94,7 +94,7 @@
     "strength_restore": 8,
     "health_restore": 0,
     "time_cooldown": 4,
-    "time_last_used":10,
+    "have_cd": true,
     "class": "food"
   },
   "nutritious_meals": {
@@ -104,7 +104,7 @@
     "strength_restore": 40,
     "health_restore": 30,
     "time_cooldown": 0,
-    "time_last_used":0,
+    "have_cd": false,
     "class": "food"
   },
   "energy_drink": {
@@ -114,21 +114,19 @@
     "intel_boost": 5,
     "intel_boost_rate": 1.1,
     "duration": 4,
-    "have_abuse_punish": true,
-    "is_used_today": false,
     "health_reduce": 5,
+    "have_abuse_punish": true,
     "class": "learning_aid"
   },
-  "milk": {
+  "": {
     "name": "牛奶",
     "description": "提高学习效率，下次学习效果提升",
     "value": 8,
     "intel_boost": 3,
     "intel_boost_rate": 1.15,
     "duration": 2,
-    "have_abuse_punish": false,
-    "is_used_today":false,
     "health_reduce": 0,
+    "have_abuse_punish": false,
     "class": "learning_aid"
   },
   "first_aid_kit": {
@@ -137,14 +135,18 @@
     "value": 30,
     "health_restore": 40,
     "duration": 0,
+    "time_cooldown": 20,
+    "have_cd": true,
     "class": "health_item"
   },
   "vitamins": {
     "name": "维生素",
     "description": "一段时间内健康不会下降",
     "value": 25,
-    "health_restore": 10,
+    "health_restore": 0,
     "duration": 24,
+    "time_cooldown": 0,
+    "have_cd": false,
     "class": "health_item"
   }
 }

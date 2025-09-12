@@ -34,18 +34,20 @@
 #include <memory>
 #include <fstream>
 #include <map>
+#include<sstream>
 #include "json.hpp"
 #include "Protagonist.h"
 
-using nlohmann::json;
+using std::string;
 using std::cout;
 using std::endl;
-using std::ifstream;
-using std::make_unique;
-using std::map;
-using std::move;
-using std::string;
 using std::unique_ptr;
+using std::make_unique;
+using std::move;
+using nlohmann::json;
+using std::ifstream;
+using std::map;
+using std::stringstream;
 
 /**
  * @brief 物品类
@@ -67,6 +69,10 @@ public:
     string getDescription() const;
     int getValue() const;
     bool getIsConsumable() const;
+    virtual bool isOnCD(Protagonist& protagonist)const;
+
+    virtual void use(Protagonist& protagonist);
+    virtual void equipAndUnequip(Protagonist& protagonist);
 
     virtual void use(Protagonist& protagonist);
     virtual void equipAndUnequip(Protagonist& protagonist);
@@ -76,6 +82,7 @@ protected:
     string description;
     float value;
     bool is_consumable;
+    stringstream ss;
 };
 
 /**
@@ -158,25 +165,19 @@ private:
  * @param strength_restore 体力恢复值（压缩饼干、营养餐）
  * @param health_restore 健康恢复值（营养餐）
  * @param time_cooldown 冷却时间（压缩饼干）
- * @param time_last_used 上次使用时间（压缩饼干）
  * @note time_last_used的变量类型需要和游戏的时间流逝设计对齐
  * */
 class Food : public Consumable
 {
 public:
-    Food(const string &name, const string &description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used);
-    void use(Protagonist &protagonist) override;
-
-    /**
-     * @brief 检查是否在冷却中
-     */
-    bool isOnCooldown() const;
-
+    Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, bool have_cd);
+    bool isOnCD(Protagonist& protagonist)const override;
+    void use(Protagonist& protagonist) override;
 private:
     float strength_restore;
     float health_restore;
     float time_cooldown;
-    float time_last_used;
+    bool have_cd;
 };
 
 /**
@@ -191,15 +192,13 @@ private:
 class LearningAid : public Consumable
 {
 public:
-    LearningAid(const string &name, const string &description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, bool is_used_today, float health_reduce);
-    void use(Protagonist &protagonist) override;
-
+    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce);
+    void use(Protagonist& protagonist) override;
 private:
     float intel_boost;
     float intel_boost_rate;
     float duration;
     bool have_abuse_punish;
-    bool is_used_today;
     float health_reduce;
 };
 
@@ -211,12 +210,14 @@ private:
 class HealthItem : public Consumable
 {
 public:
-    HealthItem(const string &name, const string &description, float value, float health_restore, float duration);
-    void use(Protagonist &protagonist) override;
-
+    HealthItem(const string& name, const string& description, float value, float health_restore, float duration, float time_cooldown, bool have_cd);
+    bool isOnCD(Protagonist& protagonist)const override;
+    void use(Protagonist& protagonist) override;
 private:
     float health_restore;
     float duration;
+    float time_cooldown;
+    bool have_cd;
 };
 
 /**

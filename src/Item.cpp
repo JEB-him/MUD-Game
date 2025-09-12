@@ -11,7 +11,6 @@
   *          消耗品的use方法未实现、用具equipAndUnequip方法未适配主角类接口的改变 \n
   * */
 
-#pragma once
 #include"Item.h"
 #include<filesystem>
 
@@ -71,10 +70,12 @@
 
  /**
  * @brief Item类的使用虚函数、装备/卸下虚函数，抛出异常
- * TODO 抛出异常
  */
-void Item::use(Protagonist& protagonist){ }
-void Item::equipAndUnequip(Protagonist& protagonist){ }
+ bool Item::isOnCD(Protagonist& protagonist)const {
+     return false;
+}
+ void Item::use(Protagonist& protagonist){ }
+ void Item::equipAndUnequip(Protagonist& protagonist){ }
 
  /**
  * @brief Consumable类构造函数
@@ -106,47 +107,56 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
  * @note  item.getIsConsumable() == false时可调用该接口
  */
   void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
+      /**
+         * @note 装备前判断是否未装备
+         */
+      if (!equip_state) {
 
-      ///**
-      //* @brief 装备前判断是否未装备
-      //*/
-      //if (!equip_state) {
+          /**
+          * @note 装备状态：已装备
+          */
+          equip_state = true;
 
-      //    /**
-      //    * @brief 装备状态：已装备
-      //    */
-      //    equip_state = true;
+          /**
+          * @note 根据学习资料的文理类型，提高对应的智力比例增量
+          */
+          if (is_science) {
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
+          }
+          else {
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
+          }
 
-      //    /**
-      //    * @brief 根据学习资料的文理类型，提高对应的智力比例增量
-      //    * TODO: 主角类接口发生了修改，未作适配
-      //    */
-      //    if (is_science) {
-      //        protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() + intel_boost_rate);
-      //    }
-      //    else {
-      //        protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() + intel_boost_rate);
-      //    }
+          /**
+          * @note feedback
+          * TODO view
+          */
+          ss << "\"" << name << "\"" << "已装备。";
+          //view->gameoutput(ss.str());
+          ss.str("");
+      }
+      else {
 
-      //    /**
-      //    * @brief feedback，后续可用View的方法替换
-      //    */
-      //    cout << "\"" << name << "\"" << "已装备。" << endl;
-      //}
-      //else {
-      //    /**
-      //    * @brief 与上一个scope相反
-      //    * TODO: 主角类接口发生了修改，未作适配
-      //    */
-      //    equip_state = false;
-      //    if (is_science) {
-      //        protagonist.resetIntelSciBoostRate(protagonist.getIntelSciBoostRate() - intel_boost_rate);
-      //    }
-      //    else {
-      //        protagonist.resetIntelArtsBoostRate(protagonist.getIntelArtsBoostRate() - intel_boost_rate);
-      //    }
-      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
-      //}
+          /**
+          * @note 与上一个scope相反
+          */
+
+          equip_state = false;
+          if (is_science) {
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, -intel_boost_rate, true);
+          }
+          else {
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
+          }
+
+          /**
+          * @note feedback
+          * TODO view
+          */
+          ss << "\"" << name << "\"" << "已取消装备。";
+          //view->gameoutput(ss.str());
+          ss.str("");
+      }
   }
 
 
@@ -161,110 +171,207 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
  * @note  item.getIsConsumable() == false时存在该接口
  */
   void StudyAid::equipAndUnequip(Protagonist& protagonist) {
-      //if (!equip_state) {
+      if (!equip_state) {
 
-      //    /**
-      //    * @brief 装备状态：已装备
-      //    */
-      //    equip_state = true;
+          /**
+          * @note 装备状态：已装备
+          */
+          equip_state = true;
 
-      //    /**
-      //    * @brief 学习消耗时间和健康，基础消耗量要乘以一个rate = 1,这里把这个rate降低至小于1。
-      //    * TODO: 主角类接口发生了修改，未作适配
-      //    */
-      //    protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() - time_reduction_rate);
-      //    protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() - health_preservation_rate);
+          /**
+          * @note 学习消耗时间和健康，基础消耗量要乘以一个rate = 1,这里把这个rate降低至小于1。
+          * TODO: 主角类接口发生了修改，未作适配
+          */
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, -time_reduction_rate, true);
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, -health_preservation_rate, true);
 
-      //    /**
-      //    * @brief feedback，后续可用View的方法替换
-      //    */
-      //    cout << "\"" << name << "\"" << "已装备。" << endl;
-      //}
-      //else {
+          /**
+          * @note feedback
+          * TODO view
+          */
+          ss << "\"" << name << "\"" << "已装备。";
+          //view->gameoutput(ss.str());
+          ss.str("");
+      }
+      else {
 
-      //    /**
-      //    * @brief 与上一个scope相反 
-      //    * TODO: 主角类接口发生了修改，未作适配
-      //    */
-      //    equip_state = false;
+          /**
+          * @note 与上一个scope相反 
+          * TODO: 主角类接口发生了修改，未作适配
+          */
 
-      //    protagonist.resetLearningTimeReductionRate(protagonist.getLearningTimeReductionRate() + time_reduction_rate);
-      //    protagonist.resetLearningHealthPreservationRate(protagonist.getLearningHealthPreservationRate() + health_preservation_rate);
+          equip_state = false;
 
-      //    cout << "\"" << name << "\"" << "已取消装备。" << endl;
-      //}
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, time_reduction_rate, true);
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, health_preservation_rate, true);
+
+          /**
+          * @note feedback
+          * TODO view
+          */
+          ss << "\"" << name << "\"" << "已取消装备。";
+          //view->gameoutput(ss.str());
+          ss.str("");
+      }
   }
 
 
  /**
  * @brief 食品类构造函数
  */
- Food::Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used) :
-     Consumable(name, description, value), strength_restore(strength_restore), health_restore(health_restore), time_cooldown(time_cooldown), time_last_used(time_last_used) { }
+ Food::Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, bool have_cd) :
+     Consumable(name, description, value), strength_restore(strength_restore), health_restore(health_restore), have_cd(have_cd), time_cooldown(time_cooldown) { }
 
- /*TODO*/
- bool Food::isOnCooldown()const {
-     return true;
+ bool Food::isOnCD(Protagonist& protagonist)const {
+     //if (have_cd && /*now()*/ - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TUsedCompressedCracker] > time_cooldown)
+     //    return true;
+     //else
+         return false;
  }
  /**
  * @brief 使用“食品类物品”
  * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
- * TODO: 这里需要获取当前时间的接口now(),需要等时间(计时)的具体逻辑出来后再具体修改
+ * TODO: 当前为阉割版，物品使用无cd。
  */
   void Food::use(Protagonist& protagonist) {
+          /**
+          * @note 恢复主角一定体力和健康
+          */
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::STRENGTH, strength_restore, true);
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, health_restore, true);
 
-      /**
-      * @brief 等CD
-      */
-      //if (/*now()*/ -time_last_used > time_cooldown) {
+          /**
+          * @note 记录上次使用时间(计算CD) TODO now()
+          */
+          //protagonist.updateAttr(BasicValue::ProtagonistAttr::TUsedCompressedCracker, /*now()*/, false);
 
-      //    /**
-      //    * @brief 恢复主角一定体力和健康，建议reset接口自行判断是否超出MAX_STRENGTH和MAX_HEALTH
-      //    */
-      //    protagonist.resetStrength(protagonist.getStrength() + strength_restore);
-      //    protagonist.resetHealth(protagonist.getHealth() + health_restore);
-
-      //    cout << "\"" << name << "\"" << "已使用消耗品" << endl;
-      //}
-      //else {
-      //    cout << "冷却中,暂时无法使用该道具" << endl;
-      //}
+          /**
+          * @note feedback
+          * TODO view
+          */
+          ss << "\"" << name << "\"" << "已使用消耗品";
+          //view->gameoutput(ss.str());
+          ss.str("");
   }
 
  /**
  * @brief 学习辅助类构造函数
  */
- LearningAid::LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, bool is_used_today, float health_reduce) :
-     Consumable(name, description, value), intel_boost(intel_boost), intel_boost_rate(intel_boost_rate), duration(duration), have_abuse_punish(have_abuse_punish), is_used_today(is_used_today), health_reduce(health_reduce) { }
+ LearningAid::LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce) :
+     Consumable(name, description, value), intel_boost(intel_boost), intel_boost_rate(intel_boost_rate), duration(duration), have_abuse_punish(have_abuse_punish), health_reduce(health_reduce) { }
 
  /**
- * @brief 使用“学习辅助类物品”
- * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
+ * @brief 使用“学习辅助类物品”：
+ * @note  提高主角学习效率
+ * TODO: 当前为阉割版，持续时间永久，无滥用惩罚。
  */
   void LearningAid::use(Protagonist& protagonist) {
+      if(have_abuse_punish == false){
+          //if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BuffMilk] == false) {
+          //    /**
+          //      * @note 提高主角学习效率
+          //      */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
+          //    
+          //    /**
+          //    * @note 记录buff已生效及其生效时间
+          //    */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffMilk, true, false);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffMilk, /*now()*/, false);
+          //} else {
+          //    /**
+          //    * @note 重新记录buff生效时间
+          //    */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffMilk, /*now()*/, false);
+          //}
+      }else{
+          //if (/*now*/ -protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TBuffEnergyDrink] <= duration) {
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, -health_reduce, true);
+          //}
+          //if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BuffEnergyDrink] == false) {
+          //    /**
+          //      * @note 提高主角学习效率
+          //      */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
 
+          //    /**
+          //    * @note 记录buff已生效及其生效时间
+          //    */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffEnergyDrink, true, false);
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffEnergyDrink, /*now()*/, false);
+          //}
+          //else {
+          //    /**
+          //    * @note 重新记录buff生效时间
+          //    */
+          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffEnergyDrink, /*now()*/, false);
+          //}
+      }
       /**
-      * TODO:此处需要设置定时器，在一定时间(duration)后增益解除(执行解除增益的函数)
-      *       具体逻辑在完善时间(计时)逻辑后写
+      * @note feedback
+      * TODO view
       */
+      ss << "\"" << name << "\"" << "已使用消耗品";
+      //view->gameoutput(ss.str());
+      ss.str("");
   }
 
  /**
  * @brief 健康类构造函数
  */
- HealthItem::HealthItem(const string& name, const string& description, float value, float health_restore, float duration) :
-     Consumable(name, description, value), health_restore(health_restore), duration(duration) { }
+ HealthItem::HealthItem(const string& name, const string& description, float value, float health_restore, float duration, float time_cooldown, bool have_cd) :
+     Consumable(name, description, value), health_restore(health_restore), duration(duration), have_cd(have_cd), time_cooldown(time_cooldown){ }
+
+ bool HealthItem::isOnCD(Protagonist& protagonist)const {
+     //if (have_cd && /*now()*/ - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TUsedFirstAidKit] > time_cooldown)
+     //    return true;
+     //else
+         return false;
+ }
 
  /**
  * @brief 使用“健康类物品”
- * @note  在外部调用item.use接口使用了消耗品后，记得将该消耗品对象释放
+ * @note  提高主角学习效率
+ * TODO: 当前为阉割版，持续时间永久，无CD。
  */
   void HealthItem::use(Protagonist& protagonist) {
-     // protagonist.resetHealth(protagonist.getHealth() + health_restore);
+      if (have_cd) {
+          /**
+          * @note 获得一些健康
+          */
+          protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, health_restore, true);
+
+          /**
+          * @note 记录上次使用的时间(计算CD)
+          */
+          //protagonist.updateAttr(BasicValue::ProtagonistAttr::TUsedFirstAidKit, /*now()*/, false);
+      } else {
+          /**
+          * @note 维生素buff，一段时间内健康值不下降
+          */
+          //protagonist.updateAttr(BasicValue::ProtagonistAttr::VitminEffectRate, 0, false);
+
+          /**
+          * @note 记录维生素buff生效及其生效时间
+          */
+          //protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffVitamins, true, false);
+          //protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffVitamins, /*now()*/, false);
+
+      }
+
       /**
-      * TODO:此处需要暂停健康值损耗一段时间，具体实现需要考虑健康值损耗逻辑和时间（计时）逻辑 \n
-      *       待上述逻辑完备后再写
+      * @note feedback
+      * TODO view
       */
+      ss << "\"" << name << "\"" << "已使用消耗品";
+      //view->gameoutput(ss.str());
+      ss.str("");
   }
 
  /**
@@ -306,7 +413,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
      switch (item_class) {
      case ItemType::study_material: {
          /**
-         * @brief 读取物品参数
+         * @note 读取物品参数
          */
          string name = (string)config_item[item_name]["name"];
          string description = (string)config_item[item_name]["description"];
@@ -315,7 +422,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
          float intel_boost_rate = (float)config_item[item_name]["intel_boost_rate"];
 
          /**
-         * @brief 创建物品对象并返回
+         * @note 创建物品对象并返回
          */
          unique_ptr<Item> item_ptr = make_unique<StudyMaterial>(name,description, value, is_science, intel_boost_rate);
          return item_ptr;
@@ -324,7 +431,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
      }
      case ItemType::study_aid: {
          /**
-         * @brief 读取物品参数
+         * @note 读取物品参数
          */
          string name = (string)config_item[item_name]["name"];
          string description = (string)config_item[item_name]["description"];
@@ -333,7 +440,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
          float health_preservation_rate = (float)config_item[item_name]["health_preservation_rate"];
 
          /**
-         * @brief 创建物品对象并返回
+         * @note 创建物品对象并返回
          */
          unique_ptr<Item> item_ptr = make_unique<StudyAid>(name,description, value, time_reduction_rate, health_preservation_rate);
          return item_ptr;
@@ -342,7 +449,7 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
      }
      case ItemType::food: {
          /**
-         * @brief 读取物品参数
+         * @note 读取物品参数
          */
          string name = (string)config_item[item_name]["name"];
          string description = (string)config_item[item_name]["description"];
@@ -350,19 +457,19 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
          float strength_restore = (float)config_item[item_name]["strength_restore"];
          float health_restore = (float)config_item[item_name]["health_restore"];
          float time_cooldown = (float)config_item[item_name]["time_cooldown"];
-         float time_last_used = (float)config_item[item_name]["time_last_used"];
+         bool have_cd = (bool)config_item[item_name]["have_cd"];
 
          /**
-         * @brief 创建物品对象并返回
+         * @note 创建物品对象并返回
          */
-         unique_ptr<Item> item_ptr = make_unique<Food>(name, description, value, strength_restore, health_restore, time_cooldown, time_last_used);
+         unique_ptr<Item> item_ptr = make_unique<Food>(name, description, value, strength_restore, health_restore, time_cooldown, have_cd);
          return item_ptr;
 
          break;
      }
      case ItemType::learning_aid: {
          /**
-         * @brief 读取物品参数
+         * @note 读取物品参数
          */
          string name = (string)config_item[item_name]["name"];
          string description = (string)config_item[item_name]["description"];
@@ -370,32 +477,33 @@ void Item::equipAndUnequip(Protagonist& protagonist){ }
          float intel_boost = (float)config_item[item_name]["intel_boost"];
          float intel_boost_rate = (float)config_item[item_name]["intel_boost_rate"];
          float duration = (float)config_item[item_name]["duration"];
-         bool have_abuse_punish = (bool)config_item[item_name]["have_abuse_punish"];
-         bool is_used_today = (bool)config_item[item_name]["is_used_today"];
          float health_reduce = (float)config_item[item_name]["health_reduce"];
+         bool have_abuse_punish = (bool)config_item[item_name]["have_abuse_punish"];
 
          /**
-         * @brief 创建物品对象并返回
+         * @note 创建物品对象并返回
          */
-         unique_ptr<Item> item_ptr = make_unique<LearningAid>(name,description, value, intel_boost, intel_boost_rate, duration, have_abuse_punish, is_used_today, health_reduce);
+         unique_ptr<Item> item_ptr = make_unique<LearningAid>(name,description, value, intel_boost, intel_boost_rate, duration, health_reduce, have_abuse_punish);
          return item_ptr;
 
          break;
      }
      case ItemType::health_item: {
          /**
-         * @brief 读取物品参数
+         * @note 读取物品参数
          */
          string name = (string)config_item[item_name]["name"];
          string description = (string)config_item[item_name]["description"];
          float value = (float)config_item[item_name]["value"];
          float health_restore = (float)config_item[item_name]["health_restore"];
          float duration = (float)config_item[item_name]["duration"];
+         float time_cooldown = (float)config_item[item_name]["time_cooldown"];
+         bool have_cd = (bool)config_item[item_name]["have_cd"];
 
          /**
-         * @brief 创建物品对象并返回
+         * @note 创建物品对象并返回
          */
-         unique_ptr<Item> item_ptr = make_unique<HealthItem>(name,description, value, health_restore, duration);
+         unique_ptr<Item> item_ptr = make_unique<HealthItem>(name, description, value, health_restore, duration, time_cooldown, have_cd);
          return item_ptr;
 
          break;

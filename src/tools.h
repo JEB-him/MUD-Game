@@ -10,27 +10,17 @@
 
 #include <string>
 #include <cstdint>
-<<<<<<< HEAD
-
-// 定义 RGB 颜色类
-class RGB {
-=======
 #include <cereal/archives/binary.hpp>
 #include <cereal/cereal.hpp>
 
 // 定义  Rgb 颜色类
 class  Rgb {
->>>>>>> master
 public:
     std::uint8_t r;  // 红色分量
     std::uint8_t g;  // 绿色分量
     std::uint8_t b;  // 蓝色分量
 
-<<<<<<< HEAD
-    RGB(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
-=======
      Rgb(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
->>>>>>> master
 };
 
 /**

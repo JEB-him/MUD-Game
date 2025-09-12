@@ -120,11 +120,11 @@ bool View::reDraw() {
     puts_width = width - logs_width - 3 - LEFT_MARGIN - RIGHT_MARGIN;
     puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN;
     // 清屏
-    cout << REASE_S;
+    std::cout << REASE_S;
     // 首先绘制所有框架
     // 为了避免 Windows 和 Linux 的行为差别，统一多加一个 \r
     // 顶部
-    cout << gotoXY(TOP_MARGIN + 1, LEFT_MARGIN + 1);
+    std::cout << gotoXY(TOP_MARGIN + 1, LEFT_MARGIN + 1);
     std::cout << BLT;
     for (int i = 0; i < map_width + LEFT_PADDING + RIGHT_PADDING; ++i)
         std::cout << BH;
@@ -187,18 +187,23 @@ bool View::reDraw() {
 }
 
 void View::colorPrint(
-    const std::string& text,
-    const std::string& simple_color,
-    const RGB& rgb_color,
-    std::deque<std::string>& outputs,
-    const int& width) {
+    const std::string &text,
+    const std::string &simple_color,
+    const  Rgb & Rgb_color,
+    std::deque<std::string> &outputs,
+    const int &width)
+{
     // 添加颜色
     size_t index = 0;
-    while(index < text.length()) {
+    while (index < text.length())
+    {
         std::stringstream ss;
-        if (simple_color=="") {
-            ss << "\x1b[" << "38;2;" << rgb_color.r << ";" << rgb_color.g << ";" << rgb_color.b << "m";
-        } else {
+        if (simple_color == "")
+        {
+            ss << "\x1b[" << "38;2;" <<  Rgb_color.r << ";" <<  Rgb_color.g << ";" <<  Rgb_color.b << "m";
+        }
+        else
+        {
             ss << "\x1b[1;" << simple_colors.at(simple_color) << "m";
         }
         // 插入文本
@@ -227,11 +232,9 @@ void View::invalidate() {
         std::cout << MOVU;
     }
     std::cout << LOADCUS;
-
 }
 
-
-std::string View::uLines(const int& lines) const {
+std::string View::uLines(const int &lines) const {
     std::stringstream ss;
     ss << "\x1b[" << lines << "A";
     return ss.str();
@@ -283,7 +286,7 @@ size_t View::cutUTFString(const string& utf8_str, size_t& index, const int& widt
     return length;
 }
 
-std::string View::charToSpecial(const int& x, const int& y, int& tx, int& ty) {
+std::string View::charToSpecial(const int &x, const int &y, int &tx, int &ty) {
     char (*map)[Map::MAX_WIDTH] = controller->map->map;
     tx = x, ty = y;
     uint8_t wall_type = 0;
@@ -293,7 +296,8 @@ std::string View::charToSpecial(const int& x, const int& y, int& tx, int& ty) {
             dx = Map::DIRECTIONS[i][0], dy = Map::DIRECTIONS[i][1];
             for (int j = 1; j <= 4; ++j) {
                 int nx = x + dx * j, ny = y + dy * j;
-                if (nx < 0 || nx > Map::MAX_HEIGHT || ny < 0 || ny > Map::MAX_WIDTH) continue;
+                if (nx < 0 || nx > Map::MAX_HEIGHT || ny < 0 || ny > Map::MAX_WIDTH)
+                    continue;
                 if (map[nx][ny] == '#' || ((map[nx][ny] == 'i' || map[nx][ny] == 'o') && (i == 0 || i == 4))) {
                     wall_type |= bit_1 << i;
                 }
@@ -368,4 +372,3 @@ std::string View::charToSpecial(const int& x, const int& y, int& tx, int& ty) {
 
     return " ";
 }
-

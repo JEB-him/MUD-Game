@@ -13,8 +13,6 @@
 #include "json.hpp"
 #include "tools.h"
 #include "Controller.h"
-using std::cout;
-using std::string;
 /**
  * @brief 光标移动到指定坐标
  * @param line 指定行
@@ -44,7 +42,8 @@ public:
      * @brief 单例模式获取 View 的函数
      * @return 一个 View 的 shared 智能指针
      */
-    static std::shared_ptr<View> getInstance(std::shared_ptr<Controller> controller); /**
+    static std::shared_ptr<View> getInstance(std::shared_ptr<Controller> controller);
+    /**
      * @brief 全局重绘
      * @note 丢失所有已经绘制的图形，仅保留地图，建议在窗口大小发生改变时应用此函数
      * @return bool
@@ -74,11 +73,11 @@ public:
      * @brief 打印一条日志
      * @details 提供一个[速查表](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes)\n
      * @param msg 一条 string 文本
-     * @param rgb_color 一个 RGB 类型的颜色参数，RGB 定义见上
-     * @param simple_color 颜色，参见 ANSI Escape 表, rgb_color 不为空时该参数被忽略
+     * @param  Rgb_color 一个  Rgb 类型的颜色参数， Rgb 定义见上
+     * @param simple_color 颜色，参见 ANSI Escape 表,  Rgb_color 不为空时该参数被忽略
      * @return bool success
      */
-    bool printLog(const std::string& msg, const std::string& simple_color, const RGB& rgb_color=RGB(-1,-1,-1));
+    bool printLog(const std::string& msg, const std::string& simple_color, const  Rgb& rgb_color =  Rgb(-1, -1, -1));
 
     /**
      * @brief 输出一个问题格式的消息到操作界面
@@ -88,7 +87,7 @@ public:
      * @param simple_color 颜色，参见 ANSI Escape 表, 该参数传递空值时使用 rgb_color
      * @return Message 消息
      */
-    Message printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const RGB& rgb_color=RGB(-1,-1,-1));
+    Message printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color=Rgb(-1,-1,-1));
 
     /**
      * @brief 输出选项
@@ -149,7 +148,6 @@ private:
     std::deque<std::string> game_outputs;
     int puts_height = 0;
     int puts_width = 0;
-
 
     // 出口和入口队列
     std::queue<Position> in_positions;

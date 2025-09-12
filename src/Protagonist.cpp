@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @brief 主角的数据模型实现（Protagonist类）
  * @author Haozhe Tang
  * @date 2025-08-31

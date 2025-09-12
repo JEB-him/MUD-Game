@@ -3,29 +3,26 @@
 #include <fstream>
 
 Controller::Controller(
-    const LogLevel &level,
-    const std::filesystem::path &log_dir,
-    const std::filesystem::path &root_dir) : level(level),
-                                            log_dir(log_dir),
-                                            root_dir(root_dir)
-{
+    const LogLevel& level,
+    const std::filesystem::path& log_dir,
+    const std::filesystem::path& root_dir):
+    level(level),
+    log_dir(log_dir),
+    root_dir(root_dir) {
     // 构造函数
 }
 
-std::shared_ptr<Controller> Controller::getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir)
-{
+std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path& root_dir) {
     static auto instance = std::shared_ptr<Controller>(new Controller(level, log_dir, root_dir));
     return instance;
 }
 
-void Controller::log(const LogLevel &level, const std::string &msg)
-{
+void Controller::log(const LogLevel& level, const std::string& msg) {
     // 临时实现
     std::cout << msg << std::endl;
 }
 
-Message Controller::init()
-{
+Message Controller::init() {
     protagonist = std::make_shared<Protagonist>();
     // backpack = std::make_shared<Backpack>();
     map = std::make_shared<Map>();
@@ -36,8 +33,7 @@ Message Controller::init()
     return msg;
 }
 
-Message Controller::load(std::string username)
-{
+Message Controller::load(std::string username) {
     // 游戏开始时加载文件，名称格式为 username.bin
     std::string file_name = username + ".bin";
     std::ifstream ifile(file_name, std::ios::binary);
@@ -65,8 +61,7 @@ Message Controller::load(std::string username)
     return msg;
 }
 
-Message Controller::save()
-{
+Message Controller::save() {
     // 游戏退出时保存文件，名称格式为 username.bin
     std::string username = protagonist->getName();
     std::string file_name = username + ".bin";
@@ -93,8 +88,7 @@ Message Controller::save()
     return msg;
 }
 
-Message Controller::getEvent(EventType &event_type)
-{
+Message Controller::getEvent(EventType &event_type) {
     std::stringstream ss;
     ss.str("");
     ss.clear();
@@ -191,8 +185,7 @@ Message Controller::getEvent(EventType &event_type)
 //     }
 // }
 
-Message Controller::playerLogin()
-{
+Message Controller::playerLogin() {
     const std::string invalidChars = ";:\"'\\/<>*?|";
     std::string user_name = "";
     do
@@ -213,8 +206,7 @@ Message Controller::playerLogin()
 }
 
 
-int Controller::run()
-{
+int Controller::run() {
     std::cout << "登录/注册..." << std::endl;
     std::cout << "初始化游戏..." << std::endl;
     std::cout << "运行游戏..." << std::endl;
@@ -222,13 +214,11 @@ int Controller::run()
     bool running = false;
     EventType event_type = EventType::NONE;
     Message msg;
-    while (running)
-    {
+    while (running) {
         std::cout << "获取事件..." << std::endl;
         // msg = getEvent(event_type);
 
-        switch (event_type)
-        {
+        switch (event_type) {
         case EventType::MOVE:
             std::cout << "移动主角..." << std::endl;
             break;

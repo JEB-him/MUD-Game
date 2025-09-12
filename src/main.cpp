@@ -1,19 +1,20 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
+#include "View.h"
+#include "Controller.h"
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
-#include "Controller.h"
 #include <filesystem>
 #if defined(_WIN32) && !defined(__linux__)
 #   include <windows.h>
 #   include <clocale>
-struct SetupLocale {
-    SetupLocale() {
-        std::setlocale(LC_ALL, ".UTF-8");
-    }
-};
-SetupLocale setupLocale;
+    struct SetupLocale {
+        SetupLocale() {
+            std::setlocale(LC_ALL, ".UTF-8");
+        }
+    };
+    SetupLocale setupLocale;
 #endif
 #if !defined(_WIN32) && defined(__linux__)
 #   include <unistd.h>
@@ -34,7 +35,7 @@ void envCheck() {
     SetConsoleMode(hConsole, dwMode);
     // 双重保险
     system("chcp 65001");
-    // std::cout << View::MOVU;
+    std::cout << "\x1bM";
 #endif
 }
 

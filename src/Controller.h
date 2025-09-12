@@ -17,7 +17,6 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
-
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
@@ -53,8 +52,8 @@ public:
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
         TP,        ///< 传送到 NPC 附近
-        QUIT  ,     ///< 退出游戏
- NONE  
+        QUIT,      ///< 退出游戏
+        NONE       ///< 退出游戏
     };
 
     /**

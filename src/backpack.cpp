@@ -34,16 +34,17 @@ void Backpack::addItem(string item_name) {
  * @brief 使用或装备或卸下物品(三合一功能函数)
  * @param order 操作的物品的序号(从1开始)
  * @param protagonist 传入主角对象名
- * @details 逻辑：区分好物品类型和装备状态，然后调用Item正确的接口(use、equipAndUnequip二选一)
- * @details 逻辑：消耗品在调用此方法后，释放指针，然后序号在此物品之后的物品指针均前移一个位置
  */
 void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
+    //排除小于1和大于最大物品序号的输入值
     if (order > backpack_items.size() || order < 1) {
         throw std::runtime_error("输入了无效序号。");
     }
     else{
         int index = order - 1;
+            //消耗品类
             if (backpack_items[index].get()->getIsConsumable()) {
+                //冷却判定
                 if (backpack_items[index].get()->isOnCD(protagonist)) {
                     /**
                     * @note feedback    TODO view
@@ -59,11 +60,13 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
                     //view->gameoutput(ss.str());
                     ss.str("");
 
+                    //使用该消耗品
                     backpack_items[index].get()->use(protagonist);
-                    backpack_items[index].reset();
-                    backpack_items.erase(backpack_items.begin() + index);
+                    backpack_items[index].reset();//释放消耗品对象
+                    backpack_items.erase(backpack_items.begin() + index);//从背包的智能指针vector中删除
                 }
             }
+            //用具类
             else {
                 /**
                 * @note feedback    TODO view
@@ -72,9 +75,8 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
                 //view->gameoutput(ss.str());
                 ss.str("");
 
+                //装备该用具
                 backpack_items[index].get()->equipAndUnequip(protagonist);
-
-
             }
     }
 }

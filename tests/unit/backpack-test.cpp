@@ -7,12 +7,12 @@
 #include <string>
 #include"Protagonist.h"
 
-TEST_CASE("Backpack Construction", "[backpack]") {
+TEST_CASE("All of backpack function & Part of item function", "[backpack & part of item]") {
     Protagonist protagonist("114514", "小王");
     Backpack backpack;
     backpack.addItem("advanced_mathematics");
 
-    SECTION("Default constructor creates empty backpack") {
+    SECTION("test_body") {
         backpack.addItem("eye_protector_lamps");
         CHECK(backpack.getBackpack‌Items().size() == 2);
         backpack.addItem("nutritious_meals");

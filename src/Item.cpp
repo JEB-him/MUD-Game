@@ -11,6 +11,11 @@
 
 #include"Item.h"
 #include<filesystem>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
   /**
     * @brief 物品类型枚举定义

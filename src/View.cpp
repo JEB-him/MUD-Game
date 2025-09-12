@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
-#include <locale>     // 确保正确计算中英文字符串长度
 void View::get_cursor_position(int& x, int& y) {
 #ifdef __linux__
     struct termios oldt, newt;
@@ -22,7 +21,7 @@ void View::get_cursor_position(int& x, int& y) {
     newt = oldt;
 
     // 关闭回显和缓冲
-    newt.c_lflag &= ~(ICANON | ECHO);
+    newt.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
     // 隐藏光标
@@ -74,25 +73,25 @@ void View::get_cursor_position(int& x, int& y) {
 #endif
 }
 
-std::shared_ptr<View> View::getInstance(std::shared_ptr<Controller> controller) {
-    static auto instance = std::shared_ptr<View>(new View(controller));
+std::shared_ptr<View> View::getInstance() {
+    static auto instance = std::shared_ptr<View>(new View());
     return instance;
 }
 
-View::View(std::shared_ptr<Controller> controller):
-    controller(controller),
-    MIN_WIN_HEIGHT(controller->map->getMaxHeight() +
-                   10 +
-                   TOP_MARGIN +
-                   BOTTOM_MARGIN +
-                   TOP_PADDING +
-                   BOTTOM_PADDING),
+View::View():
+    controller(Controller::getInstance()),
     MIN_WIN_WIDTH(controller->map->getMaxWidth() +
                   40 +
                   LEFT_MARGIN +
                   RIGHT_MARGIN +
                   LEFT_PADDING +
-                  RIGHT_PADDING){
+                  RIGHT_PADDING),
+    MIN_WIN_HEIGHT(controller->map->getMaxHeight() +
+                   10 +
+                   TOP_MARGIN +
+                   BOTTOM_MARGIN +
+                   TOP_PADDING +
+                   BOTTOM_PADDING) {
 }
 
 bool View::reDraw() {
@@ -106,6 +105,9 @@ bool View::reDraw() {
     int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     int height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 #endif
+    if (controller->map == nullptr) {
+        return false;
+    }
     if (width < MIN_WIN_WIDTH || height < MIN_WIN_HEIGHT) {
         return false;
     }
@@ -118,7 +120,8 @@ bool View::reDraw() {
     logs_width = map_width + LEFT_PADDING + RIGHT_PADDING;
     // 窗口宽度-日志宽度-边框-预留空白
     puts_width = width - logs_width - 3 - LEFT_MARGIN - RIGHT_MARGIN;
-    puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN;
+    // 留出命令输入的位置
+    puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN - 2;
     // 清屏
     std::cout << REASE_S;
     // 首先绘制所有框架
@@ -157,7 +160,7 @@ bool View::reDraw() {
     std::cout << BMB;
     for (int i = 0; i < puts_width; ++i)
         std::cout << BH;
-    std::cout << BRB << "\r" << std::endl;
+    std::cout << BRB;
 
     // 打印地图
     std::cout << SAVECUS;
@@ -182,39 +185,105 @@ bool View::reDraw() {
         out_positions.pop();
     }
     std::cout << LOADCUS;
-    // log 和 game output 使用剩下的，需要保证不低于一定的宽度
+    for (int i = 0; i < puts_width + 1; ++i)
+        std::cout << "\b";
+    std::cout << SAVECUS;
+    std::cout << MOVU;
+    std::cout << "\b\x1b[38;5;214m\x1b[1m$\x1b[0m";
+    std::cout << MOVU << "\b" << BLM;
+    for (int i = 0; i < puts_width; ++i)
+        std::cout << BH;
+    std::cout << BMM;
+    std::cout << LOADCUS;
     return true;
+}
+
+Message View::drawPoMove(const Position& last_pos, const Position& pos) {
+    if (last_pos == pos) {
+        return {"位置相同", 1};
+    }
+    if (!Position::ifInMap(last_pos, *(controller->map)) || !Position::ifInMap(pos, *(controller->map))) {
+        return {"不合法的位置", -1};
+    }
+    std::cout << SAVECUS;
+    gotoMap(last_pos);
+    const auto& protago = controller->map->SPECIAL_CHARS[Map::PROTAGONIST_INDEX];
+    for (int i = 0;i < protago.width; ++i) {
+        std::cout << " ";
+    }
+    gotoMap(pos);
+    std::cout << protago.special_char;
+    std::cout << LOADCUS;
+    return {"Success", 0};
+}
+
+Message View::printLog(const std::string& msg, const std::string& simple_color, const  Rgb& rgb_color) {
+    if (logs_width <= 0) {
+        return {"窗口过小", 1};
+    }
+    colorPrint(msg, simple_color, rgb_color, logs, logs_width);
+    return {"Success", 0};
+}
+
+Message View::printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color) {
+    if (logs_width <= 0) {
+        return {"窗口过小", 1};
+    }
+    std::string text = msg;
+    if (person.length()) {
+        text = person + ": " + msg;
+    }
+    colorPrint(msg, simple_color, rgb_color, game_outputs, puts_width);
+    return {"Success", 0};
+}
+
+Message View::printOptions(const std::vector<std::string>& options) {
+    if (logs_width <= 0) {
+        return {"窗口过小", 1};
+    }
+    for (auto& msg : options) {
+        std::string text = msg;
+        colorPrint(msg, "white", Rgb(255, 255, 255), game_outputs, puts_width);
+    }
+    return {"Success", 0};
+}
+
+Message View::printCmd(const std::string& cmd) {
+    std::cout << SAVECUS << MOVU;
+    std::cout << "\x1b[38;5;214m\x1b[1m " << cmd << "\x1b[0m";
+    for (size_t i = 0; i < static_cast<size_t>(puts_width) - cmd.length(); ++i)
+        std::cout << " ";
+    std::cout  << LOADCUS;
+    // 刷新缓冲区
+    std::cout << std::flush;
+    return {"Success", 0};
 }
 
 void View::colorPrint(
     const std::string &text,
     const std::string &simple_color,
-    const  Rgb & Rgb_color,
+    const  Rgb & rgb_color,
     std::deque<std::string> &outputs,
-    const int &width)
-{
+    const int &width) {
     // 添加颜色
-    size_t index = 0;
-    while (index < text.length())
-    {
+    size_t index = 0, old_index = 0;
+    while (index < text.length()) {
         std::stringstream ss;
-        if (simple_color == "")
-        {
-            ss << "\x1b[" << "38;2;" <<  Rgb_color.r << ";" <<  Rgb_color.g << ";" <<  Rgb_color.b << "m";
-        }
-        else
-        {
+        if (simple_color == "") {
+            ss << "\x1b[" << "38;2;" <<  rgb_color.r << ";" <<  rgb_color.g << ";" <<  rgb_color.b << "m";
+        } else {
             ss << "\x1b[1;" << simple_colors.at(simple_color) << "m";
         }
         // 插入文本
         size_t insert_len = cutUTFString(text, index, width);
-        if (insert_len == -1) {
+        if (insert_len > static_cast<size_t>(width)) {
             controller->log(Controller::LogLevel::ERR, "消息打印错误");
             return;
         }
-        ss << text;
+        ss << text.substr(old_index, index);;
+        old_index = index;
         // 转换为默认格式
-        ss << "[0m";
+        ss << "\x1b[0m";
         outputs.push_back(ss.str());
     }
     invalidate();
@@ -222,16 +291,39 @@ void View::colorPrint(
 
 void View::invalidate() {
     // 处理游戏输出
-    while(game_outputs.size() > puts_height) {
+    while(game_outputs.size() > static_cast<size_t>(puts_height)) {
         game_outputs.pop_front();
     }
-    auto puts_iter = game_outputs.rbegin();
     std::cout << SAVECUS;
-    for (auto iter = game_outputs.rbegin(); iter != game_outputs.rend(); ++iter) {
+    // 移动到全部游戏输出的首行
+    std::cout << uLines(puts_height + 2);
+    int next_x = 0, next_y = 0;
+    get_cursor_position(next_x, next_y);
+    for (auto iter = game_outputs.begin(); iter != game_outputs.end(); ++iter) {
         std::cout << *iter;
-        std::cout << MOVU;
+        std::cout << gotoXY(next_x, next_y);
+        next_x += 1;
     }
     std::cout << LOADCUS;
+
+    // 处理日志输出
+    while(logs.size() > static_cast<size_t>(logs_height)) {
+        logs.pop_front();
+    }
+    std::cout << SAVECUS;
+    // 移动到日志输出的首行
+    std::cout << uLines(logs_height);
+    // 移动到首列
+    std::cout << lCols(logs_width + 1);
+    get_cursor_position(next_x, next_y);
+    for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
+        std::cout << *iter;
+        std::cout << gotoXY(next_x, next_y);
+        next_x += 1;
+    }
+    std::cout << LOADCUS;
+    // 刷新缓冲区
+    std::cout << std::flush;
 }
 
 std::string View::uLines(const int &lines) const {
@@ -264,8 +356,8 @@ std::string View::gotoXY(const int& x, const int& y) const {
 size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int& width) {
     // 该函数适用于绝大多数常用字符，但对一些偏僻字符可能会出错
     size_t length = 0;
-    for (; index < utf8_str.length() && length <= width; ) {
-        unsigned char c = utf8_str[index];
+    for (; index < utf8_str.length() && length <= static_cast<size_t>(width); ) {
+        unsigned char c = static_cast<unsigned char>(utf8_str[index]);
         if (c < 0x80) {
             // ASCII 字符（英文字母、数字等）
             index += 1;
@@ -280,7 +372,7 @@ size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int&
             length += 2;
         } else {
             // 不支持的 UTF-8 序列
-            return -1;
+            return 0xFFFF;
         }
     }
     return length;
@@ -289,9 +381,9 @@ size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int&
 std::string View::charToSpecial(const int &x, const int &y, int &tx, int &ty) {
     char (*map)[Map::MAX_WIDTH] = controller->map->map;
     tx = x, ty = y;
-    uint8_t wall_type = 0;
+    int wall_type = 0;
     if (map[x][y] == '#') {
-        uint8_t bit_1 = 1;
+        int bit_1 = 1;
         for (int i = 0, dx, dy; i < 4; ++i) {
             dx = Map::DIRECTIONS[i][0], dy = Map::DIRECTIONS[i][1];
             for (int j = 1; j <= 4; ++j) {
@@ -371,4 +463,14 @@ std::string View::charToSpecial(const int &x, const int &y, int &tx, int &ty) {
     }
 
     return " ";
+}
+
+bool View::gotoMap(const Position& pos) {
+    if (!Position::ifInMap(pos, *(controller->map))) {
+        return false;
+    }
+    int bx = TOP_MARGIN + 1 + TOP_PADDING + 1;
+    int by = LEFT_MARGIN + 1 + LEFT_PADDING + 1;
+    gotoXY(pos.x + bx, pos.y + by);
+    return true;
 }

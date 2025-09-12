@@ -1,4 +1,6 @@
 #include "Controller.h"
+#include "View.h"
+#include "tools.h"
 #include <iostream>
 #include <fstream>
 
@@ -18,8 +20,32 @@ std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const
 }
 
 void Controller::log(const LogLevel& level, const std::string& msg) {
-    // 临时实现
-    std::cout << msg << std::endl;
+    std::ofstream debug_log(log_dir / DEBUG_FILE, std::ios::app);
+    std::ofstream info_log(log_dir / INFO_FILE, std::ios::app);
+    std::ofstream warn_log(log_dir / WARN_FILE, std::ios::app);
+    std::ofstream error_log(log_dir / ERROR_FILE, std::ios::app);
+    if (view != nullptr)
+        switch (level) {
+            case LogLevel::DEBUG:
+                view->printLog(msg, "", Rgb(120, 120, 120));
+                break;
+            case LogLevel::INFO:
+                view->printLog(msg, "white", Rgb(255, 255, 255));
+                break;
+            case LogLevel::WARN:
+                view->printLog(msg, "", Rgb(219, 162, 0));
+                break;
+            case LogLevel::ERR:
+                view->printLog(msg, "red", Rgb(255, 0, 0));
+                break;
+        }
+    if (this->level == LogLevel::INFO && level != LogLevel::DEBUG)
+        info_log << msg << std::endl;
+    if (this->level == LogLevel::WARN && level != LogLevel::INFO && level != LogLevel::DEBUG)
+        warn_log << msg << std::endl;
+    if (level == LogLevel::ERR)
+        error_log << msg << std::endl;
+    debug_log << msg << std::endl;
 }
 
 Message Controller::init() {
@@ -209,26 +235,57 @@ Message Controller::playerLogin() {
 int Controller::run() {
     std::cout << "登录/注册..." << std::endl;
     std::cout << "初始化游戏..." << std::endl;
-    std::cout << "运行游戏..." << std::endl;
-    // TODO 修改此状态开启循环
-    bool running = false;
+    std::cout << "创建测试临时数据..." << std::endl;
+    map = std::make_shared<Map>("center.txt");
+    view = View::getInstance();
+    std::cout << "创建完毕..." << std::endl;
+    gameSleep(3000);
+    view->reDraw();
+    log(LogLevel::DEBUG, "运行游戏...");
+    log(LogLevel::DEBUG, "DEBUG...");
+    bool running = true;
+    // 防止死循环
+    // TODO 修改回合次数
+    static int turns = 1;
     EventType event_type = EventType::NONE;
     Message msg;
-    while (running) {
-        std::cout << "获取事件..." << std::endl;
+    while (running && turns--) {
+        log(LogLevel::DEBUG, "获取事件...");
         // msg = getEvent(event_type);
 
         switch (event_type) {
         case EventType::MOVE:
-            std::cout << "移动主角..." << std::endl;
+            log(LogLevel::DEBUG, "移动主角...");
             break;
         case EventType::QUIT:
-            std::cout << "退出游戏..." << std::endl;
+            log(LogLevel::INFO, "退出游戏...");
             running = false;
             break;
         case EventType::NONE:
+            log(LogLevel::DEBUG, "无按键响应...");
             break;
         }
     }
+
+    // 测试用
+    view->printCmd("测试命令");
+    gameSleep(2000);
+    view->printCmd("2 hello cat");
+    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    gameSleep(2000);
+    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
+    std::vector<std::string> tmp_ops {
+        "1. 带一个",
+        "2. no"
+    };
+    view->printOptions(tmp_ops);
+    // 测试结束
+
+
+    log(LogLevel::INFO, "正在保存游戏...");
+    gameSleep(2000);
+
+    // 保持界面完整性
+    std::cout << "\n\n";
     return 0;
 }

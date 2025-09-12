@@ -165,7 +165,7 @@ private:
     void colorPrint(
             const std::string& text,
             const std::string& simple_color,
-            const RGB& rgb_color,
+            const Rgb& rgb_color,
             std::deque<std::string>& outputs,
             const int& width);
 

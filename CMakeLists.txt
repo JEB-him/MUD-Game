@@ -38,9 +38,11 @@ target_include_directories(game PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 target_include_directories(game PUBLIC "${PROJECT_SOURCE_DIR}/src")
 
 # Curses
-# find_package(Curses REQUIRED)
-# include_directories(${CURSES_INCLUDE_DIR})
-# target_link_libraries(game PRIVATE ${CURSES_LIBRARIES})
+if(UNIX)
+    find_package(Curses REQUIRED)
+    include_directories(${CURSES_INCLUDE_DIR})
+    target_link_libraries(game PRIVATE ${CURSES_LIBRARIES})
+endif()
 
 # 检测是否为 Visual Studio 生成器
 if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))
@@ -49,7 +51,7 @@ else()
     message(STATUS "平台检测:${CMAKE_GENERATOR}")
     # 编译模式下开启警告和调试信息
     target_compile_options(game
-        PRIVATE -g -Wall -Wextra
+        PRIVATE -g -Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wconversion -Wsign-conversion
     )
 endif()
 

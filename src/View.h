@@ -116,23 +116,23 @@ private:
     static constexpr int LEFT_PADDING   = 1;
     static constexpr int RIGHT_PADDING  = 1;
 
-    constexpr static std::string BV  = "\U00002502";
-    constexpr static std::string BH  = "\U00002500";
-    constexpr static std::string BLM = "\U0000251C";
-    constexpr static std::string BMM = "\U00002524";
-    constexpr static std::string BLT = "\U0000256D";
-    constexpr static std::string BMT = "\U0000252C";
-    constexpr static std::string BRT = "\U0000256E";
-    constexpr static std::string BLB = "\U00002570";
-    constexpr static std::string BMB = "\U00002534";
-    constexpr static std::string BRB = "\U0000256F";
+    inline const static std::string BV  = "\U00002502";
+    inline const static std::string BH  = "\U00002500";
+    inline const static std::string BLM = "\U0000251C";
+    inline const static std::string BMM = "\U00002524";
+    inline const static std::string BLT = "\U0000256D";
+    inline const static std::string BMT = "\U0000252C";
+    inline const static std::string BRT = "\U0000256E";
+    inline const static std::string BLB = "\U00002570";
+    inline const static std::string BMB = "\U00002534";
+    inline const static std::string BRB = "\U0000256F";
 
-    constexpr static std::string MOVHOME = "\x1b[H";
-    constexpr static std::string MOVU    = "\x1bM";
-    constexpr static std::string MOVD    = "\n";
-    constexpr static std::string SAVECUS = "\x1b[s";
-    constexpr static std::string LOADCUS = "\x1b[u";
-    constexpr static std::string REASE_S = "\x1b[2J";
+    inline const static std::string MOVHOME = "\x1b[H";
+    inline const static std::string MOVU    = "\x1bM";
+    inline const static std::string MOVD    = "\n";
+    inline const static std::string SAVECUS = "\x1b[s";
+    inline const static std::string LOADCUS = "\x1b[u";
+    inline const static std::string REASE_S = "\x1b[2J";
 
     std::string uLines(const int& lines) const;
     std::string dLines(const int& lines) const;

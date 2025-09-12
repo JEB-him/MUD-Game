@@ -45,16 +45,25 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
     else{
         int index = order - 1;
             if (backpack_items[index].get()->getIsConsumable()) {
-                /**
-                * @note feedback    TODO view
-                */
-                ss << "消耗品" << "\"" << backpack_items[index].get()->getName() << "\"" << "已被使用。";
-                //view->gameoutput(ss.str());
-                ss.str("");
+                if (backpack_items[index].get()->isOnCD(protagonist)) {
+                    /**
+                    * @note feedback    TODO view
+                    */
+                    ss << "冷却中,暂时无法使用该道具";
+                    //view->gameoutput(ss.str());
+                    ss.str("");
+                } else {
+                    /**
+                    * @note feedback    TODO view
+                    */
+                    ss << "消耗品" << "\"" << backpack_items[index].get()->getName() << "\"" << "已被使用。";
+                    //view->gameoutput(ss.str());
+                    ss.str("");
 
-                backpack_items[index].get()->use(protagonist); 
-                backpack_items[index].reset();
-                backpack_items.erase(backpack_items.begin() + index);
+                    backpack_items[index].get()->use(protagonist);
+                    backpack_items[index].reset();
+                    backpack_items.erase(backpack_items.begin() + index);
+                }
             }
             else {
                 /**

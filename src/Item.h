@@ -68,6 +68,7 @@ public:
     string getDescription() const;
     int getValue() const;
     bool getIsConsumable() const;
+    virtual bool isOnCD(Protagonist& protagonist)const;
 
     virtual void use(Protagonist& protagonist);
     virtual void equipAndUnequip(Protagonist& protagonist);
@@ -154,23 +155,18 @@ private:
  * @param strength_restore 体力恢复值（压缩饼干、营养餐）
  * @param health_restore 健康恢复值（营养餐）
  * @param time_cooldown 冷却时间（压缩饼干）
- * @param time_last_used 上次使用时间（压缩饼干）
  * @note time_last_used的变量类型需要和游戏的时间流逝设计对齐
  * */
 class Food : public Consumable {
 public:
-    Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, float time_last_used);
+    Food(const string& name, const string& description, float value, float strength_restore, float health_restore, float time_cooldown, bool have_cd);
+    bool isOnCD(Protagonist& protagonist)const override;
     void use(Protagonist& protagonist) override;
-
-    /**
-    * @brief 检查是否在冷却中
-    */
-    bool isOnCooldown() const;
 private:
     float strength_restore;
     float health_restore;
     float time_cooldown;
-    float time_last_used;
+    bool have_cd;
 };
 
 /**
@@ -184,14 +180,13 @@ private:
  * */
 class LearningAid : public Consumable {
 public:
-    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, bool is_used_today, float health_reduce);
+    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce);
     void use(Protagonist& protagonist) override;
 private:
     float intel_boost;
     float intel_boost_rate;
     float duration;
     bool have_abuse_punish;
-    bool is_used_today;
     float health_reduce;
 };
 
@@ -202,11 +197,14 @@ private:
  * */
 class HealthItem : public Consumable {
 public:
-    HealthItem(const string& name, const string& description, float value, float health_restore, float duration);
+    HealthItem(const string& name, const string& description, float value, float health_restore, float duration, float time_cooldown, bool have_cd);
+    bool isOnCD(Protagonist& protagonist)const override;
     void use(Protagonist& protagonist) override;
 private:
     float health_restore;
     float duration;
+    float time_cooldown;
+    bool have_cd;
 };
 
 /**

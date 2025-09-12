@@ -74,9 +74,6 @@ public:
     virtual void use(Protagonist& protagonist);
     virtual void equipAndUnequip(Protagonist& protagonist);
 
-    virtual void use(Protagonist& protagonist);
-    virtual void equipAndUnequip(Protagonist& protagonist);
-
 protected:
     string name;
     string description;

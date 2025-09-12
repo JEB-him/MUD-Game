@@ -118,7 +118,7 @@
     "have_abuse_punish": true,
     "class": "learning_aid"
   },
-  "": {
+  "milk": {
     "name": "牛奶",
     "description": "提高学习效率，下次学习效果提升",
     "value": 8,

@@ -11,6 +11,8 @@
 #include "NPC.h"
 #include "InputHandler.h"
 #include "backpack.h"
+#include "View.h"
+// #include "backpack.h"
 #include <set>
 #include <ctime>
 
@@ -41,7 +43,8 @@ public:
     /**
      * @brief 事件类型
      */
-    enum class EventType {
+    enum class EventType
+    {
         MOVE,      ///< 移动主角
         AC_NPC,    ///< 与NPC互动
         AC_INST,   ///< 与器械互动
@@ -49,9 +52,9 @@ public:
         REFRESH,   ///< 刷新地图
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
-        TP,        ///< 传送到 NPC 附近
-        QUIT,      ///< 退出游戏
-        NONE       ///< 无事件
+        // TP,        ///< 传送到 NPC 附近
+        QUIT,    ///< 退出游戏
+        NONE     ///< 无事件
     };
 
     /**
@@ -98,10 +101,9 @@ public:
     std::shared_ptr<Backpack>     backpack    = nullptr;
 
     template <class Archive>
-    void serialize(Archive &archive) {
-        // TODO Check 这个地方需要加入 map 吗？
-        archive(CEREAL_NVP(map),
-                CEREAL_NVP(protagonist),
+    void serialize(Archive &archive)
+    {
+        archive(CEREAL_NVP(protagonist),
                 CEREAL_NVP(npc)
                 // CEREAL_NVP(backpack),
         );
@@ -141,6 +143,7 @@ private:
      */
     Message init();
 
+    
     Message load(std::string username);
 
     /**
@@ -152,8 +155,6 @@ private:
      */
     Message save();
 
- 
-
     /**
      * TODO
      * @brief 登录
@@ -162,10 +163,8 @@ private:
     Message playerLogin(std::string &user_name);
 
     /**
-     * TODO
      * @brief 获得用户操作事件
      * @param[out] event_type 事件类型
-     * @return 返回消息
      */
     Message getEvent(EventType &event_type);
 
@@ -181,10 +180,8 @@ private:
      */
 
     /**
-     * @brief 跳转场景
-     * @details 遍历跳转场景的入口，拿到传送到哪个入口
-     * @param[in] exit_id
+     * @brief 解决用户操作事件
+     * @param[out] event_type 事件类型
      */
-    Message handleCmd(std::string cmd);
-
+    Message handleEvent(EventType &event_type);
 };

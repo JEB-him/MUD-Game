@@ -47,7 +47,7 @@ public:
 	 * @brief 获取背包管理物品智能指针的vector数组
 	 * @return vector数组的引用
 	 */
-	vector<unique_ptr<Item>>& getBackpack‌Items();
+	vector<unique_ptr<Item>> &getBackpackItems();
 
 	/**
 	 * @brief  添加（生成）名为“item_name”的物品

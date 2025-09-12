@@ -148,6 +148,7 @@ int InputHandler::waitKeyDown()
 }
 
 #else
+/*
 #include <ncurses.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -220,7 +221,7 @@ int InputHandler::waitKeyDown()
     }
 
     return capturedKey;
-}
+}*/
 #endif
 
 // int main()

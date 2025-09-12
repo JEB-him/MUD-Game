@@ -38,9 +38,9 @@ target_include_directories(game PUBLIC "${PROJECT_SOURCE_DIR}/Third")
 target_include_directories(game PUBLIC "${PROJECT_SOURCE_DIR}/src")
 
 # Curses
-find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIR})
-target_link_libraries(game PRIVATE ${CURSES_LIBRARIES})
+# find_package(Curses REQUIRED)
+# include_directories(${CURSES_INCLUDE_DIR})
+# target_link_libraries(game PRIVATE ${CURSES_LIBRARIES})
 
 # 检测是否为 Visual Studio 生成器
 if(CMAKE_GENERATOR MATCHES "Visual Studio" OR (CMAKE_GENERATOR STREQUAL "Ninja" AND (MSVC OR DEFINED CMAKE_VS_INSTALL_DIR OR DEFINED ENV{VisualStudioVersion})))

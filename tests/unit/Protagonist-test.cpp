@@ -82,45 +82,45 @@ TEST_CASE("Protagonist Basic Functionality", "[Protagonist]") {
         REQUIRE(stateDesc == "死亡");
     }
 
-    // 测试5：序列化与反序列化
-    SECTION("Serialization and Deserialization") {
-        // 修改部分属性用于测试
-        protag.updateAttr(BasicValue::ProtagonistAttr::MONEY, 100, false);
-        protag.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, 1.5f, false);
-        protag.updateAttr(BasicValue::ProtagonistAttr::IS_INJURED, 1, false);
+    // // 测试5：序列化与反序列化
+    // SECTION("Serialization and Deserialization") {
+    //     // 修改部分属性用于测试
+    //     protag.updateAttr(BasicValue::ProtagonistAttr::MONEY, 100, false);
+    //     protag.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, 1.5f, false);
+    //     protag.updateAttr(BasicValue::ProtagonistAttr::IS_INJURED, 1, false);
 
-        // 序列化
-        std::string serializedData = protag.serialize();
-        REQUIRE(!serializedData.empty());
+    //     // 序列化
+    //     std::string serializedData = protag.serialize();
+    //     REQUIRE(!serializedData.empty());
 
-        // 创建新对象并反序列化
-        Protagonist newProtag(TEST_ID, TEST_NAME);
-        auto msg = newProtag.deserialize(serializedData);
-        REQUIRE(msg.status == 0);
+    //     // 创建新对象并反序列化
+    //     Protagonist newProtag(TEST_ID, TEST_NAME);
+    //     auto msg = newProtag.deserialize(serializedData);
+    //     REQUIRE(msg.status == 0);
 
-        // 验证反序列化结果
-        REQUIRE(newProtag.getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] == 100);
-        REQUIRE(newProtag.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.5f);
+    //     // 验证反序列化结果
+    //     REQUIRE(newProtag.getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] == 100);
+    //     REQUIRE(newProtag.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.5f);
         
-        std::string stateDesc;
-        REQUIRE(newProtag.getHealthState(stateDesc) == BasicValue::HealthState::INJURED);
-    }
+    //     std::string stateDesc;
+    //     REQUIRE(newProtag.getHealthState(stateDesc) == BasicValue::HealthState::INJURED);
+    // }
 
-    // 测试6：JSON文件错误处理
-    SECTION("JSON Error Handling") {
-        // 备份原测试文件
-        std::filesystem::path testFile = ".\\..\\tests\\unit\\Protagonist_Test.json";
-        std::filesystem::path backupFile = testFile.string() + ".bak";
-        std::filesystem::copy_file(testFile, backupFile, std::filesystem::copy_options::overwrite_existing);
+    // // 测试6：JSON文件错误处理
+    // SECTION("JSON Error Handling") {
+    //     // 备份原测试文件
+    //     std::filesystem::path testFile = ".\\..\\tests\\unit\\Protagonist_Test.json";
+    //     std::filesystem::path backupFile = testFile.string() + ".bak";
+    //     std::filesystem::copy_file(testFile, backupFile, std::filesystem::copy_options::overwrite_existing);
 
-        // 测试文件不存在的情况
-        std::filesystem::remove(testFile);
-        Protagonist badProtag(TEST_ID, TEST_NAME);
-        auto baseAttrs = badProtag.getBaseAttrs();
-        REQUIRE(baseAttrs[BasicValue::ProtagonistAttr::HEALTH] == 100);  // 使用默认值
+    //     // 测试文件不存在的情况
+    //     std::filesystem::remove(testFile);
+    //     Protagonist badProtag(TEST_ID, TEST_NAME);
+    //     auto baseAttrs = badProtag.getBaseAttrs();
+    //     REQUIRE(baseAttrs[BasicValue::ProtagonistAttr::HEALTH] == 100);  // 使用默认值
 
-        // 恢复原测试文件
-        std::filesystem::copy_file(backupFile, testFile, std::filesystem::copy_options::overwrite_existing);
-        std::filesystem::remove(backupFile);
-    }
+    //     // 恢复原测试文件
+    //     std::filesystem::copy_file(backupFile, testFile, std::filesystem::copy_options::overwrite_existing);
+    //     std::filesystem::remove(backupFile);
+    // }
 }

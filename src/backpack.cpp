@@ -4,7 +4,6 @@
 * @brief 背包类实现
 */
 
-#pragma once
 #include"backpack.h"
 
 /**

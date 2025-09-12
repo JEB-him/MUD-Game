@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file tools.h
  * @details 这是一个工具文件，用于存放常用的工具类
  * @author Jie Jiang
@@ -7,23 +7,44 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
+#include <cereal/archives/binary.hpp>
+#include <cereal/cereal.hpp>
+
+// 定义  Rgb 颜色类
+class  Rgb {
+public:
+    std::uint8_t r;  // 红色分量
+    std::uint8_t g;  // 绿色分量
+    std::uint8_t b;  // 蓝色分量
+
+     Rgb(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
+};
 
 /**
  * @brief 一个通用的坐标类，建议都使用该类来储存坐标
  */
-class Position {
+class Position 
+{
 public:
     // `<` 表示该注释作用的代码在注释的前面而不是后面
     /* 上面这种只有2个`/`,或者现在使用的只有1个`*`的注释不会被 Doxygen 识别到 */
-    int x;      ///< 横坐标, 该成员 public
-    int y;      ///< 纵坐标，该成员 public
+    int x=0;      ///< 横坐标, 该成员 public
+    int y=0;      ///< 纵坐标，该成员 public
 
     /**
      * @brief 使用一对 int 值来构造一个坐标类
      * @param x 横坐标，默认为 0
      * @param y 纵坐标，默认为 0
      */
-    Position(const int& x=0, const int& y=0);
+    Position(const int& x, const int& y);
+    Position()=default;
+    template <class Archive>
+    void serialize(Archive &arch)
+    {
+        arch(CEREAL_NVP(x),
+        CEREAL_NVP(y));
+    };
 };
 
 /**
@@ -60,20 +81,23 @@ private:
  */
 class SpecialChar {
 public:
-    const std::string special_char;            ///< 因为这些符号一般都占 3 字节，所以需要使用string
-    const int width;                           ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
-    const std::string simple_color;            ///< ANSI 普通颜色
-    const std::string rgb_color;               ///< ANSI RGB 颜色
+    const std::string special_char;    ///< 因为这些符号一般都占 3 字节，所以需要使用string
+    const int width;                   ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const std::string simple_color;    ///< ANSI 普通颜色
+    const  Rgb  Rgb_color;               ///< ANSI  Rgb 颜色
+    const bool need_empty;             ///< 是否需有手动添加空格
     /**
      * @brief 构造函数，有特殊意义的参数见下
      * @param simple_color 默认为 "white"
-     * @param rgb_color 默认为空，当次参数有值时覆盖 simple_color 的效果
+     * @param  Rgb_color 当 simple_color 为空时启用
      */
     SpecialChar(
-        const std::string& specail_char,
+        const std::string& special_char,
         const int& width,
+        const bool& need_empty=true,
         const std::string& simple_color="white",
-        const std::string& rgb_color="");
+        const  Rgb&  Rgb_color= Rgb(0, 0, 0)
+    );
 
     /**
      * @brief 默认构造函数

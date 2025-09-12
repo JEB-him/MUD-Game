@@ -1,4 +1,3 @@
-#pragma once
 #include "catch.hpp"
 #include "Item.h"
 #include "backpack.h"

@@ -32,7 +32,6 @@ using std::vector;
  */
 class Backpack {
 public:
-
 	/**
 	 * @brief 背包类构造函数
 	 * @details vector初始容量设定为0，容量超限则扩容10倍

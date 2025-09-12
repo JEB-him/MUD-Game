@@ -11,7 +11,6 @@
   *          消耗品的use方法未实现、用具equipAndUnequip方法未适配主角类接口的改变 \n
   * */
 
-#pragma once
 #include"Item.h"
 #include<filesystem>
 

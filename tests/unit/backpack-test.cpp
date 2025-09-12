@@ -6,7 +6,7 @@
 #include <string>
 #include"Protagonist.h"
 
-TEST_CASE("All of backpack function & Part of item function", "[backpack & part of item]") {
+TEST_CASE("All of backpack function and part of item function", "[backpack][part of item]") {
     Protagonist protagonist("114514", "小王");
     Backpack backpack;
     backpack.addItem("advanced_mathematics");

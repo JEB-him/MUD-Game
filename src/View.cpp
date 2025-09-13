@@ -241,8 +241,10 @@ Message View::drawPoMove(const Position& last_pos, const Position& pos) {
     for (int i = 0;i < protago.width; ++i) {
         std::cout << " ";
     }
+    std::cout << std::flush;
     gotoMap(pos);
     std::cout << protago.special_char;
+    std::cout << std::flush;
     std::cout << LOADCUS;
     return {"Success", 0};
 }
@@ -507,10 +509,11 @@ std::string View::charToSpecial(const int &x, const int &y, int &tx, int &ty) {
 
 bool View::gotoMap(const Position& pos) {
     if (!Position::ifInMap(pos, *(controller->map))) {
+        controller->log(Controller::LogLevel::DEBUG, "Not in Map");
         return false;
     }
     int bx = TOP_MARGIN + 1 + TOP_PADDING + 1;
     int by = LEFT_MARGIN + 1 + LEFT_PADDING + 1;
-    gotoXY(pos.x + bx, pos.y + by);
+    std::cout << gotoXY(pos.x + bx, pos.y + by);
     return true;
 }

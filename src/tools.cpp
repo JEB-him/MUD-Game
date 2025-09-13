@@ -1,5 +1,10 @@
 #include "tools.h"
 #include "Map.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 void gameSleep(unsigned int time) {
 #ifdef _WIN32
@@ -10,14 +15,6 @@ void gameSleep(unsigned int time) {
 }
 
 Position::Position(const int& x, const int& y) : x(x), y(y) {}
-
-void gameSleep(unsigned int time) {
-#ifdef _WIN32
-    Sleep(ms);
-#else
-    usleep(time * 1000); // 转换为微秒
-#endif
-}
 
 bool operator == (const Position& a, const Position& b) {
     return a.x == b.x && a.y == b.y;

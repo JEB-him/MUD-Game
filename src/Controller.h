@@ -12,6 +12,8 @@
 #include "NPC.h"
 #include "InputHandler.h"
 // #include "backpack.h"
+#include <set>
+#include <ctime>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -129,7 +131,7 @@ private:
     Controller(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
 
     /**
-     * @brief 初始化函数
+     * @brief 初始化函数·
      * @details 初始化信息，包括：\n
      *          0. 调用 view 模块中的函数进行界面初始化
      *          1. 初始化必要的智能指针
@@ -160,7 +162,7 @@ private:
      * @brief 登录
      * @details 实现登录逻辑
      */
-    Message playerLogin();
+    Message playerLogin(std::string &user_name);
 
     /**
      * TODO

@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cereal/archives/binary.hpp>
 #include <cereal/cereal.hpp>
+#include <regex>
 
 // 定义  Rgb 颜色类
 class  Rgb {
@@ -107,3 +108,11 @@ public:
      */
     SpecialChar();
 };
+
+/**
+ * @brief 检查用户名是否合法
+ * @details 只允许字母、数字、下划线和中文字符
+ * @param username 待检查的用户名
+ * @return 合法返回 true，否则返回 false
+ */
+bool isValidUsername(const std::string& username);

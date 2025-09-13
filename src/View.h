@@ -42,7 +42,7 @@ public:
      * @brief 单例模式获取 View 的函数
      * @return 一个 View 的 shared 智能指针
      */
-    static std::shared_ptr<View> getInstance(std::shared_ptr<Controller> controller);
+    static std::shared_ptr<View> getInstance();
     /**
      * @brief 全局重绘
      * @note 丢失所有已经绘制的图形，仅保留地图，建议在窗口大小发生改变时应用此函数
@@ -52,6 +52,7 @@ public:
 
     /**
      * @brief 局部重绘
+     * @note 暂时不考虑实现
      * @details 重新擦出绘制制定区域，适用于操作框满需要重绘的情况
      * @param area\n
      *        0 - 重绘地图
@@ -72,29 +73,41 @@ public:
     /**
      * @brief 打印一条日志
      * @details 提供一个[速查表](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes)\n
+     *          要求窗口大小满足条件，map 已经初始化
      * @param msg 一条 string 文本
-     * @param  Rgb_color 一个  Rgb 类型的颜色参数， Rgb 定义见上
-     * @param simple_color 颜色，参见 ANSI Escape 表,  Rgb_color 不为空时该参数被忽略
+     * @param  rgb_color 一个  Rgb 类型的颜色参数， Rgb 定义见上
+     * @param simple_color 颜色，参见 ANSI Escape 表,  rgb_color 不为空时该参数被忽略
      * @return bool success
      */
-    bool printLog(const std::string& msg, const std::string& simple_color, const  Rgb& rgb_color =  Rgb(-1, -1, -1));
+    Message printLog(const std::string& msg, const std::string& simple_color, const  Rgb& rgb_color =  Rgb(0, 0, 0));
 
     /**
      * @brief 输出一个问题格式的消息到操作界面
-     * @param 询问的人，置空则不显示
+     * @details 提供一个[速查表](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes)\n
+     *          要求窗口大小满足条件，map 已经初始化
+     * @param person 询问的人，置空则不显示
      * @param text 消息
      * @param rgb_color 颜色
      * @param simple_color 颜色，参见 ANSI Escape 表, 该参数传递空值时使用 rgb_color
      * @return Message 消息
      */
-    Message printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color=Rgb(-1,-1,-1));
+    Message printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color=Rgb(0,0,0));
 
     /**
      * @brief 输出选项
+     * @details 提供一个[速查表](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes)\n
+     *          要求窗口大小满足条件，map 已经初始化
      * @param options 选项列表(vector)
      * @return Message
      */
     Message printOptions(const std::vector<std::string>& options);
+
+    /**
+     * @brief 打印缓冲区域中的命令
+     * @param cmd std::string 命令
+     * @return Message
+     */
+    Message printCmd(const std::string& cmd);
     
     /**
      * @brief 清空屏幕
@@ -102,10 +115,14 @@ public:
     static void clear() { std::cout << "\x1b[2J"; }
 
 private:
+    // 控制器智能指针
+    std::shared_ptr<Controller> controller;
+
+    // 设置日志和游戏输出的最大尺寸
     const int MIN_WIN_WIDTH;
     const int MIN_WIN_HEIGHT;
 
-    // 设置日志和游戏输出的最大行数
+    // 设置留白
     static constexpr int TOP_MARGIN    = 0;
     static constexpr int BOTTOM_MARGIN = 3;
     static constexpr int LEFT_MARGIN   = 1;
@@ -153,11 +170,8 @@ private:
     std::queue<Position> in_positions;
     std::queue<Position> out_positions;
 
-    // 控制器智能指针
-    std::shared_ptr<Controller> controller;
-
-    // 构造函数，要求控制器指针
-    View(std::shared_ptr<Controller> controller);
+    // 构造函数
+    View();
 
     // 获得光标位置
     void get_cursor_position(int& x, int& y);
@@ -177,6 +191,10 @@ private:
 
     // 特殊字符输出
     std::string charToSpecial(const int& x, const int& y, int& tx, int& ty);
+
+    // 跳转到地图的某个位置
+    // ！不支持恢复光标位置
+    bool gotoMap(const Position& pos);
 };
 
 /*

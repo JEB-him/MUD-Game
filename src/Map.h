@@ -70,6 +70,7 @@ public:
         SpecialChar("", -1),
         SpecialChar(" ", 4),    ///< 出口
     };
+    constexpr static int PROTAGONIST_INDEX = 1;
 
     Map() = default;
     /**

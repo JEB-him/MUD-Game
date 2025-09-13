@@ -6,21 +6,26 @@
  
 #pragma once
 
-#pragma once
-
 #include <string>
-#include <cstdint>
 #include <cereal/archives/binary.hpp>
 #include <cereal/cereal.hpp>
+
+/**
+ * @brief 游戏睡眠函数，兼容多平台
+ * @param time 时间(ms)
+ */
+void gameSleep(unsigned int time);
+
+class Map;
 
 // 定义  Rgb 颜色类
 class  Rgb {
 public:
-    std::uint8_t r;  // 红色分量
-    std::uint8_t g;  // 绿色分量
-    std::uint8_t b;  // 蓝色分量
+    int r;  // 红色分量
+    int g;  // 绿色分量
+    int b;  // 蓝色分量
 
-     Rgb(std::uint8_t r=0, std::uint8_t g=0, std::uint8_t b=0);
+    Rgb(int r=0, int g=0, int b=0);
 };
 
 /**
@@ -47,7 +52,10 @@ public:
         arch(CEREAL_NVP(x),
         CEREAL_NVP(y));
     };
+    static bool ifInMap(const Position& pos, const Map& map);
 };
+
+bool operator == (const Position& a, const Position& b);
 
 /**
  * @brief 一个通用的消息类，用于在调用中返回消息,
@@ -85,9 +93,9 @@ class SpecialChar {
 public:
     const std::string special_char;    ///< 因为这些符号一般都占 3 字节，所以需要使用string
     const int width;                   ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
+    const bool need_empty;             ///< 是否需有手动添加空格
     const std::string simple_color;    ///< ANSI 普通颜色
     const  Rgb  Rgb_color;               ///< ANSI  Rgb 颜色
-    const bool need_empty;             ///< 是否需有手动添加空格
     /**
      * @brief 构造函数，有特殊意义的参数见下
      * @param simple_color 默认为 "white"

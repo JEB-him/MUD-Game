@@ -68,8 +68,8 @@ int main(int argc, char* argv[]) {
     }
 
     auto cli = Opt(root_str, "root directory")["-r"]["--root"]("所有配置文件的根目录(使用/)") |
-               Opt(log_str, "log directory")["-g"]["--logs"]("日志文件输出目录(使用/)") |
-               Opt(level, "log level")["-p"]["--glevel"]("日志等级\n决定日志的详细程度") |
+               Opt(log_str, "log directory")["-l"]["--logs"]("日志文件输出目录(使用/)") |
+               Opt(level, "log level")["-g"]["--glevel"]("日志等级\n决定日志的详细程度") |
                Help(help)|
                Arg(program, "test|run")("测试/进行游戏").required();
     auto result = cli.parse( Args( argc, argv ) );
@@ -126,8 +126,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::cout << "\n项目运行时目录设置为: " << root_dir << "..."<< std::endl;
-    std::cout << "\n项目运行时目录设置为: " << log_dir << "..."<< std::endl;
+    std::cout << "\n\n项目运行时目录设置为: " << root_dir << "..."<< std::endl;
+    std::cout << "项目运行时目录设置为: " << log_dir << "..."<< std::endl;
     // 如果是测试
     if (program == "test") {
         return session.run();

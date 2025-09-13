@@ -7,11 +7,10 @@
 #include <memory>
 #include "tools.h"
 #include "Map.h"
-// #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
 #include "InputHandler.h"
-// #include "backpack.h"
+#include "backpack.h"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -71,7 +70,7 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
+    static std::shared_ptr<Controller> getInstance(const LogLevel &level=LogLevel::INFO, const std::filesystem::path &log_dir=std::filesystem::path(), const std::filesystem::path &root_dir=std::filesystem::path());
 
     /**
      * @brief 日志函数
@@ -92,11 +91,12 @@ public:
     int run();
 
     // Model 类的智能指针
-    std::shared_ptr<Map> map;
-    std::shared_ptr<Protagonist> protagonist;
-    std::shared_ptr<NPC> npc;
-    // std::shared_ptr<Backpack> backpack;
-    std::shared_ptr<InputHandler> input;
+    std::shared_ptr<Map>          map         = nullptr;
+    std::shared_ptr<Protagonist>  protagonist = nullptr;
+    std::shared_ptr<NPC>          npc         = nullptr;
+    std::shared_ptr<View>         view        = nullptr;
+    std::shared_ptr<InputHandler> input       = nullptr;
+    std::shared_ptr<Backpack>     backpack    = nullptr;
 
     template <class Archive>
     void serialize(Archive &archive)

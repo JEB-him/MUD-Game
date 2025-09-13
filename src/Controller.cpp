@@ -238,6 +238,7 @@ int Controller::run() {
     std::cout << "创建测试临时数据..." << std::endl;
     map = std::make_shared<Map>("center.txt");
     view = View::getInstance();
+    protagonist = std::make_shared<Protagonist>("TEST_USER_0001", "Jeb");
     std::cout << "创建完毕..." << std::endl;
     gameSleep(3000);
     view->reDraw();
@@ -268,26 +269,32 @@ int Controller::run() {
     }
 
     // 测试用
+    std::stringstream ss;
     view->printCmd("测试命令");
+    gameSleep(500);
     view->printCmd("2 hello cat");
+    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
     std::vector<std::string> tmp_ops {
         "1. 带一个",
         "2. no"
     };
     view->printOptions(tmp_ops);
-    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
-    gameSleep(2000);
-    view->printQuestion("展位", "清晨，你在室友的闹铃声中醒来....", "white");
     view->printQuestion("NPC", "你好", "white");
-    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
-    gameSleep(2000);
-    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
-    std::vector<std::string> tmp2_ops {
-        "1. 带一个",
-        "2. no"
-    };
-    view->printOptions(tmp2_ops);
-    view->printQuestion("NPC", "你好", "white");
+    log(LogLevel::DEBUG, "移动主角");
+    int map_event, id;
+    Position old_pos = map->getPos();
+    ss << "初始位置: " << old_pos.x << " " << old_pos.y;
+    log(LogLevel::DEBUG, ss.str());
+    ss.str("");
+    gameSleep(500);
+    map->moveProtagonist(0, map_event, id);
+    Position pos = map->getPos();
+    protagonist->setPosition(pos);
+    view->drawPoMove(old_pos, pos);
+    ss << "当前位置: " << pos.x << " " << pos.y;
+    log(LogLevel::DEBUG, ss.str());
+    ss.str("");
     // 测试结束
 
 

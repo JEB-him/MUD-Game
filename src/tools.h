@@ -95,18 +95,18 @@ public:
     const int width;                   ///< 符号宽度, 这个宽度和 strlen 并不一致，请注意！！！
     const bool need_empty;             ///< 是否需有手动添加空格
     const std::string simple_color;    ///< ANSI 普通颜色
-    const  Rgb  Rgb_color;               ///< ANSI  Rgb 颜色
+    const  Rgb  rgb_color;               ///< ANSI  Rgb 颜色
     /**
      * @brief 构造函数，有特殊意义的参数见下
      * @param simple_color 默认为 "white"
-     * @param  Rgb_color 当 simple_color 为空时启用
+     * @param  rgb_color 当 simple_color 为空时启用
      */
     SpecialChar(
         const std::string& special_char,
         const int& width,
         const bool& need_empty=true,
         const std::string& simple_color="white",
-        const  Rgb&  Rgb_color= Rgb(0, 0, 0)
+        const  Rgb&  rgb_color= Rgb(0, 0, 0)
     );
 
     /**

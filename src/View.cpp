@@ -489,7 +489,16 @@ std::string View::charToSpecial(const int &x, const int &y, int &tx, int &ty) {
         if (!Map::SPECIAL_CHARS[index].need_empty) {
             ty += Map::SPECIAL_CHARS[index].width - 1;
         }
-        std::stringstream ss(Map::SPECIAL_CHARS[index].special_char);
+        auto rgb_color = Map::SPECIAL_CHARS[index].rgb_color;
+        auto simple_color = Map::SPECIAL_CHARS[index].simple_color;
+        std::stringstream ss;
+        if (simple_color == "") {
+            ss << "\x1b[" << "38;2;" <<  rgb_color.r << ";" <<  rgb_color.g << ";" <<  rgb_color.b << "m";
+        } else {
+            ss << "\x1b[1;" << simple_colors.at(simple_color) << "m";
+        }
+        ss << Map::SPECIAL_CHARS[index].special_char;
+        ss << "\x1b[0m";
         return ss.str();
     }
 

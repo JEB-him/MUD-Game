@@ -35,12 +35,12 @@ SpecialChar::SpecialChar(
     const int& width,
     const bool& need_empty,
     const std::string& simple_color,
-    const Rgb& Rgb_color):
+    const Rgb& rgb_color):
     special_char(special_char),
     width(width),
     need_empty(need_empty),
     simple_color(simple_color),
-    Rgb_color(Rgb_color) {
+    rgb_color(rgb_color) {
     // 构造函数体
 }
 

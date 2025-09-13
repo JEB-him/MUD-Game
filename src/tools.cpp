@@ -8,7 +8,7 @@
 
 void gameSleep(unsigned int time) {
 #ifdef _WIN32
-    Sleep(ms);
+    Sleep(time);
 #else
     usleep(time * 1000); // 转换为微秒
 #endif

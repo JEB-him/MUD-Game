@@ -279,6 +279,16 @@ int Controller::run() {
         "2. no"
     };
     view->printOptions(tmp_ops);
+    view->printQuestion("NPC", "你好", "white");
+    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    gameSleep(2000);
+    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
+    std::vector<std::string> tmp2_ops {
+        "1. 带一个",
+        "2. no"
+    };
+    view->printOptions(tmp2_ops);
+    view->printQuestion("NPC", "你好", "white");
     // 测试结束
 
 

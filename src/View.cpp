@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
+
 void View::get_cursor_position(int& x, int& y) {
 #ifdef __linux__
     struct termios oldt, newt;
@@ -23,10 +24,6 @@ void View::get_cursor_position(int& x, int& y) {
     // 关闭回显和缓冲
     newt.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    // 隐藏光标
-    printf("\033[?25l");
-    fflush(stdout);
 #elif defined(_WIN32)
     HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -43,9 +40,6 @@ void View::get_cursor_position(int& x, int& y) {
     mode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
     SetConsoleMode(hIn, mode);
 
-    // 隐藏光标
-    cursorInfo.bVisible = FALSE;
-    SetConsoleCursorInfo(hOut, &cursorInfo);
 #endif
     std::cout << "\033[6n" << std::flush; // 请求光标位置
     std::string response;

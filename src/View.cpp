@@ -105,13 +105,13 @@ std::shared_ptr<View> View::getInstance() {
 
 View::View():
     controller(Controller::getInstance()),
-    MIN_WIN_WIDTH(controller->map->getMaxWidth() +
+    min_win_width(controller->map->getMaxWidth() +
                   40 +
                   LEFT_MARGIN +
                   RIGHT_MARGIN +
                   LEFT_PADDING +
                   RIGHT_PADDING),
-    MIN_WIN_HEIGHT(controller->map->getMaxHeight() +
+    min_win_height(controller->map->getMaxHeight() +
                    10 +
                    TOP_MARGIN +
                    BOTTOM_MARGIN +
@@ -138,7 +138,7 @@ bool View::reDraw() {
     if (controller->map == nullptr) {
         return false;
     }
-    if (width < MIN_WIN_WIDTH || height < MIN_WIN_HEIGHT) {
+    if (width < min_win_width || height < min_win_height) {
         return false;
     }
     int map_width =  controller->map->getMaxWidth();

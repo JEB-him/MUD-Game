@@ -133,7 +133,10 @@ int main(int argc, char* argv[]) {
         return session.run();
     } else if (program == "run") {
         auto controller = Controller::getInstance(levels[level], log_dir, root_dir);
-        return controller->run();
+        int runcode = controller->run();
+        // 确保光标正常显示
+        controller->view->enableCursor();
+        return runcode;
     }
     if (help) {
         std::cout << "Documentation: " << root_dir.generic_string() << "/docs/html/index.html" << std::endl;

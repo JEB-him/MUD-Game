@@ -13,7 +13,33 @@
 #endif
 #include <iostream>
 #include <string>
-#include <stdio.h>
+
+void View::enableCursor() {
+#if defined(__linux__)
+    std::cout << "\x1b[?25h";
+    std::cout.flush();
+#elif defined(__WIN32)
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(handle, &cursorInfo);
+    cursorInfo.bVisible = true; // 显示光标
+    SetConsoleCursorInfo(handle, &cursorInfo);
+#endif
+}
+
+void View::disableCursor() {
+#if defined(__linux__)
+    // 使用ANSI转义序列隐藏光标
+    std::cout << "\x1b[?25l";
+    std::cout.flush();
+#elif defined(__WIN32)
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(handle, &cursorInfo);
+    cursorInfo.bVisible = false; // 隐藏光标
+    SetConsoleCursorInfo(handle, &cursorInfo);
+#endif
+}
 
 void View::get_cursor_position(int& x, int& y) {
 #ifdef __linux__
@@ -24,6 +50,10 @@ void View::get_cursor_position(int& x, int& y) {
     // 关闭回显和缓冲
     newt.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    // 隐藏光标
+    std::cout << "\x1b[?25l";
+    std::cout.flush();
 #elif defined(_WIN32)
     HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -40,8 +70,11 @@ void View::get_cursor_position(int& x, int& y) {
     mode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
     SetConsoleMode(hIn, mode);
 
+    // 隐藏光标
+    cursorInfo.bVisible = FALSE;
+    SetConsoleCursorInfo(hOut, &cursorInfo);
 #endif
-    std::cout << "\033[6n" << std::flush; // 请求光标位置
+    std::cout << "\x1b[6n" << std::flush; // 请求光标位置
     std::string response;
     char ch;
     while (std::cin.get(ch)) {
@@ -49,7 +82,7 @@ void View::get_cursor_position(int& x, int& y) {
         if (ch == 'R') break;
     }
     int row, col;
-    if (sscanf(response.c_str(), "\033[%d;%dR", &row, &col) == 2) {
+    if (sscanf(response.c_str(), "\x1b[%d;%dR", &row, &col) == 2) {
         x = row, y = col;
     } else {
         x = -1, y = -1;
@@ -57,8 +90,6 @@ void View::get_cursor_position(int& x, int& y) {
 #ifdef __linux__
     // 恢复状态
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    printf("\033[?25h"); // 显示光标
-    fflush(stdout);
 #elif defined(_WIN32)
     // 恢复状态
     SetConsoleMode(hIn, oldMode);
@@ -86,6 +117,11 @@ View::View():
                    BOTTOM_MARGIN +
                    TOP_PADDING +
                    BOTTOM_PADDING) {
+    disableCursor();
+}
+
+View::~View() {
+    enableCursor();
 }
 
 bool View::reDraw() {
@@ -115,7 +151,7 @@ bool View::reDraw() {
     // 窗口宽度-日志宽度-边框-预留空白
     puts_width = width - logs_width - 3 - LEFT_MARGIN - RIGHT_MARGIN;
     // 留出命令输入的位置
-    puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN - 2;
+    puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN - 1;
     // 清屏
     std::cout << REASE_S;
     // 首先绘制所有框架
@@ -227,7 +263,7 @@ Message View::printQuestion(const std::string& person, const std::string& msg, c
     if (person.length()) {
         text = person + ": " + msg;
     }
-    colorPrint(msg, simple_color, rgb_color, game_outputs, puts_width);
+    colorPrint(text, simple_color, rgb_color, game_outputs, puts_width);
     return {"Success", 0};
 }
 
@@ -245,7 +281,7 @@ Message View::printOptions(const std::vector<std::string>& options) {
 Message View::printCmd(const std::string& cmd) {
     std::cout << SAVECUS << MOVU;
     std::cout << "\x1b[38;5;214m\x1b[1m " << cmd << "\x1b[0m";
-    for (size_t i = 0; i < static_cast<size_t>(puts_width) - cmd.length(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(puts_width) - cmd.length() - 1; ++i)
         std::cout << " ";
     std::cout  << LOADCUS;
     // 刷新缓冲区
@@ -274,7 +310,7 @@ void View::colorPrint(
             controller->log(Controller::LogLevel::ERR, "消息打印错误");
             return;
         }
-        ss << text.substr(old_index, index);;
+        ss << text.substr(old_index, index - old_index);
         old_index = index;
         // 转换为默认格式
         ss << "\x1b[0m";
@@ -293,9 +329,10 @@ void View::invalidate() {
     std::cout << uLines(puts_height + 2);
     int next_x = 0, next_y = 0;
     get_cursor_position(next_x, next_y);
+    // 输出所有游戏输出
     for (auto iter = game_outputs.begin(); iter != game_outputs.end(); ++iter) {
-        std::cout << *iter;
         std::cout << gotoXY(next_x, next_y);
+        std::cout << *iter;
         next_x += 1;
     }
     std::cout << LOADCUS;
@@ -311,8 +348,8 @@ void View::invalidate() {
     std::cout << lCols(logs_width + 1);
     get_cursor_position(next_x, next_y);
     for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-        std::cout << *iter;
         std::cout << gotoXY(next_x, next_y);
+        std::cout << *iter;
         next_x += 1;
     }
     std::cout << LOADCUS;

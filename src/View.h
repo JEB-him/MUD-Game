@@ -39,6 +39,11 @@ public:
         {"default", "39"}
     };
     /**
+     * @brief 析构函数
+     * @details 将会恢复光标
+     */
+    ~View();
+    /**
      * @brief 单例模式获取 View 的函数
      * @return 一个 View 的 shared 智能指针
      */
@@ -113,6 +118,16 @@ public:
      * @brief 清空屏幕
      */
     static void clear() { std::cout << "\x1b[2J"; }
+
+    /**
+     * @brief 恢复光标显示
+     */
+    static void enableCursor();
+
+    /**
+     * @brief 隐藏光标
+     */
+    static void disableCursor();
 
 private:
     // 控制器智能指针

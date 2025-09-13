@@ -269,16 +269,15 @@ int Controller::run() {
 
     // 测试用
     view->printCmd("测试命令");
-    gameSleep(2000);
     view->printCmd("2 hello cat");
-    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
-    gameSleep(2000);
-    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
     std::vector<std::string> tmp_ops {
         "1. 带一个",
         "2. no"
     };
     view->printOptions(tmp_ops);
+    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
+    gameSleep(2000);
+    view->printQuestion("展位", "清晨，你在室友的闹铃声中醒来....", "white");
     view->printQuestion("NPC", "你好", "white");
     view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
     gameSleep(2000);

@@ -4,6 +4,7 @@
 #include "NPC.h"
 #include "Protagonist.h"
 #include "Controller.h"
+#include "View.h"
 #include <fstream>
 #include <algorithm>
 #include <string>
@@ -22,6 +23,7 @@ using json = nlohmann::json;
  * @brief 将NPCType枚举转换为字符串
  * @param type NPC类型
  * @return 对应的字符串表示
+ * @deprecated Controller 将直接使用字符串创建 NPC
  */
 const std::string& NPCTypeToString(NPCType type) {
     static const std::unordered_map<NPCType, std::string> typeMap {
@@ -39,27 +41,30 @@ const std::string& NPCTypeToString(NPCType type) {
 
 /**
  * @brief 构造函数
- * @param name NPC名称
+ * @param name NPC名称\n
+ *        1. 配置文件中的姓和名分开
+ *        2. 如果配置文件不指定姓名，则必须指定性别，以进行随机分配
  * @param id NPC唯一标识符
  */
-NPC::NPC(const std::string& name, int id) 
-    : name(name), id(id) {}
+NPC::NPC(const std::string& first_name, const std::string& last_name, int id) 
+    : first_name(first_name), last_name(last_name), id(id) {
+    name = first_name + last_name;
+}
 
 /**
  * @brief 加载交互配置
- * @param npcType NPC类型
- * @param configPath 配置文件路径
+ * @param npc_type NPC (string)
+ * @param config_path 配置文件路径
  */
-void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) {
-    std::string typeStr = NPCTypeToString(npcType);
+void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& config_path) {
     
     // 清空旧交互树
     interactionTree.clear();
     currentInteractionId.clear();
 
-    std::ifstream file(configPath);
+    std::ifstream file(config_path.c_str());
     if (!file.is_open()) {
-        throw std::runtime_error("无法打开配置文件: " + configPath);
+        throw std::runtime_error("无法打开配置文件: " + config_path);
     }
 
     try {
@@ -67,10 +72,10 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
         file >> config;
 
         // 验证角色配置存在
-        if (!config.contains(typeStr)) {
-            throw std::runtime_error("配置文件缺少" + typeStr + "角色配置");
+        if (!config.contains(npc_type)) {
+            throw std::runtime_error("配置文件缺少" + npc_type + "角色配置");
         }
-        auto& roleConfig = config[typeStr];
+        auto& roleConfig = config[npc_type];
 
         // 检查initial字段
         if (!roleConfig.contains("initial")) {
@@ -80,7 +85,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
             throw std::runtime_error("initial字段必须是字符串");
         }
         std::string initialNode = roleConfig["initial"].get<std::string>();
-        currentInteractionId = typeStr + "_" + initialNode;
+        currentInteractionId = npc_type + "_" + initialNode;
 
         // 加载交互节点
         if (!roleConfig.contains("interactions") || !roleConfig["interactions"].is_object()) {
@@ -93,6 +98,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 throw std::runtime_error("节点" + nodeId + "的prompt字段缺失或不是字符串");
             }
             std::string prompt = nodeData["prompt"].get<std::string>();
+            replaceText(prompt);
             InteractionNode node{
                 prompt,
                 {},
@@ -110,6 +116,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                     throw std::runtime_error("选项缺少text字段或不是字符串");
                 }
                 std::string text = option["text"].get<std::string>();
+                replaceText(text);
 
                 std::string nextNode;
                 if (option.contains("next")) {
@@ -126,7 +133,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
 
                 // 生成带前缀的nextNode
                 if (!nextNode.empty()) {
-                    nextNode = typeStr + "_" + nextNode;
+                    nextNode = npc_type + "_" + nextNode;
                 }
 
                 // 解析condition字段
@@ -147,7 +154,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 }
             }
 
-            std::string prefixedId = typeStr + "_" + nodeId;
+            std::string prefixedId = npc_type + "_" + nodeId;
             interactionTree[prefixedId] = node;
         }
 
@@ -199,81 +206,139 @@ void NPC::startInteraction() {
         return;
     }
 
-    auto controller = Controller::getInstance(Controller::LogLevel::INFO, "logs/", "config/");
-    auto playerMoney00 = controller -> protagonist -> getBaseAttrs();
-    int playerMoney0 = playerMoney00[BasicValue::ProtagonistAttr::MONEY];
-    std::cout << "当前金钱: " << playerMoney0 << std::endl;
+    auto controller = Controller::getInstance();
+    if (!controller) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： controller");
+    }
+    auto view = View::getInstance();
+    if (!view) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： view");
+    }
+    if (!(controller->protagonist)) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： protagonist");
+    }
+    if (!(controller->input)) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： input");
+    }
+    if (!(controller->backpack)) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： backpack");
+    }
+    auto backpack = controller->backpack;
+    auto input = controller->input;
+    auto protagonist = controller -> protagonist;
+    auto base_attrs = controller -> protagonist -> getBaseAttrs();
+    // TODO 修复 map 类型
+    int current_money = base_attrs[BasicValue::ProtagonistAttr::MONEY];
+    ss.str("");
+    ss << "当前金钱: $" << current_money;
+    view->printQuestion("", ss.str(), "yellow");
 
-    std::cout << "*-*" << node.prompt << std::endl;
+    ss.str("");
+    ss << "*-*" << node.prompt;
+    view->printQuestion("", ss.str(), "white");
 
     if (node.effect.size() > 0) {
         // 执行效果
         for (auto& [type, value] : node.effect) {
-            int changeValue = std::stoi(value);
+                int changeValue;
+            try {
+                changeValue = std::stoi(value);
+            } catch (const std::invalid_argument& e) {
+                ss.str("");
+                ss << "无效Effect in NPC process: " << e.what();
+                controller->log(Controller::LogLevel::ERR, ss.str());
+                continue;
+            } catch (const std::out_of_range& e) {
+                ss.str("");
+                ss << "Effect exceed \'int\' range in NPC process: " << e.what();
+                controller->log(Controller::LogLevel::ERR, ss.str());
+                continue;
+            }
 
+            Message success_msg;
+            ss.str("");
             if (type == "STRENGTH") {
-                controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::STRENGTH, changeValue, true);
-                std::cout << "体力" << (changeValue > 0 ? "增加" : "减少") << std::abs(changeValue) << "点" << std::endl;
+                success_msg = controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::STRENGTH, changeValue, true);
+                ss << "体力" << (changeValue > 0 ? "增加" : "减少") << std::abs(changeValue) << "点";
             } else if (type == "MONEY") {
                 controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::MONEY, changeValue, true);
-                std::cout << "金钱" << (changeValue > 0 ? "获得" : "消耗") << std::abs(changeValue) << "元" << std::endl;
+                ss << "金钱" << (changeValue > 0 ? "获得" : "消耗") << std::abs(changeValue) << "元";
             } else if (type == "INTEL_ARTS") {
                 controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::INTEL_ARTS, changeValue, true);
-                std::cout << "文科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点" << std::endl;
+                ss << "文科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点";
             } else if (type == "INTEL_SCI") {
                 controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, changeValue, true);
-                std::cout << "理科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点" << std::endl;
+                ss << "理科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点";
+            } else if (type == "TIME") {
+                controller->protagonist->addGameTime(changeValue);
+                ss << "时间" << (changeValue > 0 ? "逆流" : "流逝") << std::abs(changeValue) << "小时";
+            } else if (type == "OBJ") {
+                backpack->addItem(value);
+                ss << "获得物品" << backpack->getItemInf(value).name;
+            }
+                view->printQuestion("", ss.str(), "white");
+            
+            if (success_msg.status != 0) {
+                controller->log(Controller::LogLevel::ERR, success_msg.msg);
             }
         }
     }
 
+    // 输出选项
+    std::vector<std::string> outputs_options;
     for (size_t i = 0; i < node.options.size(); ++i) {
-        std::cout << i << ": " << node.options[i].text << std::endl;
+        ss.str("");
+        ss << i << ": " << node.options[i].text;
+        outputs_options.push_back(ss.str());
     }
+    view->printOptions(outputs_options);
 
     int choice = -1;
 
     while (true) {
-        std::cout << "请输入你的选择：";
-        std::string input;
-        std::getline(std::cin, input);
+        auto press_ascii = input->waitKeyDown();
+        press_ascii -= '0';
+        if (press_ascii < 0 || press_ascii > 9) {
+            controller->log(Controller::LogLevel::ERR, "非法选项输入");
+            continue;
+        }
 
-        try {
-            size_t pos;
-            choice = std::stoi(input, &pos);
-            
-            // 检查是否整个输入都是数字
-            if (pos != input.length()) {
-                throw std::invalid_argument("包含非数字字符");
-            }
-
-            // 检查选项范围
-            if (choice >= 0 && choice < static_cast<int>(node.options.size())) {
+        // 检查选项范围
+        if (choice >= 0 && static_cast<size_t>(choice) < node.options.size()) {
+            try {
                 if (node.options[choice].conditions.size() > 0) {
-                    if (node.options[choice].conditions[0].type == "MONEY") {
-                        int requiredMoney = std::stoi(node.options[choice].conditions[0].value);
-                        std::cout << "需要 " << requiredMoney << " 金钱, 当前金钱: " << playerMoney0 << std::endl;
-                        if (playerMoney0 < requiredMoney) {
-
-                            std::cout << "金钱不足，无法完成交易，请重新选择！" << std::endl;
-                            continue; // 有效输入但条件不满足，重新选择
-                        } else {
-                            playerMoney00 = controller -> protagonist -> getBaseAttrs();
-                            playerMoney0 = playerMoney00[BasicValue::ProtagonistAttr::MONEY];
-                            std::cout << "交易成功，剩余金钱: " << playerMoney0 << std::endl; 
+                    for (auto& [type, value] : node.options[choice].conditions) {
+                        if (node.options[choice].conditions[0].type == "MONEY") {
+                            int required_money = std::stoi(value);
+                            if (current_money < required_money) {
+                                view->printQuestion("", "金钱不足，无法完成交易，请重新选择！", "white");
+                                continue; // 有效输入但条件不满足，重新选择
+                            }
+                        }
+                        if (node.options[choice].conditions[0].type == "TIME") {
+                            int required_time = std::stoi(value);
+                            int current_time = base_attrs[BasicValue::ProtagonistAttr::GAME_TIME];
+                            if (current_time < required_time) {
+                                view->printQuestion("", "时间不足，请重新选择！", "white");
+                                continue; // 有效输入但条件不满足，重新选择
+                            }                       
                         }
                     }
                 }
-                break; // 有效输入，退出循环
-            } else {
-                std::cout << "选择超出范围，请输入有效选项编号" << std::endl;
+            } catch (const std::invalid_argument& e) {
+                ss.str("");
+                ss << "无效条件" << e.what();
+                controller->log(Controller::LogLevel::ERR, ss.str());
+                continue;
+            } catch (const std::out_of_range& e) {
+                ss.str("");
+                ss << "Effect exceed \'int\' range in NPC condition process: " << e.what();
+                controller->log(Controller::LogLevel::ERR, ss.str());
+                continue;
             }
-        }
-        catch (const std::exception&) {
-            std::cout << "无效输入，请输入数字选项" << std::endl;
-            // 清除错误状态（针对cin直接读取的情况）
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break; // 有效输入，退出循环
+        } else {
+            std::cout << "选择超出范围，请输入有效选项编号" << std::endl;
         }
     }
 
@@ -296,4 +361,27 @@ void NPC::handleOptionSelection(int optionIndex) {
     }
 
     
+}
+
+bool NPC::replaceText(std::string& text) {
+    // 定义占位符和对应的替换值
+    const std::unordered_map<std::string_view, std::string> replacements = {
+        {"{{name}}", name},
+        {"{{first_name}}", first_name},
+        {"{{last_name}}", last_name}
+    };
+    
+    bool replaced = false;
+    
+    // 遍历所有占位符并进行替换
+    for (const auto& [placeholder, value] : replacements) {
+        size_t pos = 0;
+        while ((pos = text.find(placeholder, pos)) != std::string::npos) {
+            text.replace(pos, placeholder.length(), value);
+            pos += value.length();
+            replaced = true;
+        }
+    }
+
+    return replaced;
 }

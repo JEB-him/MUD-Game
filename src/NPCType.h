@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 
-enum class NPCType {
+enum class NPCType
+{
     STUDENT,
     PROFESSOR,
     CANTEEN_STAFF,
@@ -9,5 +10,6 @@ enum class NPCType {
     DORM_MANAGER,
     EMPLOYER,
     LIBRARIAN,
-    COACH
+    COACH,
+    INSTRUMENT
 };

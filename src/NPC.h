@@ -17,7 +17,7 @@ class NPC {
     
 public:
     // Protagonist& m_player; // 引用主角对象，便于访问和修改主角属性
-    NPC(const std::string& first_name, const std::string& last_name, int id);
+    NPC(const std::string& first_name="", const std::string& last_name="", int id=0);
     ~NPC() = default;
     void loadInteractionConfig(const std::string& npc_type, const std::string& configPath);
     void startInteraction();

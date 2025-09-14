@@ -14,6 +14,11 @@
 #include<vector>
 #include<cmath>
 
+/**
+* @brief ItemBasicInf类构造函数
+*/
+ItemBasicInf::ItemBasicInf(string name, string description, int value):name(name),description(description),value(value) { }
+
   /**
     * @brief 物品类型枚举定义
     * @details 包含五种物品细分类型（学习资料、学习辅助工具、食品、学习辅助食品、健康类物品）及未知类型
@@ -426,6 +431,15 @@ ItemCreator::ItemCreator() {
     }
     config_file_item >> config_item;
     config_file_item.close();
+}
+
+/**
+ * @brief 获取物品基础信息
+ * @param item_name 物品唯一标识符
+ * */
+ItemBasicInf ItemCreator::getItemInf(string& item_name)const {
+    ItemBasicInf item_inf(config_item[item_name]["name"], config_item[item_name]["description"], config_item[item_name]["value"]);
+    return item_inf;
 }
 
 /**

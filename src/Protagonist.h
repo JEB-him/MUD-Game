@@ -109,6 +109,11 @@ public:
      */
     std::unordered_map<BasicValue::ProtagonistAttr, float> getBaseAttrs() const;
 
+
+
+    std::vector<std::string> getBaseInfoAsVector() const;
+
+
     /**
      * @brief 获取所有隐藏属性（供Controller同步UI/存档）
      * @return std::unordered_map 键值对：key=BasicValue::ProtagonistAttr，value=当前值
@@ -141,6 +146,9 @@ public:
      * @return Position 当前坐标
      */
     Position getPosition() const;
+
+    std::vector<std::string> getStatus() const;
+
 
     // -------------------------- 2. 属性修改接口（供Controller/Item类交互） --------------------------
     /**

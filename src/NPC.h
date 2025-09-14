@@ -17,9 +17,9 @@ class NPC {
     
 public:
     // Protagonist& m_player; // 引用主角对象，便于访问和修改主角属性
-    NPC(const std::string& name, int id);
+    NPC(const std::string& name);
     ~NPC() = default;
-    void loadInteractionConfig(NPCType npcType, const std::string& configPath);
+    void loadInteractionConfig(const std::string& npc_type, const std::string& configPath);
     void startInteraction();
     void handleOptionSelection(int optionIndex);
 
@@ -47,11 +47,13 @@ private:
         std::vector<Effect> effect;
     };
 
+    // 采取中文姓名，name 由 last_name 和 first_name 无空格拼接
+    std::string first_name;
+    std::string last_name;
     std::string name;
-    int id;
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;
     std::unordered_map<std::string, std::function<void()>> interactionCallbacks;
-    mutable int playerMoney = 19; // 假设主角当前金钱为10，实际应从Protagonist对象获取
+    bool replaceText(std::string& text);
 };
 

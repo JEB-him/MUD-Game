@@ -137,14 +137,14 @@ Scene::Scene(const std::string& scene_name, const std::filesystem::path& file_pa
         if(loadSceneFile()){
             loadExits();
         } else {
-            std::cerr << "错误: 无法加载场景文件: " << scene_file << std::endl;
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data");
         }
     }
 
 bool Scene::loadSceneFile() {
     std::ifstream file(scene_file);
     if (!file.is_open()) {
-        std::cerr << "错误: 无法打开场景文件: " << scene_file << std::endl;
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data");
         return false;
     }
     try {
@@ -152,7 +152,7 @@ bool Scene::loadSceneFile() {
         file.close();
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "错误: 解析场景文件时出错 - " << e.what() << std::endl;
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data: " + std::string(e.what()));
         file.close();
         return false;
     }
@@ -165,7 +165,7 @@ void Scene::loadExits() {
     // 确保已加载场景数据
     if (scenes_json.empty()) {
         if (!loadSceneFile()) {
-            std::cerr << "错误: 无法加载场景数据" << std::endl;
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data");
             return;
         }
     }
@@ -181,11 +181,11 @@ void Scene::loadExits() {
                 // 将出口信息添加到exits映射中
                 exits[exit_id] = target_scene;
             } catch (const std::exception& e) {
-                std::cerr << "警告: 处理出口时出错 - " << e.what() << std::endl;
+                Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data: " + std::string(e.what()));
             }
         }
     } else {
-        std::cerr << "警告: 未找到场景 '" << name << "' 的配置" << std::endl;
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading NPC data");
     }
 }
 

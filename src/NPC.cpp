@@ -270,8 +270,10 @@ void NPC::startInteraction() {
                 controller -> protagonist -> updateAttr(BasicValue::ProtagonistAttr::INTEL_SCI, changeValue, true);
                 ss << "理科能力" << (changeValue > 0 ? "提升" : "降低") << std::abs(changeValue) << "点";
             } else if (type == "TIME") {
+                controller->protagonist->addGameTime(changeValue);
                 ss << "时间" << (changeValue > 0 ? "逆流" : "流逝") << std::abs(changeValue) << "小时";
             } else if (type == "OBJ") {
+                backpack->addItem(value);
                 ss << "获得物品" << backpack->getItemInf(value).name;
             }
                 view->printQuestion("", ss.str(), "white");

@@ -1,0 +1,48 @@
+{
+  "Canteen":
+    {
+      
+        "1":"Career",
+        "2":"Center",
+        "3":"Classroom",
+        "4":"Dormitory"
+      },
+    "Career":{
+        "1":"Canteen",
+        "2":"Center",
+        "3":"Gym"
+      },
+    "Center":{  
+      "1":"Canteen",
+      "2":"Career",
+      "3":"Classroom",
+      "4":"Dormitory"
+    },
+    "Classroom":{
+    
+      "1":"Canteen",
+      "3":"Gym",
+      "4":"Library"
+    },
+    "Dormitory":{
+        "1":"Canteen",
+        "2":"Center",
+        "3":"Gym",
+        "4":"Library"
+      },
+  "Gym":
+      {
+        "1":"Career",
+        "2":"Classroom",
+        "3":"Dormitory",
+        "4":"Canteen"
+      },
+  "Library":
+          {
+              "1":"Career",
+              "3":"Dormitory",
+              "4":"Gym"
+            }
+    }
+  
+

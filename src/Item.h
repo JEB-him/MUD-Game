@@ -16,9 +16,10 @@
 #include <memory>
 #include <fstream>
 #include <map>
-#include<sstream>
-#include "json.hpp"
+#include <sstream>
 #include "Protagonist.h"
+#include "json.hpp"
+#include "tools.h"
 
 using std::string;
 using std::cout;
@@ -58,9 +59,7 @@ public:
     Item(const string &name, const string &description, float value, bool is_consumable);
     virtual ~Item() = default;
 
-    /**
-     * @brief 获取物品信息
-     */
+    //获取物品信息
     string getName() const;//物品名字
     string getDescription() const;//物品描述
     int getValue() const;//物品价值
@@ -89,7 +88,7 @@ public:
 
     /**
      * @brief 使用消耗品
-     * @param 主角类引用
+     * @param protagonist 主角类引用
      */
     virtual void use(Protagonist &protagonist) = 0;
 };
@@ -179,11 +178,12 @@ private:
  * @param duration 持续时间（能量饮料、牛奶）
  * @param have_abuse_punish 是否有滥用惩罚(能量饮料)
  * @param health_reduce 健康降低值（能量饮料）
+ * @param punish_cd 防止滥用的最低时间间隔（能量饮料）
  * */
 class LearningAid : public Consumable
 {
 public:
-    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce);
+    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce, int punish_cd);
     void use(Protagonist& protagonist) override;
 private:
     float intel_boost;
@@ -191,6 +191,7 @@ private:
     float duration;
     bool have_abuse_punish;
     float health_reduce;
+    int punish_cd;
 };
 
 /**
@@ -223,11 +224,45 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
-    ItemBasicInf getItemInf(string& item_name)const;
-    unique_ptr<Item> createItem(string item_name);
-    
+    unique_ptr<Item> createItem(string& item_name);
+    /**
+     * @brief 清理主角身上的某个buff
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message clearBuff(BasicValue::Buff buff_name,Protagonist& protagonist);
+    /**
+     * @brief 更新主角buff状态
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message updateBuff(Protagonist& protagonist);
 private:
     ifstream config_file_item;
     json config_item;
 };
 
+/**
+ * @brief 物品buff信息库，包含所有外部需要获取的buff信息
+ * @param energy_drink_intel_boost 能量饮料buff的智力基础增量
+ * @param energy_drink_intel_boost_rate 能量饮料buff的智力比例增量
+ * @param milk_drink_intel_boost 牛奶buff的智力基础增量
+ * @param milk_drink_intel_boost_rate 牛奶buff的智力比例增量
+ */
+//class ItemBuffInf {
+//public:
+//    ItemBuffInf(const float energy_drink_intel_boost,
+//        const float energy_drink_intel_boost_rate,
+//        const float milk_drink_intel_boost,
+//        const float milk_drink_intel_boost_rate,
+//        const int energy_drink_duration,
+//        const int milk_duration,
+//        const int vitamins_duration);
+//    const float energy_drink_intel_boost;
+//    const float energy_drink_intel_boost_rate;
+//    const float milk_drink_intel_boost;
+//    const float milk_drink_intel_boost_rate;
+//    const int energy_drink_duration;
+//    const int milk_duration;
+//    const int vitamins_duration;
+//};

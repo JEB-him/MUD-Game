@@ -47,7 +47,19 @@ public:
 	 * @brief 获取背包管理物品智能指针的vector数组
 	 * @return vector数组的引用
 	 */
-	vector<unique_ptr<Item>>& getBackpack‌Items();
+	vector<unique_ptr<Item>> &getBackpackItems();
+
+	/**
+	 * @brief  获取物品的基础信息（名字、描述、价值）
+	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
+	 */
+	ItemBasicInf getItemInf(string& item_name)const;
+
+	/**
+	 * @brief  获取物品的基础信息（名字、描述、价值）
+	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
+	 */
+	ItemBasicInf getItemInf(string& item_name)const;
 
 	/**
 	 * @brief  获取物品的基础信息（名字、描述、价值）
@@ -70,6 +82,11 @@ public:
 	 * @details 逻辑：消耗品在调用此方法后，释放指针，然后序号在此物品之后的物品指针均前移一个位置
 	 */
 	void useFunctionOfItem(int order, Protagonist& protagonist);
+
+	/**
+	 * @brief 获取item_creator的引用
+	 */
+	ItemCreator& getItemCreator();
 
 private:
 	ItemCreator item_creator;

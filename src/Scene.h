@@ -22,34 +22,15 @@ class Scene {
 public:
     std::string name;   //< 场景名称
     std::map<int, std::string> exits;  //< 场景出口映射
-    std::filesystem::path scene_file;  //< 场景配置文件路径
-   
-    nlohmann::json scenes_json;  //< 存储解析后的JSON数据
-
-    /**
-     * @brief 默认构造函数
-     */
-    static std::shared_ptr<std::vector<std::string>> getScenes();
-
-    /**
-     * @brief 从文件加载 NPC 数据并获取具有指定场景属性的 NPC
-     * @return 包含 NPC 名称和类型的映射的共享指针
-     */
-    std::shared_ptr<std::map<std::string, NPCType>> getNPCs();
-
-    /**
-     * @brief 从 JSON 对象中加载特殊字符NPC
-     */
-    std::shared_ptr<std::map<std::string, NPCType>> getSpecialCharNPCs();
+    std::filesystem::path scene_file=".config/";  //< 场景配置文件路径
     
-    Scene() : name(""), scene_file(".config/scenes.json") {}
+    Scene();
     
     /**
      * @brief 带参数的构造函数
      * @param scene_name 场景名称
-     * @param file_path 场景配置文件路径
      */
-    Scene(const std::string& scene_name, const std::filesystem::path& file_path);
+    Scene(const std::string& scene_name);
     
     /**
      * @brief 析构函数
@@ -63,12 +44,21 @@ public:
     
     /**
      * @brief 加载场景配置文件
+     * @param fi 文件路径
      * @return 成功返回true，失败返回false
      */
-    bool loadSceneFile();
+    bool loadSceneFile(std::filesystem::path fi);
+    
     /**
      * @brief 根据出口键获取目标场景名称
      * @param key 出口id
      */
     std::string getSceneName(int key);
+
+    /**
+     * @brief 根据特殊字符获取NPC ID
+     * @param specialChar NPC的特殊字符标识
+     * @return NPC的ID字符串，如果未找到则返回空字符串
+     */
+    std::string getNPCname(const char& specialChar);
 };

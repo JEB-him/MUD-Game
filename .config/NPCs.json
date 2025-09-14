@@ -1,11 +1,6 @@
 {
   "Student": {
-    "scenes": [
-      "Canteen",
-      "Center",
-      "Classroom",
-      "Library"
-    ],
+    "special_char":"s",
     "initial": "Student_intelligence",
     "interactions": {
       "Student_intelligence": {
@@ -40,9 +35,7 @@
   },
   
   "Roommate": {
-    "scenes": [
-      "Dormitory"
-    ],
+    "special_char":"r",
     "initial": "Roommate_initial",
     "interactions": {
       "Roommate_initial": {
@@ -365,6 +358,7 @@
   },
 
   "Football": {
+    "special_char":"p",
     "initial": "train_football_if",
     "interactions": {
       "train_football_if": {
@@ -409,6 +403,7 @@
   },
   
   "Basketball": {
+    "special_char":"q",
     "initial": "train_basketball_if",
     "interactions": {
       "train_basketball_if": {
@@ -453,6 +448,7 @@
   },
 
   "Badminton": {
+    "special_char":"t",
     "initial": "train_badminton_if",
     "interactions": {
       "train_badminton_if": {
@@ -497,6 +493,7 @@
   },
 
   "Running": {
+    "special_char":"u",
     "initial": "train_running_if",
     "interactions": {
       "train_running_if": {
@@ -539,38 +536,39 @@
   },
 
   "Bed": {
-    "initial": "train_running_if",
+    "special_char":"0",
+    "initial": "sleep_if",
     "interactions": {
-      "train_running_if": {
-        "prompt": "参加跑步锻炼无需金币，但会消耗3点时间，获得20体力。你确定要参加吗？",
+      "sleep_if": {
+        "prompt": "你个小懒虫，进入梦乡无需金币，但会消耗10点时间，获得50体力。你确定要睡觉吗？",
         "options": [
           {
-            "id": "coach_train_running_yes",
+            "id": "sleep_yes",
             "text": "是",
-            "next": "running_result",
+            "next": "sleep_result",
             "condition": {
-              "time": "3"
+              "time": "10"
             }
           },
           {
-            "id": "running_leave",
+            "id": "sleep_leave",
             "text": "离开",
             "next": "END"
           }
         ]
       },
       "running_result": {
-        "prompt": "你参加了跑步锻炼，时间-3，体力+20。",
+        "prompt": "你参加了跑步锻炼，时间-10，体力+50。",
         "options": [
           {
-            "id": "running_end",
+            "id": "sleep_end",
             "text": "离开",
             "next": "END"
           }
         ],
         "effect": {
-          "TIME": "-3",
-          "STRENGTH": "20"
+          "TIME": "-10",
+          "STRENGTH": "50"
         }
       },
       "END": {

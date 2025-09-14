@@ -15,6 +15,8 @@
 #include   <cereal/types/string.hpp>
 // 9月9日更改：添加默认构造函数，类内基础属性初始化，移除const限定符，添加隐藏属性
 
+class ItemCreator;
+
 /**
  * @brief 主角属性枚举及健康状态枚举
  * @details ProtagonistAttr枚举定义了所有可修改的属性，HealthState枚举定义了健康状态
@@ -322,18 +324,4 @@ private:
      * @return bool true=合法，false=包含非法字符
      */
     bool isValidName(const std::string &name);
-
-    /**
-     * @brief 清理主角身上的某个buff
-     * @param buff_name buff对应键值
-     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
-     */
-    Message clearBuff(BasicValue::Buff buff_name);
-    
-    /**
-     * @brief 更新主角所有的buff状态
-     * @param buff_name buff对应键值
-     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
-     */
-    Message updateBuff();
 };

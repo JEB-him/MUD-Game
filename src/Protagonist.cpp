@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "Protagonist.h"
+#include "Item.h"
 #include "json.hpp"
 #include <fstream>
 #include <stdexcept>
@@ -409,19 +410,7 @@ Message Protagonist::addGameTime(int time)
         return Message("增加的时间必须为正数", -1);
     }
     game_time += time;
-    updateBuff();
+    ItemCreator item_creator;
+    item_creator.updateBuff(*this);
     return Message("游戏内时间增加成功", 0);
-}
-
-Message Protagonist::clearBuff(BasicValue::Buff buff_name) {
-    switch (buff_name) {
-    case BasicValue::Buff::BUFF_ENERGY_DRINK:
-        break;
-    case BasicValue::Buff::BUFF_MILK:
-        break;
-    case BasicValue::Buff::BUFF_VITAMINS:
-        break;
-    default:
-        break;
-    }
 }

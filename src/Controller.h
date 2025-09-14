@@ -11,6 +11,8 @@
 #include "NPC.h"
 #include "InputHandler.h"
 #include "backpack.h"
+#include <set>
+#include <ctime>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -20,8 +22,7 @@
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
  */
-class Controller
-{
+class Controller {
 public:
     friend class View;
 
@@ -30,19 +31,17 @@ public:
      * @note 日志消息会按照等级被输出到日志文件中，同时控制台会打印设定等级
      * 的消息，详见 README 日志输出
      */
-    enum class LogLevel
-    {
+    enum class LogLevel {
         DEBUG, ///< 消息只应当在调试时被看到
         INFO,  ///< 程序正常运行时可以输出的消息
         WARN,  ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERR  ///< 严重的错误，该事件发生时程序会 Crash
+        ERR    ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**
      * @brief 事件类型
      */
-    enum class EventType
-    {
+    enum class EventType {
         MOVE,      ///< 移动主角
         AC_NPC,    ///< 与NPC互动
         AC_INST,   ///< 与器械互动
@@ -52,7 +51,7 @@ public:
         JUMP,      ///< 跳转场景
         TP,        ///< 传送到 NPC 附近
         QUIT,      ///< 退出游戏
-        NONE       ///< 退出游戏
+        NONE       ///< 无事件
     };
 
     /**
@@ -99,8 +98,8 @@ public:
     std::shared_ptr<Backpack>     backpack    = nullptr;
 
     template <class Archive>
-    void serialize(Archive &archive)
-    {
+    void serialize(Archive &archive) {
+        // TODO Check 这个地方需要加入 map 吗？
         archive(CEREAL_NVP(map),
                 CEREAL_NVP(protagonist),
                 CEREAL_NVP(npc)
@@ -129,7 +128,7 @@ private:
     Controller(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
 
     /**
-     * @brief 初始化函数
+     * @brief 初始化函数·
      * @details 初始化信息，包括：\n
      *          0. 调用 view 模块中的函数进行界面初始化
      *          1. 初始化必要的智能指针
@@ -160,7 +159,7 @@ private:
      * @brief 登录
      * @details 实现登录逻辑
      */
-    Message playerLogin();
+    Message playerLogin(std::string &user_name);
 
     /**
      * TODO

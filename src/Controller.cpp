@@ -3,18 +3,21 @@
 #include "tools.h"
 #include <iostream>
 #include <fstream>
+#include <regex>
+
 
 Controller::Controller(
-    const LogLevel& level,
-    const std::filesystem::path& log_dir,
-    const std::filesystem::path& root_dir):
+    const LogLevel &level,
+    const std::filesystem::path &log_dir,
+    const std::filesystem::path &root_dir):
     level(level),
     log_dir(log_dir),
     root_dir(root_dir) {
     // 构造函数
 }
 
-std::shared_ptr<Controller> Controller::getInstance(const LogLevel& level, const std::filesystem::path& log_dir, const std::filesystem::path& root_dir) {
+std::shared_ptr<Controller> Controller::getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir)
+{
     static auto instance = std::shared_ptr<Controller>(new Controller(level, log_dir, root_dir));
     return instance;
 }
@@ -51,64 +54,93 @@ void Controller::log(const LogLevel& level, const std::string& msg) {
 Message Controller::init() {
     protagonist = std::make_shared<Protagonist>();
     // backpack = std::make_shared<Backpack>();
-    map = std::make_shared<Map>();
     input = std::make_shared<InputHandler>();
+    view = View::getInstance();
 
-    Message msg("Init Success!", 0);
-    log(LogLevel::INFO, msg.msg);
-    return msg;
+    Message msg {"Init Success!", 0};
+    std::cout << msg.msg << std::endl;
+    return msg.msg;
 }
 
 Message Controller::load(std::string username) {
     // 游戏开始时加载文件，名称格式为 username.bin
-    std::string file_name = username + ".bin";
+    std::filesystem::path file_name = root_dir / "saves" / (username + ".bin");
     std::ifstream ifile(file_name, std::ios::binary);
-    if (!ifile.is_open())
-    {
-        Message msg = Message("Create a new accout", 0);
+    Position init_pos {-1, -1};
+    Message msg;
+    std::string map_filename;
+    // 创建新用户之后还需要设置主角的位置
+    if (!ifile.is_open()) {
+        if(!std::filesystem::exists(file_name)){
+            std::ofstream fout(file_name, std::ios::binary);
+            fout.close();
+            std::cout << "创建用户文件: " << file_name.string() << std::endl;
+        }
 
+        time_t now = time(NULL);
+        // 将当前时间转换为本地时间
+        struct tm *local_tm = localtime(&now);
+        // 使用 strftime 格式化时间
+        std::string playerID(25, '\0');
+        strftime(playerID.data(), playerID.size(), "OUC_%Y-%m-%d_%H:%M:%S", local_tm);
 
-        log(LogLevel::INFO, msg.msg);
-        return msg;
-    }
-    // 使用cereal进行反序列化
-    {
-        cereal::BinaryInputArchive iarchive(ifile);
-        iarchive(CEREAL_NVP(*protagonist));
-                //  CEREAL_NVP(*backpack),
-                 //CEREAL_NVP(*map));
+        protagonist = std::make_shared<Protagonist>(playerID, username);
+        msg = Message("Create a new account", 0);
+        // 设置默认出生点
+        map_filename = "???";
+    } else {
+        // 使用cereal进行反序列化
+        {
+            cereal::BinaryInputArchive iarchive(ifile);
+            iarchive(CEREAL_NVP(*protagonist));
+            //  CEREAL_NVP(*backpack),
+            // CEREAL_NVP(*map));
+            ifile.close();
+        }
+
+        // 向场景类获取地图文件，向主角获取坐标
+        init_pos = protagonist->getPosition();
+        map_filename = "???";
+
         ifile.close();
+        msg = Message("Load Success!", 0);
     }
-    map=std::make_shared<Map>();
-
-    ifile.close();
-    Message msg = Message("Load Success!", 0);
-    log(LogLevel::INFO, msg.msg);
+    // 初始化地图数据
+    if (init_pos.x != -1) {
+        // 使用 init_pos 填入下面的参数列表中
+        map = std::make_shared<Map>();
+    } else {
+        // 仅使用地图文件初始化
+        map = std::make_shared<Map>();
+    }
+    std::cout << msg.msg << std::endl;
+    view->reDraw();
     return msg;
 }
 
 Message Controller::save() {
     // 游戏退出时保存文件，名称格式为 username.bin
     std::string username = protagonist->getName();
-    std::string file_name = username + ".bin";
+    std::filesystem::path file_name = root_dir / "saves" / (username + ".bin");
     std::ofstream ofile(file_name, std::ios::binary);
-    if (!ofile.is_open())
-    {
+    if (!ofile.is_open()) {
         Message msg = Message("Save Failed!", -1);
         std::cerr << msg.msg << std::endl;
         log(LogLevel::ERR, msg.msg);
         return msg;
     }
+
     // 使用cereal进行序列化
     {
         cereal::BinaryOutputArchive oarchive(ofile);
         oarchive(
-                 CEREAL_NVP(*protagonist));
-        
+            CEREAL_NVP(*protagonist));
+
         ofile.close();
     }
     map->save();
     ofile.close();
+
     Message msg = Message("Save Success!", 0);
     log(LogLevel::INFO, msg.msg);
     return msg;
@@ -133,11 +165,8 @@ Message Controller::getEvent(EventType &event_type) {
         // Backspace
         else if (ch == 8)
         {
-            std::string content = ss.str();
-            content.pop_back();
-            ss.str(content);
-            ss.clear();
-            ss << content;
+            char tmp_ch;
+            ss >> tmp_ch;
             continue;
         }
 
@@ -151,8 +180,10 @@ Message Controller::getEvent(EventType &event_type) {
         {
             ss << char(ch);
         }
-        // 这里将处理好的ss传给View
+
+        view->printCmd(ss.str());
     }
+    // TODO 修正逻辑，只有按下 Enter 才需要处理下面的逻辑
     // 处理cmd
     // switch (cmd)
     // {
@@ -211,37 +242,88 @@ Message Controller::getEvent(EventType &event_type) {
 //     }
 // }
 
-Message Controller::playerLogin() {
-    const std::string invalidChars = ";:\"'\\/<>*?|";
-    std::string user_name = "";
-    do
+// 登录逻辑，在init()后调用
+Message Controller::playerLogin(std::string &user_name) {
+    // 用户名文件夹和名单文件路径
+    std::filesystem::path saves_dir = root_dir / "saves";
+    std::filesystem::path users_file = saves_dir / "users.txt";
+    std::set<std::string> user_set;
+
+    // 如果目录不存在，创建目录
+    if (!std::filesystem::exists(saves_dir)) {
+        std::filesystem::create_directories(saves_dir);
+        log(LogLevel::INFO, "创建用户存档目录: " + saves_dir.string());
+    }
+
+    // 如果名单文件不存在，创建空文件
+    if (!std::filesystem::exists(users_file)) {
+        std::ofstream fout(users_file);
+        fout.close();
+        log(LogLevel::INFO, "创建用户名单文件: " + users_file.string());
+    }
+
+    // 读取已存在的用户名
     {
-        
+        std::ifstream fin(users_file);
+        std::string line;
+        while (std::getline(fin, line)) {
+            if (!line.empty()) user_set.insert(line);
+        }
+        fin.close();
+    }
+
+    // 打印所有已存在的用户名
+    std::cout << "已存在的用户目录：" << std::endl;
+    if (user_set.empty()) {
+        std::cout << "（暂无用户，请新建用户名）" << std::endl;
+    } else {
+        int i=0;
+        for (const auto& name : user_set) {
+            std::cout << i++ << ": " << name << std::endl;
+        }
+    }
+
+    std::string name;
+    do {
         std::cout << "Enter username: ";
-        std::cin >> user_name;
-        if (user_name.find_first_of(invalidChars) != std::string::npos)
-        {
-            std::cout << "Invalid username. Please avoid using special characters: " << invalidChars << std::endl;
-            log (LogLevel::WARN, "Invalid username attempt: " + user_name);
+        std::getline(std::cin, name);
+
+        if (name.empty()) {
+            std::cout << "Username cannot be empty. Please try again." << std::endl;
+            std::cout << "**Empty username attempt**" << std::endl;
             continue;
         }
-    } while (1);
-    log(LogLevel::INFO, "Username accepted: " + user_name);
-    // 登录逻辑
+
+        if (isValidUsername(name)) {
+            break;
+        } else {
+            std::cout <<"\033[31m"<< "Invalid username. Only letters, numbers, underscores, and Chinese characters are allowed." << "\033[0m" << std::endl;
+            std::cout << "\033[31m**Invalid username attempt: " << name << "**\033[0m" << std::endl;
+        }
+    } while (true);
+
+    user_name = name;
+    std::cout  << "SUCCESS! Hello: "<<"\033[93m" << name << "\033[0m" << std::endl;
+    std::cout << "Username accepted: " << name << std::endl;
+
+    // 如果是新用户，写入用户名文件
+    if (user_set.find(name) == user_set.end()) {
+        std::ofstream fout(users_file, std::ios::app);
+        fout << name << std::endl;
+        fout.close();
+        std::cout << "新用户已加入名单: " << name << std::endl;
+    }
+
     return Message("Login Success!", 0);
 }
 
 
-int Controller::run() {
-    std::cout << "登录/注册..." << std::endl;
-    std::cout << "初始化游戏..." << std::endl;
-    std::cout << "创建测试临时数据..." << std::endl;
-    map = std::make_shared<Map>("center.txt");
-    view = View::getInstance();
-    protagonist = std::make_shared<Protagonist>("TEST_USER_0001", "Jeb");
-    std::cout << "创建完毕..." << std::endl;
-    gameSleep(3000);
-    view->reDraw();
+int Controller::run()
+{
+    init();
+    std::string user_name;
+    playerLogin(user_name);
+    load(user_name);
     log(LogLevel::DEBUG, "运行游戏...");
     log(LogLevel::DEBUG, "DEBUG...");
     bool running = true;
@@ -254,7 +336,8 @@ int Controller::run() {
         log(LogLevel::DEBUG, "获取事件...");
         // msg = getEvent(event_type);
 
-        switch (event_type) {
+        switch (event_type)
+        {
         case EventType::MOVE:
             log(LogLevel::DEBUG, "移动主角...");
             break;

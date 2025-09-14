@@ -22,3 +22,14 @@ SpecialChar::SpecialChar(
 }
 
 SpecialChar::SpecialChar() : need_empty(false), width(-1) {}
+
+
+bool isValidUsername(const std::string& username) {
+    // 白名单正则表达式：
+    // - 允许英文字母（大小写）、数字、下划线
+    // - 允许中文字符（UTF-8编码范围）
+    // 注意：中文字符在UTF-8中通常占用3个字节，范围是[\u4e00-\u9fa5]（基本多文种平面）
+    // 但由于C++标准库正则表达式对Unicode支持有限，我们直接使用字节模式匹配
+    static const std::regex pattern("^[A-Za-z0-9_\u4e00-\u9fa5]+$");;
+    return std::regex_match(username, pattern);
+}

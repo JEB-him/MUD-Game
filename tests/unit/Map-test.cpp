@@ -13,6 +13,18 @@ void writeMap2File(int n, const char map[][Map::MAX_WIDTH], const std::string& f
         file << map[i] << std::endl;
     }
 }
+TEST_CASE("Map can save maps", "[Map][save]") {
+        char map_str[Map::MAX_HEIGHT][Map::MAX_WIDTH] = {
+            "##########o   ###",
+            "#               #",
+            "#               #",
+            "#               #",
+            "##########i   ###"
+        };
+        writeMap2File(5, map_str);
+        Map map(TMP_FILE);
+        map.save();
+}
 
 TEST_CASE("Map can load correct map files and reject wrong map files", "[Map][constructor]") {
     SECTION("Simple map i/o in row") {

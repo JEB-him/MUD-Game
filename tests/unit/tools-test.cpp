@@ -34,3 +34,13 @@ TEST_CASE("SpecialChar should be set correctly", "[tools][special_char]") {
     SpecialChar special_char1("\U000f1302", 2);
     REQUIRE(special_char1.special_char == "󱌂");
 }
+
+TEST_CASE("Username check correctly", "[tools][username]") {
+    REQUIRE(isValidUsername("卦师傅"));
+    REQUIRE(!isValidUsername("卦 师傅"));
+    REQUIRE(isValidUsername("卦_师傅"));
+    REQUIRE(isValidUsername("卦J_师傅"));
+    REQUIRE(isValidUsername("J_师傅"));
+    REQUIRE(isValidUsername("_师傅"));
+    REQUIRE(!isValidUsername(":_师傅"));
+}

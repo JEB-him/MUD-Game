@@ -251,7 +251,7 @@
         "prompt": "成功阅读理科书籍，理科智力+10。",
         "options": [],
         "effect": {
-          "TIME": -1,
+          "TIME": "-3",
             "INTEL_SCI": "10"
         }
       },
@@ -259,7 +259,7 @@
         "prompt": "成功阅读文科书籍，文科智力+10。",
         "options": [],
         "effect": {
-          "TIME": -1,
+          "TIME": "-2",
             "INTEL_ARTS": "10"
         }
       },
@@ -498,6 +498,48 @@
 
   "Running": {
     "initial": "train_running_if",
+    "interactions": {
+      "train_running_if": {
+        "prompt": "参加跑步锻炼无需金币，但会消耗3点时间，获得20体力。你确定要参加吗？",
+        "options": [
+          {
+            "id": "coach_train_running_yes",
+            "text": "是",
+            "next": "running_result",
+            "condition": {
+              "time": "3"
+            }
+          },
+          {
+            "id": "running_leave",
+            "text": "离开",
+            "next": "END"
+          }
+        ]
+      },
+      "running_result": {
+        "prompt": "你参加了跑步锻炼，时间-3，体力+20。",
+        "options": [
+          {
+            "id": "running_end",
+            "text": "离开",
+            "next": "END"
+          }
+        ],
+        "effect": {
+          "TIME": "-3",
+          "STRENGTH": "20"
+        }
+      },
+      "END": {
+        "prompt": "对话结束",
+        "options": []
+      }
+    }
+  },
+
+  "Bed": {
+    "initial": "save_if",
     "interactions": {
       "train_running_if": {
         "prompt": "参加跑步锻炼无需金币，但会消耗3点时间，获得20体力。你确定要参加吗？",

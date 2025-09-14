@@ -20,7 +20,7 @@
 using std::string;
 using std::cout;
 using std::endl;
-using std::unique_ptr;
+using std::shared_ptr;
 using std::make_unique;
 using std::move;
 using std::vector;
@@ -47,7 +47,7 @@ public:
 	 * @brief 获取背包管理物品智能指针的vector数组
 	 * @return vector数组的引用
 	 */
-	vector<unique_ptr<Item>> &getBackpackItems();
+	vector<shared_ptr<Item>>& getBackpack‌Items();
 
 	/**
 	 * @brief  获取物品的基础信息（名字、描述、价值）
@@ -90,6 +90,6 @@ public:
 
 private:
 	ItemCreator item_creator;
-	vector<unique_ptr<Item>> backpack_items;
+	vector<shared_ptr<Item>> backpack_items;
 	stringstream ss;
 };

@@ -445,9 +445,9 @@ ItemBasicInf ItemCreator::getItemInf(string& item_name)const {
 /**
  * @brief 创建物品对象
  * @param item_name 物品名称
- * @return 物品对象的unique_ptr
+ * @return 物品对象的shared_ptr
  */
-unique_ptr<Item> ItemCreator::createItem(string& item_name) {
+shared_ptr<Item> ItemCreator::createItem(string& item_name) {
      //读取该物品所属类，并将string类型的类名转化为enum类型
     ItemType item_class = getItemType((string)config_item[item_name]["class"]);
 
@@ -462,7 +462,7 @@ unique_ptr<Item> ItemCreator::createItem(string& item_name) {
         float intel_boost_rate = (float)config_item[item_name]["intel_boost_rate"];
 
         //创建物品对象并返回
-        return make_unique<StudyMaterial>(name, description, value, is_science, intel_boost_rate);
+        return make_shared<StudyMaterial>(name, description, value, is_science, intel_boost_rate);
 
         break;
     }
@@ -475,7 +475,7 @@ unique_ptr<Item> ItemCreator::createItem(string& item_name) {
         float health_preservation_rate = (float)config_item[item_name]["health_preservation_rate"];
 
         //创建物品对象并返回
-        return make_unique<StudyAid>(name, description, value, time_reduction_rate, health_preservation_rate);
+        return make_shared<StudyAid>(name, description, value, time_reduction_rate, health_preservation_rate);
 
          break;
     }
@@ -490,7 +490,7 @@ unique_ptr<Item> ItemCreator::createItem(string& item_name) {
         bool have_cd = (bool)config_item[item_name]["have_cd"];
 
         //创建物品对象并返回
-        return make_unique<Food>(name, description, value, strength_restore, health_restore, time_cooldown, have_cd);
+        return make_shared<Food>(name, description, value, strength_restore, health_restore, time_cooldown, have_cd);
 
         break;
     }
@@ -507,7 +507,7 @@ unique_ptr<Item> ItemCreator::createItem(string& item_name) {
         bool have_abuse_punish = (bool)config_item[item_name]["have_abuse_punish"];
 
         //创建物品对象并返回
-        return make_unique<LearningAid>(name, description, value, intel_boost, intel_boost_rate, duration, have_abuse_punish, health_reduce, punish_cd);
+        return make_shared<LearningAid>(name, description, value, intel_boost, intel_boost_rate, duration, have_abuse_punish, health_reduce, punish_cd);
 
         break;
     }
@@ -522,7 +522,7 @@ unique_ptr<Item> ItemCreator::createItem(string& item_name) {
         bool have_cd = (bool)config_item[item_name]["have_cd"];
 
         //创建物品对象并返回
-        return make_unique<HealthItem>(name, description, value, health_restore, duration, time_cooldown, have_cd);
+        return make_shared<HealthItem>(name, description, value, health_restore, duration, time_cooldown, have_cd);
 
         break;
     }

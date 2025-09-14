@@ -17,7 +17,7 @@ Backpack::Backpack():item_creator(), backpack_items(0){ }
  * @brief 获取背包管理物品智能指针的vector数组
  * @return vector数组的引用
  */
-vector<unique_ptr<Item>>& Backpack::getBackpack‌Items() {
+vector<shared_ptr<Item>>& Backpack::getBackpack‌Items() {
     return backpack_items;
 }
 

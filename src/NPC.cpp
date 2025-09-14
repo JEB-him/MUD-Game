@@ -40,28 +40,30 @@ const std::string& NPCTypeToString(NPCType type) {
 
 /**
  * @brief 构造函数
- * @param name NPC名称
+ * @param name NPC名称\n
+ *        1. 配置文件中的姓和名分开
+ *        2. 如果配置文件不指定姓名，则必须指定性别，以进行随机分配
  * @param id NPC唯一标识符
  */
-NPC::NPC(const std::string& name, int id) 
-    : name(name), id(id) {
+NPC::NPC(const std::string& first_name, const std::string& last_name, int id) 
+    : first_name(first_name), last_name(last_name), id(id) {
+    name = first_name + last_name;
 }
 
 /**
  * @brief 加载交互配置
- * @param npcType NPC类型
- * @param configPath 配置文件路径
+ * @param npc_type NPC (string)
+ * @param config_path 配置文件路径
  */
-void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) {
-    std::string typeStr = NPCTypeToString(npcType);
+void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& config_path) {
     
     // 清空旧交互树
     interactionTree.clear();
     currentInteractionId.clear();
 
-    std::ifstream file(configPath);
+    std::ifstream file(config_path.c_str());
     if (!file.is_open()) {
-        throw std::runtime_error("无法打开配置文件: " + configPath);
+        throw std::runtime_error("无法打开配置文件: " + config_path);
     }
 
     try {
@@ -69,10 +71,10 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
         file >> config;
 
         // 验证角色配置存在
-        if (!config.contains(typeStr)) {
-            throw std::runtime_error("配置文件缺少" + typeStr + "角色配置");
+        if (!config.contains(npc_type)) {
+            throw std::runtime_error("配置文件缺少" + npc_type + "角色配置");
         }
-        auto& roleConfig = config[typeStr];
+        auto& roleConfig = config[npc_type];
 
         // 检查initial字段
         if (!roleConfig.contains("initial")) {
@@ -82,7 +84,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
             throw std::runtime_error("initial字段必须是字符串");
         }
         std::string initialNode = roleConfig["initial"].get<std::string>();
-        currentInteractionId = typeStr + "_" + initialNode;
+        currentInteractionId = npc_type + "_" + initialNode;
 
         // 加载交互节点
         if (!roleConfig.contains("interactions") || !roleConfig["interactions"].is_object()) {
@@ -95,6 +97,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 throw std::runtime_error("节点" + nodeId + "的prompt字段缺失或不是字符串");
             }
             std::string prompt = nodeData["prompt"].get<std::string>();
+            replaceText(prompt);
             InteractionNode node{
                 prompt,
                 {},
@@ -112,6 +115,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                     throw std::runtime_error("选项缺少text字段或不是字符串");
                 }
                 std::string text = option["text"].get<std::string>();
+                replaceText(text);
 
                 std::string nextNode;
                 if (option.contains("next")) {
@@ -128,7 +132,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
 
                 // 生成带前缀的nextNode
                 if (!nextNode.empty()) {
-                    nextNode = typeStr + "_" + nextNode;
+                    nextNode = npc_type + "_" + nextNode;
                 }
 
                 // 解析condition字段
@@ -149,7 +153,7 @@ void NPC::loadInteractionConfig(NPCType npcType, const std::string& configPath) 
                 }
             }
 
-            std::string prefixedId = typeStr + "_" + nodeId;
+            std::string prefixedId = npc_type + "_" + nodeId;
             interactionTree[prefixedId] = node;
         }
 
@@ -298,4 +302,27 @@ void NPC::handleOptionSelection(int optionIndex) {
     }
 
     
+}
+
+bool NPC::replaceText(std::string& text) {
+    // 定义占位符和对应的替换值
+    const std::unordered_map<std::string_view, std::string> replacements = {
+        {"{{name}}", name},
+        {"{{first_name}}", first_name},
+        {"{{last_name}}", last_name}
+    };
+    
+    bool replaced = false;
+    
+    // 遍历所有占位符并进行替换
+    for (const auto& [placeholder, value] : replacements) {
+        size_t pos = 0;
+        while ((pos = text.find(placeholder, pos)) != std::string::npos) {
+            text.replace(pos, placeholder.length(), value);
+            pos += value.length();
+            replaced = true;
+        }
+    }
+
+    return replaced;
 }

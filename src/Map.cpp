@@ -3,7 +3,6 @@
  * @author Jie Jiang
  */
 #include "Map.h"
-#include "Controller.h"
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
@@ -32,7 +31,7 @@ Map::~Map() {
     // 析构函数只是用来兜底的，Controller 应当自行 save 以获取信息
     if (is_valid && modified) {
         Message success = save();
-        // TODO 添加日志输出
+        Controller::getInstance()->log(Controller::LogLevel::WARN, "不安全的保存");
     }
 }
 
@@ -62,8 +61,7 @@ int Map::getMaxHeight() const {
  *          1. 主角不能进入宽度小于其 width 的空间（着重注意其他宽字符）
  *          2. 主角碰撞完器械、NPC、墙壁以及进入出口后，位置不会发生改变
  */
-Message Map::moveProtagonist(const int &direction, Controller::EventType &event_type, int &id)
-{
+Message Map::moveProtagonist(const int &direction, Controller::EventType &event_type, int &id) {
     if (y + 1 >= MAX_WIDTH) {
         return {"Bad position", -1};
     }
@@ -86,15 +84,11 @@ Message Map::moveProtagonist(const int &direction, Controller::EventType &event_
         case 'o':
             event_type = Controller::EventType::JUMP;
             id = getExitId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
-            return {"抵达出口", 0};
-        case '9':
-            event_type = Controller::EventType::AC_NPC;
-            id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
-            return {"与 NPC 交互", 0};
+            return {"抵达出口", 0}; 
         default:
-            event_type = Controller::EventType::AC_INST;
-            id = char2index(back_code);
-            return {"与器械交互", 0};
+            event_type = Controller::EventType::AC_NPC;
+            id = back_code;
+            return {"与 NPC 交互", 0};
     }
     return {"", 0};
 }
@@ -255,17 +249,16 @@ Message Map::loadMap(const std::string& filename) {
 }
 
 bool Map::indexInit(const int& rows) {
+    std::stringstream ss;
     int times = std::min(MAX_HEIGHT, rows + 1);
     for (int i = 0; i < times; ++i) {
         for (int j = 0;j < MAX_WIDTH; ++ j) {
             if (!map[i][j]) break;
+            ss << i << "," << j;
             if (map[i][j] == 'o') {
-                // TODO 添加出口 ID
+                exits[ss.str()] = static_cast<int>(exits.size() - 1);
             } else if (map[i][j] == 'i') {
-                // TODO 添加入口 ID
-            } else if (map[i][j] == '9') {
-                // TODO 添加 NPC ID
-
+                entries[ss.str()] = static_cast<int>(entries.size() - 1);
             } else if (map[i][j] == '1') {
                 if (x != -1 || y != -1) {
                     return false;
@@ -458,11 +451,28 @@ bool Map::checkWideChar(const int& x, const int& y) {
 }
 
 int Map::getExitId(const Position& pos) {
-    // TODO: 等待场景类实现
-    return -1;
-}
-
-int Map::getNPCId(const Position& pos) {
-    // TODO: 等待 NPC 类实现
+    std::stringstream ss;
+    // 横向出口
+    int st = std::max(0, pos.y - 3);
+    int ed = std::min(MAX_WIDTH, pos.y + 3);
+    for (int i = st; i <= ed; ++i) {
+        if (map[x][i] == 'o') {
+            ss << x << "," << i;
+            return exits[ss.str()];
+        }
+    }
+    // 纵向出口
+    st = std::max(0, pos.x - 1);
+    ed = std::min(MAX_HEIGHT, pos.x + 1);
+    for (int i = st; i <= ed; ++i) {
+        if (map[i][y] == 'o') {
+            ss << i << "," << y;
+            return exits[ss.str()];
+        }
+        if (map[i][y+1] == 'o') {
+            ss << i << "," << y + 1;
+            return exits[ss.str()];
+        }
+    }
     return -1;
 }

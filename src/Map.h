@@ -4,10 +4,12 @@
  * */
 #pragma once
 #include <string>
+#include <unordered_map>
 #include "tools.h"
 #include "Controller.h"
 
 class View;
+
 /**
  * @brief Map 类，用于读取 map 文件
  * @details 关于地图文件的一些规定：\n
@@ -22,7 +24,6 @@ class View;
  *         10. 为了同时兼容 Linux 和 Windows, 地图路径只能是一个文件名，不能有任何 `/` 或 '\' 符号
  * @note 该类的重要原则应当是保证任何状态下 Map 类中的所有成员全部设置正确
  */
-
 class Map
 {
 public:
@@ -136,9 +137,8 @@ public:
      *             的编号\n
      *             3: 碰撞器械，位置不变，Controller 应当与物品类交互\n
      *             4: 碰撞墙壁，位置不变\n
-     * @param[out] id 出口/NPC/器械编号\n
-     *             若位置在出口，为出口id, 若碰撞NPC，为 NPC id\n
-     *             器械为 SPECIAL_CHARS 中的索引\n
+     * @param[out] id 出口编号/NPC 字符的 ASCII 码\n
+     * @param[out] npc_id npc 唯一标识
      * @note 该函数会通过修改 event_type 来告诉 Controller 事件类型
      * @return a Message.
      *
@@ -215,7 +215,10 @@ private:
     int x;
     int y;
 
-    // 入口s、出口
+    // 入口、出口、NPCs
+    std::unordered_map<std::string, int> entries;
+    std::unordered_map<std::string, int> exits;
+    std::unordered_map<std::string, int> npcs;
 
     // 这些函数都不会被放到文档里面，因为私有的不会被放进去，至于原因，显然是因为
     // 这些方法都只有你自己会用，注释只要能看懂就行，不用在意格式
@@ -263,11 +266,6 @@ private:
      * @brief 获取出口 ID
      */
     int getExitId(const Position &pos);
-
-    /**
-     * @brief 获取NPC ID
-     */
-    NPCType getNPCId(const Position& pos);
 
     /**
      * @brief 储存行到地图中，并检查是否含有非法字符

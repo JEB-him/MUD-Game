@@ -1,4 +1,10 @@
 #include "Controller.h"
+#include "backpack.h"
+#include "Protagonist.h"
+#include "NPC.h"
+#include "InputHandler.h"
+#include "View.h"
+#include "Map.h"
 #include "View.h"
 #include "tools.h"
 #include <iostream>
@@ -289,7 +295,7 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::OPEN_PACK:
     {
         std::shared_ptr<View> view = View::getInstance();
-        vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        // vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
         vector<std::string> item_names();
         view->printOptions(item_names);
         // 按下任意键退出

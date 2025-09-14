@@ -2,24 +2,21 @@
  * @file Controller.h
  */
 #pragma once
-#include <iostream>
 #include <filesystem>
 #include <memory>
 #include "tools.h"
-#include "Map.h"
-#include "Protagonist.h"
-#include "NPC.h"
-#include "InputHandler.h"
-#include "backpack.h"
-#include "View.h"
-// #include "backpack.h"
-#include <set>
-#include <ctime>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
+
+class View;
+class Backpack;
+class NPC;
+class Protagonist;
+class InputHandler;
+
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n

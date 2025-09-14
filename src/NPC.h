@@ -17,7 +17,7 @@ class NPC {
     
 public:
     // Protagonist& m_player; // 引用主角对象，便于访问和修改主角属性
-    NPC(const std::string& first_name, const std::string& last_name, int id);
+    NPC(const std::string& name);
     ~NPC() = default;
     void loadInteractionConfig(const std::string& npc_type, const std::string& configPath);
     void startInteraction();
@@ -51,8 +51,6 @@ private:
     std::string first_name;
     std::string last_name;
     std::string name;
-
-    int id;
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;
     std::unordered_map<std::string, std::function<void()>> interactionCallbacks;

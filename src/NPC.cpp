@@ -40,14 +40,10 @@ const std::string& NPCTypeToString(NPCType type) {
 
 /**
  * @brief 构造函数
- * @param name NPC名称\n
- *        1. 配置文件中的姓和名分开
- *        2. 如果配置文件不指定姓名，则必须指定性别，以进行随机分配
- * @param id NPC唯一标识符
+ * @param name NPC名称
  */
-NPC::NPC(const std::string& first_name, const std::string& last_name, int id) 
-    : first_name(first_name), last_name(last_name), id(id) {
-    name = first_name + last_name;
+NPC::NPC(const std::string& name) 
+    : name(name) {
 }
 
 /**

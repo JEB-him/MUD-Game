@@ -10,6 +10,7 @@
 #pragma once
 
 #include "tools.h"
+#include "json.hpp"
 
 // 前向声明视图和输入处理类
 class View;
@@ -41,4 +42,7 @@ public:
 
 private:
     std::string name="带饭家";
+    nlohmann::json items;
+    size_t current_page = 0;
+    static std::string get_utf_empty(const std::string& text, const int& len);
 };

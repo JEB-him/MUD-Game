@@ -11,6 +11,7 @@
 #include "NPC.h"
 #include "InputHandler.h"
 #include "backpack.h"
+#include "Store.h"
 #include <set>
 #include <ctime>
 
@@ -89,6 +90,12 @@ public:
      */
     int run();
 
+    /**
+     * @brief 获取 root_dir
+     * @return std::filesystem::path
+     */
+    std::filesystem::path getRootDir() const;
+
     // Model 类的智能指针
     std::shared_ptr<Map>          map         = nullptr;
     std::shared_ptr<Protagonist>  protagonist = nullptr;
@@ -96,6 +103,7 @@ public:
     std::shared_ptr<View>         view        = nullptr;
     std::shared_ptr<InputHandler> input       = nullptr;
     std::shared_ptr<Backpack>     backpack    = nullptr;
+    std::shared_ptr<Store>        store       = nullptr;
 
     template <class Archive>
     void serialize(Archive &archive) {

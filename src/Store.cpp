@@ -1,5 +1,4 @@
 #include "Store.h"
-#include "json.hpp"
 #include "Controller.h"
 #include "View.h"
 #include <vector>
@@ -7,63 +6,135 @@
 #include <fstream>
 #include <filesystem>
 
+using json = nlohmann::json;
 Store::Store() {
     // 初始化商品列表
     auto controller = Controller::getInstance();
-    std::filesystem::path items_path = controller->root_dir / 
-    std::ifstream items_file()
-}
-
-void Store::showProducts(int page) {
-    int itemsPerPage = 10;
-    int startIndex = page * itemsPerPage;
-    int totalPages = (products.size() + itemsPerPage - 1) / itemsPerPage;
-    
-    if (page < 0 || startIndex >= products.size()) {
-        view->printQuestion("无效的页码!", {"white"});
+    std::filesystem::path items_path = controller->getRootDir() / ".config/Item.json";
+    std::cout << items_path << std::endl;
+    std::ifstream items_file(items_path.c_str());
+    if (!items_file.is_open()) {
+        controller->log(Controller::LogLevel::ERR, "项目配置异常");
         return;
     }
-    
+    items_file >> items;
+}
+
+Message Store::showProducts(int page) {
+    std::stringstream ss;
+    auto view = View::getInstance();
+    auto controller = Controller::getInstance();
+    controller->log(Controller::LogLevel::DEBUG, std::to_string(items.size()));
+
+    if (page == -1) {
+        page = 0;
+        prompt();
+    }
+    size_t itemsPerPage = 10;
+    size_t startIndex = (size_t)page * itemsPerPage;
+    size_t totalPages = (items.size() + itemsPerPage - 1) / itemsPerPage;
+
+    if (page < -1 || startIndex >= items.size()) {
+        controller->log(Controller::LogLevel::ERR, "无效页码");
+        return {"无效页码", 1};
+    }
+
     // 显示当前页码信息
-    std::string pageInfo = "第 " + std::to_string(page + 1) + " 页，共 " + 
-                          std::to_string(totalPages) + " 页";
-    view->printQuestion(pageInfo, {"white"});
+    ss << "第 " << page + 1 << " 页，共 " << totalPages << " 页";
+    view->printQuestion("", ss.str(), "white");
     
     // 准备当前页的商品列表
     std::vector<std::string> currentPageProducts;
-    for (int i = startIndex; i < startIndex + itemsPerPage && i < products.size(); i++) {
-        currentPageProducts.push_back(std::to_string(i - startIndex) + ". " + products[i]);
+    size_t i = 0;
+    for (auto [key, value]: items.items()) {
+        if (startIndex <= i && i < startIndex + itemsPerPage) {
+            ss.str("");
+            ss << i - startIndex << ". " << value["name"].get<std::string>() << get_utf_empty(value["name"], 20) << value["value"];
+            currentPageProducts.push_back(ss.str());
+        } else if (i > startIndex + itemsPerPage) {
+            break;
+        }
+        ++i;
     }
     
     // 显示商品列表
     view->printOptions(currentPageProducts);
-    
-    // 显示帮助信息
-    prompt();
+    current_page = page;
+    return {"Success", 0};
 }
 
-void Store::buyProduct(int index) {
-    int actualIndex = index;
-    
-    if (actualIndex < 0 || actualIndex >= products.size()) {
-        view->printQuestion("无效的商品索引!", {"white"});
-        return;
+Message Store::buyProduct(int index) {
+    size_t actualIndex = (size_t)index + current_page * 10;
+    std::stringstream ss;
+    auto view = View::getInstance();
+    auto controller = Controller::getInstance();
+
+    if (actualIndex < 0 || actualIndex >= items.size()) {
+        controller->log(Controller::LogLevel::ERR, "无效的商品索引");
+        return {"无效的商品索引", 1};
     }
+
+    view->printQuestion("", "================", "white");
+    size_t i = 0;
+    for (auto& [key, value] : items.items()) {
+        if (i == index) {
+            ss << value["name"] << " " << value["description"];
+            view->printQuestion("", ss.str(), "white");
+            break;
+        }
+        ++i;
+    }
+    view->printQuestion("", "================", "white");
     
     // 询问是否确认购买
-    std::string question = "是否确认购买 '" + products[actualIndex] + "'? (Y/N)";
-    view->printQuestion(question, {"white"});
+    std::string question = "确认购买? (Y/N)";
+    view->printQuestion("", question, "white");
     
     // 获取用户输入
-    char response = inputHandler->waitKeyDown();
+    int response = controller->input->waitKeyDown();
     
     if (response == 'Y' || response == 'y') {
-        view->printQuestion("购买成功! 感谢您的光临。", {"white"});
-    } else {
-        view->printQuestion("已取消购买。", {"white"});
+        view->printQuestion("", "购买成功! 感谢您的光临。","white");
     }
+    return {"Success", 0};
 }
 
-void Store::showHelp() {
-    view->printQuestion("使用命令: page [num] 来翻页, buy [index] 来购买", {"white"});
+void Store::prompt() {
+    auto view = View::getInstance();
+    std::vector<std::string> prompts {
+        ""
+        "欢迎来到带饭家！想买点什么呢？",
+        "============ Help ============",
+        "使用 store [页码] 翻页",
+        "使用 buy [索引] 购买"
+    };
+    view->printOptions(prompts);
+}
+
+std::string Store::get_utf_empty(const std::string& text, const int& len) {
+    size_t length = 0, index = 0;
+    for (; index < text.length(); ) {
+        unsigned char c = static_cast<unsigned char>(text[index]);
+        if (c < 0x80) {
+            // ASCII 字符（英文字母、数字等）
+            index += 1;
+            ++length;
+        } else if ((c & 0xE0) == 0xC0) {
+            // 2字节 UTF-8 字符
+            index += 2;
+            ++length;
+        } else if ((c & 0xF0) == 0xE0) {
+            // 3字节 UTF-8 字符（包括大部分中文）
+            index += 3;
+            length += 2;
+        } else {
+            // 不支持的 UTF-8 序列
+            return "";
+        }
+    }
+    std::string res;
+    for (int i = 0; i < len - (int)length; ++ i) {
+        res += " ";
+    }
+    return res;
 }

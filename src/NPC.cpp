@@ -43,7 +43,8 @@ const std::string& NPCTypeToString(NPCType type) {
  * @param id NPC唯一标识符
  */
 NPC::NPC(const std::string& name, int id) 
-    : name(name), id(id) {}
+    : name(name), id(id) {
+}
 
 /**
  * @brief 加载交互配置

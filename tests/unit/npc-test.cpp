@@ -38,7 +38,7 @@ TEST_CASE("npc test", "[npc][test]") {
     // Professor.startInteraction();
 
     NPC Coach("教练", 1009);
-    Coach.loadInteractionConfig(NPCType::COACH, "tests/unit/NPCs.json");
+    Coach.loadInteractionConfig(NPCType::COACH, ".config/NPCs.json");
     Coach.startInteraction();
 
     // // Important!!! 这种表达式必须使用一个大括号括起来

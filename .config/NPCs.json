@@ -1,5 +1,11 @@
 {
   "Student": {
+    "scenes": [
+      "Canteen",
+      "Center",
+      "Classroom",
+      "Library"
+    ],
     "initial": "Student_intelligence",
     "interactions": {
       "Student_intelligence": {
@@ -19,9 +25,10 @@
       },
       "Student_teach_result": {
         "prompt": "通过请教，你的文科智力提升了5点。",
-        "options": [ ],
+        "options": [],
         "next": "END",
         "effect": {
+          "TIME": -2,
           "INTEL_ARTS": "5"
         }
       },
@@ -33,6 +40,9 @@
   },
   
   "Roommate": {
+    "scenes": [
+      "Dormitory"
+    ],
     "initial": "Roommate_initial",
     "interactions": {
       "Roommate_initial": {
@@ -55,6 +65,7 @@
         "options": [ ],
         "next": "END",
         "effect": {
+          "TIME": -1,
           "INTEL_SCI": "-10",
           "STRENGTH": "10"
         }
@@ -68,6 +79,7 @@
   
   "DormManager": {
     "initial": "DormManager_initial",
+    "special_char": "f",
     "interactions": {
       "DormManager_initial": {
         "prompt": "你遇到了宿舍管理员。",
@@ -129,6 +141,7 @@
   
   "Employer": {
     "initial": "Employer_initial",
+    "special_char": "g",
     "interactions": {
       "Employer_initial": {
         "prompt": "招聘人员正在招兼职。",
@@ -160,6 +173,7 @@
           }
         ],
         "effect": {
+          "TIME": -1,
           "MONEY": "10"
         }
       },
@@ -173,6 +187,7 @@
           }
         ],
         "effect": {
+          "TIME": -1,
           "MONEY": "5"
         }
       },
@@ -184,6 +199,7 @@
   },
   
   "Librarian": {
+    "special_char": "h",
     "initial": "Librarian_counter",
     "interactions": {
       "Librarian_counter": {
@@ -235,6 +251,7 @@
         "prompt": "成功阅读理科书籍，理科智力+10。",
         "options": [],
         "effect": {
+          "TIME": -1,
             "INTEL_SCI": "10"
         }
       },
@@ -242,6 +259,7 @@
         "prompt": "成功阅读文科书籍，文科智力+10。",
         "options": [],
         "effect": {
+          "TIME": -1,
             "INTEL_ARTS": "10"
         }
       },
@@ -253,6 +271,7 @@
   },
   
   "CanteenStaff": {
+    "special_char": "j",
     "initial": "CanteenStaff_counter",
     "interactions": {
       "CanteenStaff_counter": {
@@ -293,6 +312,7 @@
           }
         ],
         "effect": {
+          "TIME": -1,
           "STRENGTH": "30",
           "MONEY": "-15"
         }
@@ -305,6 +325,7 @@
   },
   
   "Professor": {
+    "special_char": "k",
     "initial": "Professor_officeHours",
     "interactions": {
       "Professor_officeHours": {
@@ -332,6 +353,7 @@
           }
         ],
         "effect": {
+          "TIME": -1,
           "INTEL_SCI": "15"
         }
       },
@@ -342,177 +364,171 @@
     }
   },
 
-  "Coach": {
-    "initial": "Coach_counter",
+  "Football": {
+    "initial": "train_football_if",
     "interactions": {
-      "Coach_counter": {
-        "prompt": "教练正在体育场。",
+      "train_football_if": {
+        "prompt": "参加足球锻炼需要消耗10金币并获得10体力, 1点时间。你确定要参加吗？",
         "options": [
-          {
-            "id": "Coach_train",
-            "text": "参加体育锻炼",
-            "next": "Coach_train_options"
-          },
-          {
-            "id": "Coach_leave",
-            "text": "离开",
-            "next": "END"
-          }
+            {
+                "id": "coach_train_football_yes",
+                "text": "是",
+                "next": "football_result",
+                "condition": {
+                    "money": "10",
+                    "time": "1"
+                }
+            },
+            {
+                "id": "football_leave",
+                "text": "离开",
+                "next": "END"
+            }
         ]
       },
-      "Coach_train_options": {
-        "prompt": "请选择你想参加的运动：",
+      "football_result": {
+        "prompt": "你参加了足球锻炼，金币-10，体力+10, 时间 -1。",
         "options": [
           {
-            "id": "Coach_train_football",
-            "text": "足球",
-            "next": "Coach_train_football_if"
-          },
-          {
-            "id": "Coach_train_basketball",
-            "text": "篮球",
-            "next": "Coach_train_basketball_if"
-          },
-          {
-            "id": "Coach_train_run",
-            "text": "跑步",
-            "next": "Coach_train_run_if"
-          },
-          {
-            "id": "Coach_train_badminton",
-            "text": "羽毛球",
-            "next": "Coach_train_badminton_if"
-          },
-          {
-            "id": "Coach_train_leave",
-            "text": "离开",
-            "next": "END"
-          }
-        ]
-      },
-        "Coach_train_football_if": {
-            "prompt": "参加足球锻炼需要消耗10金币并获得10体力。你确定要参加吗？",
-            "options": [
-            {
-                "id": "Coach_train_football_yes",
-                "text": "是",
-                "next": "Coach_train_football_result",
-                "condition": {
-                    "MONEY": "10"
-                }
-            },
-            {
-                "id": "Coach_train_football_no",
-                "text": "重新选择",
-                "next": "Coach_train_options"
-            }
-            ]
-        },
-        "Coach_train_basketball_if": {
-            "prompt": "参加篮球锻炼需要消耗15金币并获得15体力。你确定要参加吗？",
-            "options": [
-            {
-                "id": "Coach_train_basketball_yes",
-                "text": "是",
-                "next": "Coach_train_basketball_result",
-                "condition": {
-                    "MONEY": "15"
-                }
-            },
-            {
-                "id": "Coach_train_basketball_no",
-                "text": "重新选择",
-                "next": "Coach_train_options"
-            }
-            ]
-        },
-        "Coach_train_run_if": {
-            "prompt": "参加跑步锻炼需要消耗0金币并获得10体力。你确定要参加吗？",
-            "options": [
-            {
-                "id": "Coach_train_run_yes",
-                "text": "是",
-                "next": "Coach_train_run_result"
-            },
-            {
-                "id": "Coach_train_run_no",
-                "text": "重新选择",
-                "next": "Coach_train_options"
-            }
-            ]
-        },
-        "Coach_train_badminton_if": {
-            "prompt": "参加羽毛球锻炼需要消耗20金币并获得15体力。你确定要参加吗？",
-            "options": [
-            {
-                "id": "Coach_train_badminton_yes",
-                "text": "是",
-                "next": "Coach_train_badminton_result",
-                "condition": {
-                    "MONEY": "20"
-                }
-            },
-            {
-                "id": "Coach_train_badminton_no",
-                "text": "重新选择",
-                "next": "Coach_train_options"
-            }
-            ]
-        },
-      "Coach_train_football_result": {
-        "prompt": "你参加了足球锻炼，金币-10，体力+10。",
-        "options": [
-          {
-            "id": "Coach_train_football_end",
+            "id": "football_end",
             "text": "离开",
             "next": "END"
           }
         ],
         "effect": {
+          "TIME": "-1",
           "STRENGTH": "10",
           "MONEY": "-10"
         }
       },
-      "Coach_train_basketball_result": {
+      "END": {
+        "prompt": "对话结束",
+        "options": []
+      }
+    }
+  },
+  
+  "Basketball": {
+    "initial": "train_basketball_if",
+    "interactions": {
+      "train_basketball_if": {
+        "prompt": "参加篮球锻炼需要消耗15金币并获得15体力。你确定要参加吗？",
+        "options": [
+          {
+            "id": "coach_train_basketball_yes",
+            "text": "是",
+            "next": "basketball_result",
+            "condition": {
+              "money": "15",
+              "time": "1"
+            }
+          },
+          {
+            "id": "basketball_leave",
+            "text": "离开",
+            "next": "END"
+          }
+        ]
+      },
+      "basketball_result": {
         "prompt": "你参加了篮球锻炼，金币-15，体力+15。",
         "options": [
           {
-            "id": "Coach_train_basketball_end",
+            "id": "basketball_end",
             "text": "离开",
             "next": "END"
           }
         ],
         "effect": {
+          "TIME": "-1",
           "STRENGTH": "15",
           "MONEY": "-15"
         }
       },
-      "Coach_train_run_result": {
-        "prompt": "你参加了跑步锻炼，体力+10。",
+      "END": {
+        "prompt": "对话结束",
+        "options": []
+      }
+    }
+  },
+
+  "Badminton": {
+    "initial": "train_badminton_if",
+    "interactions": {
+      "train_badminton_if": {
+        "prompt": "参加羽毛球锻炼需要消耗5金币并获得10体力，但会花费更多时间。你确定要参加吗？",
         "options": [
           {
-            "id": "Coach_train_run_end",
+            "id": "coach_train_badminton_yes",
+            "text": "是",
+            "next": "badminton_result",
+            "condition": {
+              "money": "5",
+              "time": "2"
+            }
+          },
+          {
+            "id": "badminton_leave",
+            "text": "离开",
+            "next": "END"
+          }
+        ]
+      },
+      "badminton_result": {
+        "prompt": "你参加了羽毛球锻炼，金币-5，体力+10，时间-2。",
+        "options": [
+          {
+            "id": "badminton_end",
             "text": "离开",
             "next": "END"
           }
         ],
         "effect": {
+          "TIME": "-2",
           "STRENGTH": "10",
-          "MONEY": "0"
+          "MONEY": "-5"
         }
       },
-      "Coach_train_badminton_result": {
-        "prompt": "你参加了羽毛球锻炼，金币-20，体力+15。",
+      "END": {
+        "prompt": "对话结束",
+        "options": []
+      }
+    }
+  },
+
+  "Running": {
+    "initial": "train_running_if",
+    "interactions": {
+      "train_running_if": {
+        "prompt": "参加跑步锻炼无需金币，但会消耗3点时间，获得20体力。你确定要参加吗？",
         "options": [
           {
-            "id": "Coach_train_badminton_end",
+            "id": "coach_train_running_yes",
+            "text": "是",
+            "next": "running_result",
+            "condition": {
+              "time": "3"
+            }
+          },
+          {
+            "id": "running_leave",
+            "text": "离开",
+            "next": "END"
+          }
+        ]
+      },
+      "running_result": {
+        "prompt": "你参加了跑步锻炼，时间-3，体力+20。",
+        "options": [
+          {
+            "id": "running_end",
             "text": "离开",
             "next": "END"
           }
         ],
         "effect": {
-          "STRENGTH": "15",
-          "MONEY": "-20"
+          "TIME": "-3",
+          "STRENGTH": "20"
         }
       },
       "END": {
@@ -521,4 +537,5 @@
       }
     }
   }
+
 }

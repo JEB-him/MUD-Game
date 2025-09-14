@@ -16,9 +16,10 @@
 #include <memory>
 #include <fstream>
 #include <map>
-#include<sstream>
-#include "json.hpp"
+#include <sstream>
 #include "Protagonist.h"
+#include "json.hpp"
+#include "tools.h"
 
 using std::string;
 using std::cout;
@@ -30,6 +31,20 @@ using nlohmann::json;
 using std::ifstream;
 using std::map;
 using std::stringstream;
+
+/**
+ * @brief 物品基础信息类，用于与其他模型之间传递信息
+ * @param name 物品名称
+ * @param description 物品描述
+ * @param value 物品价值
+ * */
+class ItemBasicInf {
+public:
+    ItemBasicInf(string name, string description, int value);
+    string name;
+    string description;
+    int value;
+};
 
 /**
  * @brief 物品类
@@ -209,9 +224,46 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
-    unique_ptr<Item> createItem(string item_name);
+    unique_ptr<Item> createItem(string& item_name);
+    /**
+     * @brief 清理主角身上的某个buff
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message clearBuff(BasicValue::Buff buff_name,Protagonist& protagonist);
+    /**
+     * @brief 更新主角buff状态
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message updateBuff(Protagonist& protagonist);
 
 private:
     ifstream config_file_item;
     json config_item;
 };
+
+/**
+ * @brief 物品buff信息库，包含所有外部需要获取的buff信息
+ * @param energy_drink_intel_boost 能量饮料buff的智力基础增量
+ * @param energy_drink_intel_boost_rate 能量饮料buff的智力比例增量
+ * @param milk_drink_intel_boost 牛奶buff的智力基础增量
+ * @param milk_drink_intel_boost_rate 牛奶buff的智力比例增量
+ */
+//class ItemBuffInf {
+//public:
+//    ItemBuffInf(const float energy_drink_intel_boost,
+//        const float energy_drink_intel_boost_rate,
+//        const float milk_drink_intel_boost,
+//        const float milk_drink_intel_boost_rate,
+//        const int energy_drink_duration,
+//        const int milk_duration,
+//        const int vitamins_duration);
+//    const float energy_drink_intel_boost;
+//    const float energy_drink_intel_boost_rate;
+//    const float milk_drink_intel_boost;
+//    const float milk_drink_intel_boost_rate;
+//    const int energy_drink_duration;
+//    const int milk_duration;
+//    const int vitamins_duration;
+//};

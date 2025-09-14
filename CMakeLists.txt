@@ -51,7 +51,7 @@ else()
     message(STATUS "平台检测:${CMAKE_GENERATOR}")
     # 编译模式下开启警告和调试信息
     target_compile_options(game
-        PRIVATE -g -Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wconversion -Wsign-conversion
+        PRIVATE -g -Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Wconversion -Wsign-conversion
     )
 endif()
 

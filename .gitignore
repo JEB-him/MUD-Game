@@ -2,11 +2,13 @@ build/
 cmake-build-debug/
 .cache/
 docs/
+logs/
 .idea/
 .vs/
 .vscode/
 .idea/
 out/
+logs/
 
 build.bat
 compile_commands.json

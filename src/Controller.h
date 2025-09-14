@@ -7,10 +7,11 @@
 #include <memory>
 #include "tools.h"
 #include "Map.h"
-// #include "Item.h"
 #include "Protagonist.h"
 #include "NPC.h"
 #include "InputHandler.h"
+#include "backpack.h"
+#include "View.h"
 // #include "backpack.h"
 #include <set>
 #include <ctime>
@@ -23,8 +24,7 @@
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
  */
-class Controller
-{
+class Controller {
 public:
     friend class View;
 
@@ -33,12 +33,11 @@ public:
      * @note 日志消息会按照等级被输出到日志文件中，同时控制台会打印设定等级
      * 的消息，详见 README 日志输出
      */
-    enum class LogLevel
-    {
+    enum class LogLevel {
         DEBUG, ///< 消息只应当在调试时被看到
         INFO,  ///< 程序正常运行时可以输出的消息
         WARN,  ///< 消息对应的事件发生时，程序能运行，但仍需引起注意
-        ERR  ///< 严重的错误，该事件发生时程序会 Crash
+        ERR    ///< 严重的错误，该事件发生时程序会 Crash
     };
 
     /**
@@ -53,9 +52,10 @@ public:
         REFRESH,   ///< 刷新地图
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
-        TP,        ///< 传送到 NPC 附近
+        STORE,     ///< 商店购买
+        BUY,       ///< 购买物品
         QUIT,      ///< 退出游戏
-        NONE       ///< 退出游戏
+        NONE       ///< 无事件
     };
 
     /**
@@ -73,7 +73,7 @@ public:
      * @param log_dir 日志目录，默认为项目根目录下的 logs/
      * @param root_dir 根目录，默认为可执行文件所在路径
      */
-    static std::shared_ptr<Controller> getInstance(const LogLevel &level, const std::filesystem::path &log_dir, const std::filesystem::path &root_dir);
+    static std::shared_ptr<Controller> getInstance(const LogLevel &level=LogLevel::INFO, const std::filesystem::path &log_dir=std::filesystem::path(), const std::filesystem::path &root_dir=std::filesystem::path());
 
     /**
      * @brief 日志函数
@@ -94,17 +94,17 @@ public:
     int run();
 
     // Model 类的智能指针
-    std::shared_ptr<Map> map;
-    std::shared_ptr<Protagonist> protagonist;
-    std::shared_ptr<NPC> npc;
-    // std::shared_ptr<Backpack> backpack;
-    std::shared_ptr<InputHandler> input;
+    std::shared_ptr<Map>          map         = nullptr;
+    std::shared_ptr<Protagonist>  protagonist = nullptr;
+    std::shared_ptr<NPC>          npc         = nullptr;
+    std::shared_ptr<View>         view        = nullptr;
+    std::shared_ptr<InputHandler> input       = nullptr;
+    std::shared_ptr<Backpack>     backpack    = nullptr;
 
     template <class Archive>
     void serialize(Archive &archive)
     {
-        archive(CEREAL_NVP(map),
-                CEREAL_NVP(protagonist),
+        archive(CEREAL_NVP(protagonist),
                 CEREAL_NVP(npc)
                 // CEREAL_NVP(backpack),
         );
@@ -144,6 +144,7 @@ private:
      */
     Message init();
 
+    
     Message load(std::string username);
 
     /**
@@ -155,8 +156,6 @@ private:
      */
     Message save();
 
- 
-
     /**
      * TODO
      * @brief 登录
@@ -165,10 +164,8 @@ private:
     Message playerLogin(std::string &user_name);
 
     /**
-     * TODO
      * @brief 获得用户操作事件
      * @param[out] event_type 事件类型
-     * @return 返回消息
      */
     Message getEvent(EventType &event_type);
 
@@ -184,10 +181,8 @@ private:
      */
 
     /**
-     * @brief 跳转场景
-     * @details 遍历跳转场景的入口，拿到传送到哪个入口
-     * @param[in] exit_id
+     * @brief 解决用户操作事件
+     * @param[out] event_type 事件类型
      */
-    Message handleCmd(std::string cmd);
-
+    Message handleEvent(EventType &event_type);
 };

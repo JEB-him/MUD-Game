@@ -15,6 +15,8 @@
 #include   <cereal/types/string.hpp>
 // 9月9日更改：添加默认构造函数，类内基础属性初始化，移除const限定符，添加隐藏属性
 
+class ItemCreator;
+
 /**
  * @brief 主角属性枚举及健康状态枚举
  * @details ProtagonistAttr枚举定义了所有可修改的属性，HealthState枚举定义了健康状态
@@ -76,6 +78,16 @@ namespace BasicValue
         CANTEEN,   ///< 食堂
         HOSPITAL,  ///< 医院
     };
+
+    /**
+     * @brief 主角buff枚举
+     * @details 定义了主角可能所在的场景,现在未完善，需要场景类完善
+     */
+    enum class Buff {
+        BUFF_ENERGY_DRINK, ///< 能量饮料buff
+        BUFF_MILK, ///< 牛奶buff
+        BUFF_VITAMINS,   ///< 维生素buff
+    };
 }
 
 class Protagonist
@@ -118,6 +130,11 @@ public:
      */
     std::unordered_map<BasicValue::ProtagonistAttr, float> getBaseAttrs() const;
 
+
+
+    std::vector<std::string> getBaseInfoAsVector() const;
+
+
     /**
      * @brief 获取所有隐藏属性（供Controller同步UI/存档）
      * @return std::unordered_map 键值对：key=BasicValue::ProtagonistAttr，value=当前值
@@ -150,6 +167,9 @@ public:
      * @return Position 当前坐标
      */
     Position getPosition() const;
+
+    std::vector<std::string> getStatus() const;
+
 
     // -------------------------- 2. 属性修改接口（供Controller/Item类交互） --------------------------
     /**

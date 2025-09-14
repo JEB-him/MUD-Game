@@ -6,8 +6,8 @@
 #include <unordered_map>
 
 TEST_CASE("Item function test", "[item]") {
-    Protagonist protagonist("114514", "小王");
     Backpack backpack;
+    Protagonist protagonist("114514", "小王");
 
     //背包当前物品总量(size)测试
     backpack.addItem("advanced_mathematics");
@@ -113,6 +113,14 @@ TEST_CASE("Item function test", "[item]") {
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 5);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.2f);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.2f);
+        //buff测试
+        protagonist.addGameTime(3);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK] == 8);
+        CHECK(protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::HEALTH] == 95);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.0f);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.0f);
     }
 
     SECTION("milk") { // buff
@@ -128,10 +136,23 @@ TEST_CASE("Item function test", "[item]") {
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 3);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.15f);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.15f);
+        //buff测试
+        protagonist.addGameTime(1);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST] == 3);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 3);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.15f);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.15f);
+        protagonist.addGameTime(2);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 0);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.0f);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.0f);
         backpack.addItem("milk");
         protagonist.addGameTime(100);
         backpack.useFunctionOfItem(5, protagonist);
-        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK] == 100);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK] == 103);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST] == 3);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 3);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.15f);
@@ -178,6 +199,17 @@ TEST_CASE("Item function test", "[item]") {
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_VITAMINS] == 3);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS] == true);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE] == 0.0f);
+        CHECK(protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::HEALTH] == 10);
+        //buff测试
+        protagonist.addGameTime(20);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_VITAMINS] == 3);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS] == true);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE] == 0.0f);
+        CHECK(protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::HEALTH] == 10);
+        protagonist.addGameTime(2);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_VITAMINS] == 3);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS] == false);
+        CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE] == 1.0f);
         CHECK(protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::HEALTH] == 10);
     }
 }

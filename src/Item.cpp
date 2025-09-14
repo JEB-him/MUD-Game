@@ -11,6 +11,12 @@
 
 #include"Item.h"
 #include<filesystem>
+#include<vector>
+
+/**
+* @brief ItemBasicInf类构造函数
+*/
+ItemBasicInf::ItemBasicInf(string name, string description, int value):name(name),description(description),value(value) { }
 
   /**
     * @brief 物品类型枚举定义
@@ -427,11 +433,20 @@ ItemCreator::ItemCreator() {
 }
 
 /**
+ * @brief 获取物品基础信息
+ * @param item_name 物品唯一标识符
+ * */
+ItemBasicInf ItemCreator::getItemInf(string& item_name)const {
+    ItemBasicInf item_inf(config_item[item_name]["name"], config_item[item_name]["description"], config_item[item_name]["value"]);
+    return item_inf;
+}
+
+/**
  * @brief 创建物品对象
  * @param item_name 物品名称
  * @return 物品对象的unique_ptr
  */
-unique_ptr<Item> ItemCreator::createItem(string item_name) {
+unique_ptr<Item> ItemCreator::createItem(string& item_name) {
      //读取该物品所属类，并将string类型的类名转化为enum类型
     ItemType item_class = getItemType((string)config_item[item_name]["class"]);
 
@@ -515,3 +530,74 @@ unique_ptr<Item> ItemCreator::createItem(string item_name) {
         break;
     }
 }
+
+/**
+ * @brief 清理主角身上的某个buff
+ * @param buff_name buff对应键值
+ * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+ */
+Message ItemCreator::clearBuff(BasicValue::Buff buff_name, Protagonist& protagonist) {
+    switch (buff_name) {
+    case BasicValue::Buff::BUFF_ENERGY_DRINK: {
+        float intel_boost = config_item["energy_drink"]["intel_boost"];
+        float intel_boost_rate = config_item["energy_drink"]["intel_boost_rate"];
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK, false, false);
+        return Message("能量饮料buff已解除", 0);
+    }
+    case BasicValue::Buff::BUFF_MILK: {
+        float intel_boost = config_item["milk"]["intel_boost"];
+        float intel_boost_rate = config_item["milk"]["intel_boost_rate"];
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_MILK, false, false);
+        return Message("牛奶buff已解除", 0);
+    }
+    case BasicValue::Buff::BUFF_VITAMINS: {
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE, 1, false);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_VITAMINS, false, false);
+        return Message("维生素buff已解除", 0);
+    }
+    default:
+        return Message("错误的buff键值", -1);
+    }
+}
+
+Message ItemCreator::updateBuff(Protagonist& protagonist) {
+    std::vector<BasicValue::Buff> buff(3);
+    std::vector<int> duration(3), time(3);
+    buff[0] = BasicValue::Buff::BUFF_ENERGY_DRINK;
+    buff[1] = BasicValue::Buff::BUFF_MILK;
+    buff[2] = BasicValue::Buff::BUFF_VITAMINS;
+    duration[0] = config_item["energy_drink"]["duration"];
+    duration[1] = config_item["milk"]["duration"];
+    duration[2] = config_item["vitamins"]["duration"];
+    time[0] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK];
+    time[1] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_MILK];
+    time[2] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS];
+    for (int i = 0; i < 3; i++) {
+        if (protagonist.getGameTime() - time[i] > duration[i]) {
+            clearBuff(buff[i],protagonist);
+        }
+    }
+    return Message("buff更新成功");
+}
+//ItemBuffInf::ItemBuffInf(const float energy_drink_intel_boost,
+//const float energy_drink_intel_boost_rate,
+//const float milk_drink_intel_boost,
+//const float milk_drink_intel_boost_rate,
+//const int energy_drink_duration,
+//const int milk_duration,
+//const int vitamins_duration):
+//    energy_drink_intel_boost(energy_drink_intel_boost),
+//    energy_drink_intel_boost_rate(energy_drink_intel_boost_rate),
+//    milk_drink_intel_boost(milk_drink_intel_boost),
+//    milk_drink_intel_boost_rate(milk_drink_intel_boost_rate),
+//    energy_drink_duration(energy_drink_duration),
+//    milk_duration(milk_duration),
+//    vitamins_duration(vitamins_duration){ }

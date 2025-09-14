@@ -1,16 +1,17 @@
 #include "Controller.h"
+#include "View.h"
+#include "tools.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
 
-
 Controller::Controller(
     const LogLevel &level,
     const std::filesystem::path &log_dir,
-    const std::filesystem::path &root_dir) : level(level),
-                                             log_dir(log_dir),
-                                             root_dir(root_dir)
-{
+    const std::filesystem::path &root_dir):
+    level(level),
+    log_dir(log_dir),
+    root_dir(root_dir) {
     // 构造函数
 }
 
@@ -20,35 +21,66 @@ std::shared_ptr<Controller> Controller::getInstance(const LogLevel &level, const
     return instance;
 }
 
-void Controller::log(const LogLevel &level, const std::string &msg)
-{
-    // 临时实现
-    std::cout << msg << std::endl;
+void Controller::log(const LogLevel& level, const std::string& msg) {
+    std::ofstream debug_log(log_dir / DEBUG_FILE, std::ios::app);
+    std::ofstream info_log(log_dir / INFO_FILE, std::ios::app);
+    std::ofstream warn_log(log_dir / WARN_FILE, std::ios::app);
+    std::ofstream error_log(log_dir / ERROR_FILE, std::ios::app);
+    if (view != nullptr) {
+        Rgb rgb_color = {0 , 0, 0};
+        switch (level) {
+            case LogLevel::ERR:
+                rgb_color = {255, 0, 0};
+                if(this->level == LogLevel::ERR) view->printLog(msg, "", rgb_color);
+            case LogLevel::WARN:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(219, 162, 0);
+                if(this->level == LogLevel::WARN) view->printLog(msg, "", rgb_color);
+            case LogLevel::INFO:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(255, 255, 255);
+                if(this->level == LogLevel::INFO) view->printLog(msg, "", rgb_color);
+            case LogLevel::DEBUG:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(120, 120, 120);
+                if(this->level == LogLevel::DEBUG) view->printLog(msg, "", rgb_color);
+                break;
+        }
+    } else {
+        error_log << "未初始化 View 下调用 View::printLog" << std::endl;
+    }
+    if (this->level == LogLevel::INFO && level != LogLevel::DEBUG)
+        info_log << msg << std::endl;
+    if (this->level == LogLevel::WARN && level != LogLevel::INFO && level != LogLevel::DEBUG)
+        warn_log << msg << std::endl;
+    if (level == LogLevel::ERR)
+        error_log << msg << std::endl;
+    debug_log << msg << std::endl;
 }
 
-Message Controller::init()
-{
+Message Controller::init() {
     protagonist = std::make_shared<Protagonist>();
     // backpack = std::make_shared<Backpack>();
-    map = std::make_shared<Map>();
     input = std::make_shared<InputHandler>();
+    view = View::getInstance();
 
-    Message msg("Init Success!", 0);
-    log(LogLevel::INFO, msg.msg);
-    return msg;
+    Message msg {"Init Success!", 0};
+    std::cout << msg.msg << std::endl;
+    return msg.msg;
 }
 
-Message Controller::load(std::string username)
-{
+Message Controller::load(std::string username) {
     // 游戏开始时加载文件，名称格式为 username.bin
     std::filesystem::path file_name = root_dir / "saves" / (username + ".bin");
     std::ifstream ifile(file_name, std::ios::binary);
-    if (!ifile.is_open())
-    {
+    Position init_pos {-1, -1};
+    // 设置默认出生点
+    // TODO 修改逻辑，应当通过默认场景类获得默认文件名
+    std::string map_filename = "center.txt";
+    Message msg;
+    // 创建新用户之后还需要设置主角的位置
+    if (!ifile.is_open()) {
         if(!std::filesystem::exists(file_name)){
             std::ofstream fout(file_name, std::ios::binary);
             fout.close();
-            log(LogLevel::INFO, "创建用户文件: " + file_name.string());
+            std::cout << "创建用户文件: " << file_name.string() << std::endl;
         }
 
         time_t now = time(NULL);
@@ -59,41 +91,49 @@ Message Controller::load(std::string username)
         strftime(playerID.data(), playerID.size(), "OUC_%Y-%m-%d_%H:%M:%S", local_tm);
 
         protagonist = std::make_shared<Protagonist>(playerID, username);
-        // backpack = std::make_shared<Backpack>(); // 新建一个空的背包
-        Message msg = Message("Create a new account", 0);
+        msg = Message("Create a new account", 0);
+    } else {
+        // 使用cereal进行反序列化
+        {
+            cereal::BinaryInputArchive iarchive(ifile);
+            iarchive(CEREAL_NVP(*protagonist));
+            //  CEREAL_NVP(*backpack),
+            // CEREAL_NVP(*map));
+            ifile.close();
+        }
 
-        log(LogLevel::INFO, msg.msg);
-        return msg;
-    }
-    // 使用cereal进行反序列化
-    {
-        cereal::BinaryInputArchive iarchive(ifile);
-        iarchive(CEREAL_NVP(*protagonist));
-        //  CEREAL_NVP(*backpack),
-        // CEREAL_NVP(*map));
+        // 向场景类获取地图文件，向主角获取坐标
+        init_pos = protagonist->getPosition();
+        map_filename = "???";
+
         ifile.close();
+        msg = Message("Load Success!", 0);
     }
-    map = std::make_shared<Map>();
-
-    ifile.close();
-    Message msg = Message("Load Success!", 0);
-    log(LogLevel::INFO, msg.msg);
+    // 初始化地图数据
+    if (init_pos.x != -1) {
+        // 使用 init_pos 填入下面的参数列表中
+        map = std::make_shared<Map>(map_filename);
+    } else {
+        // 仅使用地图文件初始化
+        map = std::make_shared<Map>(map_filename);
+    }
+    std::cout << msg.msg << std::endl;
+    view->reDraw();
     return msg;
 }
 
-Message Controller::save()
-{
+Message Controller::save() {
     // 游戏退出时保存文件，名称格式为 username.bin
     std::string username = protagonist->getName();
     std::filesystem::path file_name = root_dir / "saves" / (username + ".bin");
     std::ofstream ofile(file_name, std::ios::binary);
-    if (!ofile.is_open())
-    {
+    if (!ofile.is_open()) {
         Message msg = Message("Save Failed!", -1);
         std::cerr << msg.msg << std::endl;
         log(LogLevel::ERR, msg.msg);
         return msg;
     }
+
     // 使用cereal进行序列化
     {
         cereal::BinaryOutputArchive oarchive(ofile);
@@ -104,13 +144,13 @@ Message Controller::save()
     }
     map->save();
     ofile.close();
+
     Message msg = Message("Save Success!", 0);
     log(LogLevel::INFO, msg.msg);
     return msg;
 }
 
-Message Controller::getEvent(EventType &event_type)
-{
+Message Controller::getEvent(EventType &event_type) {
     std::stringstream ss;
     ss.str("");
     ss.clear();
@@ -129,11 +169,8 @@ Message Controller::getEvent(EventType &event_type)
         // Backspace
         else if (ch == 8)
         {
-            std::string content = ss.str();
-            content.pop_back();
-            ss.str(content);
-            ss.clear();
-            ss << content;
+            char tmp_ch;
+            ss >> tmp_ch;
             continue;
         }
 
@@ -147,81 +184,174 @@ Message Controller::getEvent(EventType &event_type)
         {
             ss << char(ch);
         }
-        // 这里将处理好的ss传给View
+
+        view->printCmd(ss.str());
     }
     // 处理cmd
-    // switch (cmd)
+    if (cmd == "move")
+    {
+        event_type = EventType::MOVE;
+    }
+    else if (cmd == "ac_npc")
+    {
+        event_type = EventType::AC_NPC;
+    }
+    else if (cmd == "ac_inst")
+    {
+        event_type = EventType::AC_INST;
+    }
+    else if (cmd == "open pack" || cmd == "open_pack")
+    {
+        event_type = EventType::OPEN_PACK;
+    }
+    else if (cmd == "refresh")
+    {
+        event_type = EventType::REFRESH;
+    }
+    else if (cmd == "status")
+    {
+        event_type = EventType::STATUS;
+    }
+    else if (cmd == "jump")
+    {
+        event_type = EventType::JUMP;
+    }
+    // else if (cmd == "tp")
     // {
-    // case "move":
-    //     event_type = EventType::MOVE;
-    //     break;
-    // case "ac_npc", case "ac npc":
-    //     event_type = EventType::AC_NPC;
-    //     break;
-    // case "ac_inst", case "ac inst":
-    //     event_type = EventType::AC_INST;
-    //     break;
-    // case "open pack", case "open_pack":
-    //     event_type = EventType::OPEN_PACK;
-    //     break;
-    // case "refresh":
-    //     event_type = EventType::REFRESH;
-    //     break;
-    // case "status":
-    //     event_type = EventType::STATUS;
-    //     break;
-    // case "jump":
-    //     event_type = EventType::JUMP;
-    //     break;
-    // case "tp":
     //     event_type = EventType::TP;
-    //     break;
     // }
+    else if (cmd == "quit")
+    {
+        event_type = EventType::QUIT;
+        save();
+        exit(0);
+    }
+    else
+    {
+        event_type = EventType::NONE;
+    }
 
-    Message msg("Command: " + cmd, 0);
-    return msg;
+    return handleEvent(event_type);
 }
 
-// Message challenge::handleCmd(std::string cmd)
-// {
-//     switch (cmd)
-//     {
-//     case "help":
-//         /* code */
-//         break;
+Message Controller::handleEvent(EventType &event_type)
+{
+    switch (event_type)
+    {
+    case EventType::MOVE:
+    {
+        int ch = -1;
+        int id = -1;
+        Position pos;
+        view = View::getInstance();
+        while ((ch = input->waitKeyDown()) != 10)
+        {
+            Position last_pos = map->getPos();
+            switch (ch)
+            {
+            case 'w':
+                map->moveProtagonist(0, event_type, id);
+                break;
+            case 'a':
+                map->moveProtagonist(1, event_type, id);
+                break;
+            case 's':
+                map->moveProtagonist(2, event_type, id);
+                break;
+            case 'd':
+                map->moveProtagonist(3, event_type, id);
+                break;
+            }
+            pos = map->getPos();
+            view->drawPoMove(last_pos, pos);
+            handleEvent(event_type);
+        }
+        return Message("Move Success!", 0);
+    }
+    case EventType::AC_NPC:
+    {
+        Position position = map->getPos();
+        int npc_id = map->getNPCId(position);
+        npc->loadInteractionConfig(npc_id, "config.json");
+        npc->startInteraction();
+        npc->handleOptionSelection();
+        return (Message("AC_NPC Finished.", 0))
+    }
+    case EventType::AC_INST:
+    {
+        Position position = map->getPos();
+        int npc_id = map->getNPCId(position);
+        npc->loadInteractionConfig(npc_id, "config.json");
+        npc->startInteraction();
+        npc->handleOptionSelection();
+        return (Message("AC_INST Finished.", 0))
+    }
+    case EventType::OPEN_PACK:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        vector<std::string> item_names();
+        view->printOptions(item_names);
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Open Pack Success!", 0);
+    }
 
-//     case "quit":
-//         save();
-//         break;
+    case EventType::REFRESH:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->reDraw();
+        break;
+    }
 
-//     case "status":
-//         /* code */
-//         break;
+    case EventType::STATUS:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->printOptions(protagonist->getStatus());
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Show status.", 0);
+    }
+    case EventType::JUMP:
+    {
+        map = nullptr;
+        Position pos = map->getPos();
+        int exit_id = map->getExitId(pos);
+        // 从exit_id获取场景文件名，以scene_filename代替
 
-//     case "backpack":
-//         /* code */
-//         break;
+        map = std::make_shared<Map>("scene_filename", Position(1, 1));
+        view->reDraw();
+    }
+    case EventType::STORE:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->printOptions();
+    }
+    case EventType::BUY:
+    {
+    }
+    case EventType::NONE:
+        return Message("Invalid command!", -1);
+    }
+}
 
-//     default:
-//         break;
-//     }
-// }
-
-// 登录逻辑，在init()后调用
-Message Controller::playerLogin(std::string &user_name) {
+Message Controller::playerLogin(std::string &user_name)
+{
     // 用户名文件夹和名单文件路径
     std::filesystem::path saves_dir = root_dir / "saves";
     std::filesystem::path users_file = saves_dir / "users.txt";
     std::set<std::string> user_set;
 
     // 如果目录不存在，创建目录
-    if (!std::filesystem::exists(saves_dir)) {
+    if (!std::filesystem::exists(saves_dir))
+    {
         std::filesystem::create_directories(saves_dir);
         log(LogLevel::INFO, "创建用户存档目录: " + saves_dir.string());
     }
 
     // 如果名单文件不存在，创建空文件
-    if (!std::filesystem::exists(users_file)) {
+    if (!std::filesystem::exists(users_file))
+    {
         std::ofstream fout(users_file);
         fout.close();
         log(LogLevel::INFO, "创建用户名单文件: " + users_file.string());
@@ -231,88 +361,121 @@ Message Controller::playerLogin(std::string &user_name) {
     {
         std::ifstream fin(users_file);
         std::string line;
-        while (std::getline(fin, line)) {
-            if (!line.empty()) user_set.insert(line);
+        while (std::getline(fin, line))
+        {
+            if (!line.empty())
+                user_set.insert(line);
         }
         fin.close();
     }
 
     // 打印所有已存在的用户名
     std::cout << "已存在的用户目录：" << std::endl;
-    if (user_set.empty()) {
+    if (user_set.empty())
+    {
         std::cout << "（暂无用户，请新建用户名）" << std::endl;
-    } else {
-        int i=0;
-        for (const auto& name : user_set) {
+    }
+    else
+    {
+        int i = 0;
+        for (const auto &name : user_set)
+        {
             std::cout << i++ << ": " << name << std::endl;
         }
     }
 
     std::string name;
-    do {
+    do
+    {
         std::cout << "Enter username: ";
         std::getline(std::cin, name);
 
-        if (name.empty()) {
+        if (name.empty())
+        {
             std::cout << "Username cannot be empty. Please try again." << std::endl;
-            log(LogLevel::WARN, "Empty username attempt");
+            std::cout << "**Empty username attempt**" << std::endl;
             continue;
         }
 
-        if (isValidUsername(name)) {
+        if (isValidUsername(name))
+        {
             break;
         } else {
             std::cout <<"\033[31m"<< "Invalid username. Only letters, numbers, underscores, and Chinese characters are allowed." << "\033[0m" << std::endl;
-            log(LogLevel::WARN, "Invalid username attempt: " + name);
+            std::cout << "\033[31m**Invalid username attempt: " << name << "**\033[0m" << std::endl;
         }
     } while (true);
 
     user_name = name;
     std::cout  << "SUCCESS! Hello: "<<"\033[93m" << name << "\033[0m" << std::endl;
-    log(LogLevel::INFO, "Username accepted: " + name);
+    std::cout << "Username accepted: " << name << std::endl;
 
     // 如果是新用户，写入用户名文件
-    if (user_set.find(name) == user_set.end()) {
+    if (user_set.find(name) == user_set.end())
+    {
         std::ofstream fout(users_file, std::ios::app);
         fout << name << std::endl;
         fout.close();
-        log(LogLevel::INFO, "新用户已加入名单: " + name);
+        std::cout << "新用户已加入名单: " << name << std::endl;
     }
 
     return Message("Login Success!", 0);
 }
 
-
 int Controller::run()
 {
     init();
-    std::cout << "登录/注册..." << std::endl;
+    std::cout << "初始化成功" << std::endl;
     std::string user_name;
     playerLogin(user_name);
-    std::cout << "初始化游戏..." << std::endl;
     load(user_name);
-    std::cout << "运行游戏..." << std::endl;
-    // TODO 修改此状态开启循环
-    bool running = false;
+    log(LogLevel::DEBUG, "运行游戏...");
+    log(LogLevel::DEBUG, "DEBUG...");
+    bool running = true;
+    // 防止死循环
+    // TODO 修改回合次数
+    static int turns = 1;
     EventType event_type = EventType::NONE;
     Message msg;
-    while (running)
-    {
-        std::cout << "获取事件..." << std::endl;
-        // msg = getEvent(event_type);
-
-        switch (event_type)
-        {
-        case EventType::MOVE:
-            std::cout << "移动主角..." << std::endl;
-            break;
-        case EventType::QUIT:
-            std::cout << "退出游戏..." << std::endl;
-            running = false;
-            break;
-        case EventType::NONE:
-            break;
-        }
+    while (running && turns--) {
+        log(LogLevel::DEBUG, "获取事件...");
+        msg = getEvent(event_type);
     }
+
+    // 测试用
+    std::stringstream ss;
+    view->printCmd("测试命令");
+    gameSleep(500);
+    view->printCmd("2 hello cat");
+    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
+    std::vector<std::string> tmp_ops {
+        "1. 带一个",
+        "2. no"
+    };
+    view->printOptions(tmp_ops);
+    view->printQuestion("NPC", "你好", "white");
+    log(LogLevel::DEBUG, "移动主角");
+    int map_event, id;
+    Position old_pos = map->getPos();
+    ss << "初始位置: " << old_pos.x << " " << old_pos.y;
+    log(LogLevel::DEBUG, ss.str());
+    ss.str("");
+    gameSleep(500);
+    map->moveProtagonist(0, map_event, id);
+    Position pos = map->getPos();
+    protagonist->setPosition(pos);
+    view->drawPoMove(old_pos, pos);
+    ss << "当前位置: " << pos.x << " " << pos.y;
+    log(LogLevel::DEBUG, ss.str());
+    ss.str("");
+    // 测试结束
+
+
+    // 保存游戏
+    save();
+
+    // 保持界面完整性
+    std::cout << "\n\n";
     return 0;
 }

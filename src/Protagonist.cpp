@@ -212,7 +212,7 @@ Position Protagonist::getPosition() const
 }
 
 // 通用属性修改接口
-Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd)
+Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, float val, bool isAdd)
 {
     // 辅助函数：处理int类型属性
     auto processIntAttr = [&](int &member)

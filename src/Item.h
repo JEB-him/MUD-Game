@@ -44,9 +44,7 @@ public:
     Item(const string &name, const string &description, float value, bool is_consumable);
     virtual ~Item() = default;
 
-    /**
-     * @brief 获取物品信息
-     */
+    //获取物品信息
     string getName() const;//物品名字
     string getDescription() const;//物品描述
     int getValue() const;//物品价值
@@ -75,7 +73,7 @@ public:
 
     /**
      * @brief 使用消耗品
-     * @param 主角类引用
+     * @param protagonist 主角类引用
      */
     virtual void use(Protagonist &protagonist) = 0;
 };
@@ -165,11 +163,12 @@ private:
  * @param duration 持续时间（能量饮料、牛奶）
  * @param have_abuse_punish 是否有滥用惩罚(能量饮料)
  * @param health_reduce 健康降低值（能量饮料）
+ * @param punish_cd 防止滥用的最低时间间隔（能量饮料）
  * */
 class LearningAid : public Consumable
 {
 public:
-    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce);
+    LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce, int punish_cd);
     void use(Protagonist& protagonist) override;
 private:
     float intel_boost;
@@ -177,6 +176,7 @@ private:
     float duration;
     bool have_abuse_punish;
     float health_reduce;
+    int punish_cd;
 };
 
 /**

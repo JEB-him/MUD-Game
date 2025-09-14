@@ -160,7 +160,7 @@ public:
      * @return Message 操作结果：status=0（成功）/-1（属性名错误）/1（值越界）；msg=结果描述
      * @note 对于受伤状态（IS_INJURED），val=1表示受伤，val=0表示恢复 isAdd参数为false
      */
-    Message updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd = true);
+    Message updateAttr(BasicValue::ProtagonistAttr attr, float val, bool isAdd = true);
 
     /**
      * @brief 设置主角姓名

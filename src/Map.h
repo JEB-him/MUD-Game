@@ -261,7 +261,7 @@ private:
     /**
      * @brief 获取NPC ID
      */
-    int getNPCId(const Position& pos);
+    NPCType getNPCId(const Position& pos);
 
     /**
      * @brief 储存行到地图中，并检查是否含有非法字符

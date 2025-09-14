@@ -11,6 +11,8 @@
 #include "NPC.h"
 #include "InputHandler.h"
 #include "backpack.h"
+#include "View.h"
+// #include "backpack.h"
 #include <set>
 #include <ctime>
 
@@ -98,10 +100,9 @@ public:
     std::shared_ptr<Backpack>     backpack    = nullptr;
 
     template <class Archive>
-    void serialize(Archive &archive) {
-        // TODO Check 这个地方需要加入 map 吗？
-        archive(CEREAL_NVP(map),
-                CEREAL_NVP(protagonist),
+    void serialize(Archive &archive)
+    {
+        archive(CEREAL_NVP(protagonist),
                 CEREAL_NVP(npc)
                 // CEREAL_NVP(backpack),
         );
@@ -141,7 +142,7 @@ private:
      */
     Message init();
 
-    Message load(std::string username);
+        Message load(std::string username);
 
     /**
      * @brief 保存游戏
@@ -152,8 +153,6 @@ private:
      */
     Message save();
 
- 
-
     /**
      * TODO
      * @brief 登录
@@ -162,10 +161,8 @@ private:
     Message playerLogin(std::string &user_name);
 
     /**
-     * TODO
      * @brief 获得用户操作事件
      * @param[out] event_type 事件类型
-     * @return 返回消息
      */
     Message getEvent(EventType &event_type);
 
@@ -181,10 +178,8 @@ private:
      */
 
     /**
-     * @brief 跳转场景
-     * @details 遍历跳转场景的入口，拿到传送到哪个入口
-     * @param[in] exit_id
+     * @brief 解决用户操作事件
+     * @param[out] event_type 事件类型
      */
-    Message handleCmd(std::string cmd);
-
+    Message handleEvent(EventType &event_type);
 };

@@ -5,7 +5,13 @@
 
 #include <vector>
 #include <memory>
+#include <fstream>
+#include <string>
+#include <map>
 #include "json.hpp"
+
+#include "NPCType.h"
+#include "Controller.h"
 
 /**
  * @brief 场景类    
@@ -22,5 +28,17 @@ public:
      * @brief 从 JSON 对象中加载场景数据
      */
     static std::shared_ptr<std::vector<std::string>> getScenes();
+
+    /**
+     * @brief 从文件加载 NPC 数据并获取具有指定场景属性的 NPC
+     * @return 包含 NPC 名称和类型的映射的共享指针
+     */
+    std::shared_ptr<std::map<std::string, NPCType>> getNPCs();
+
+    /**
+     * @brief 从 JSON 对象中加载特殊字符NPC
+     */
+    std::shared_ptr<std::map<std::string, NPCType>> getSpecialCharNPCs();
+
 private:
 };

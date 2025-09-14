@@ -62,12 +62,6 @@ public:
 	ItemBasicInf getItemInf(string& item_name)const;
 
 	/**
-	 * @brief  获取物品的基础信息（名字、描述、价值）
-	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
-	 */
-	ItemBasicInf getItemInf(string& item_name)const;
-
-	/**
 	 * @brief  添加（生成）名为“item_name”的物品
 	 * @param item_name 物品的名称
 	 * @details 逻辑：利用ItemCreator的方法创造目标物品对象，存入backpack_items中

@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+// #include "Store.h"
+#include <fstream>
+#include "scene.h"
 
 Controller::Controller(
     const LogLevel &level,
@@ -151,6 +154,7 @@ Message Controller::save() {
 }
 
 Message Controller::getEvent(EventType &event_type) {
+    view->enableCursor();
     std::stringstream ss;
     ss.str("");
     ss.clear();
@@ -187,6 +191,7 @@ Message Controller::getEvent(EventType &event_type) {
 
         view->printCmd(ss.str());
     }
+    view->disableCursor();
     // 处理cmd
     if (cmd == "move")
     {
@@ -216,15 +221,23 @@ Message Controller::getEvent(EventType &event_type) {
     {
         event_type = EventType::JUMP;
     }
-    // else if (cmd == "tp")
-    // {
-    //     event_type = EventType::TP;
-    // }
     else if (cmd == "quit")
     {
         event_type = EventType::QUIT;
         save();
         exit(0);
+    }
+    else if (cmd == "store")
+    {
+        event_type = EventType::STORE;
+    }
+    else if (cmd == "help")
+    {
+        event_type = EventType::HELP;
+    }
+    else if (cmd == "use")
+    {
+        event_type = EventType::USE;
     }
     else
     {
@@ -236,12 +249,12 @@ Message Controller::getEvent(EventType &event_type) {
 
 Message Controller::handleEvent(EventType &event_type)
 {
+    int NPCid = -1;
     switch (event_type)
     {
     case EventType::MOVE:
     {
         int ch = -1;
-        int id = -1;
         Position pos;
         view = View::getInstance();
         while ((ch = input->waitKeyDown()) != 10)
@@ -250,16 +263,16 @@ Message Controller::handleEvent(EventType &event_type)
             switch (ch)
             {
             case 'w':
-                map->moveProtagonist(0, event_type, id);
+                map->moveProtagonist(0, event_type, NPCid);
                 break;
             case 'a':
-                map->moveProtagonist(1, event_type, id);
+                map->moveProtagonist(1, event_type, NPCid);
                 break;
             case 's':
-                map->moveProtagonist(2, event_type, id);
+                map->moveProtagonist(2, event_type, NPCid);
                 break;
             case 'd':
-                map->moveProtagonist(3, event_type, id);
+                map->moveProtagonist(3, event_type, NPCid);
                 break;
             }
             pos = map->getPos();
@@ -270,43 +283,33 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::AC_NPC:
     {
-        Position position = map->getPos();
-        int npc_id = map->getNPCId(position);
-        npc->loadInteractionConfig(npc_id, "config.json");
-        npc->startInteraction();
-        npc->handleOptionSelection();
-        return (Message("AC_NPC Finished.", 0))
+        if (NPCid == -1)
+            return Message("Invalid NPC id!", -1);
+        Scene scene();
+        scene.getNPCname(NPCid);
     }
     case EventType::AC_INST:
     {
-        Position position = map->getPos();
-        int npc_id = map->getNPCId(position);
-        npc->loadInteractionConfig(npc_id, "config.json");
-        npc->startInteraction();
-        npc->handleOptionSelection();
-        return (Message("AC_INST Finished.", 0))
     }
     case EventType::OPEN_PACK:
     {
-        std::shared_ptr<View> view = View::getInstance();
-        vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
-        vector<std::string> item_names();
+        std::vector<std::unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        std::vector<std::string> item_names;
+        for (auto &item_pt : item_pts)
+        {
+            item_names.push_back(item_pt->getName());
+        }
         view->printOptions(item_names);
-        // 按下任意键退出
-        int ch = input->waitKeyDown();
         return Message("Open Pack Success!", 0);
     }
-
     case EventType::REFRESH:
     {
-        std::shared_ptr<View> view = View::getInstance();
         view->reDraw();
-        break;
+        return Message("Refresh Success!", 0);
     }
 
     case EventType::STATUS:
     {
-        std::shared_ptr<View> view = View::getInstance();
         view->printOptions(protagonist->getStatus());
         // 按下任意键退出
         int ch = input->waitKeyDown();
@@ -315,21 +318,87 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::JUMP:
     {
         map = nullptr;
-        Position pos = map->getPos();
-        int exit_id = map->getExitId(pos);
-        // 从exit_id获取场景文件名，以scene_filename代替
 
         map = std::make_shared<Map>("scene_filename", Position(1, 1));
         view->reDraw();
+        return Message("Jump Success!", 0);
     }
-    case EventType::STORE:
+    case EventType::USE:
     {
-        std::shared_ptr<View> view = View::getInstance();
-        view->printOptions();
+        view = View::getInstance();
+        std::vector<std::unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        std::vector<std::string> item_names;
+        for (auto &item_pt : item_pts)
+        {
+            item_names.push_back(item_pt->getName());
+        }
+        view->printOptions(item_names);
+        std::stringstream item_option;
+        item_option.str("");
+        int index = -1;
+        while (1)
+        {
+            int ch = input->waitKeyDown();
+            if (ch == 10) // Enter
+            {
+                if (item_option.str().empty())
+                {
+                    return Message("Invalid item option!", -1);
+                }
+                int size = item_option.str().size();
+                for (int i = size; i > 0; i--)
+                {
+                    index += (item_option.str()[i] - '0') * pow(10, size - i);
+                }
+                if (index > item_names.size() - 1)
+                {
+                    return Message("Invalid item option!", -1);
+                }
+            }
+            else if (ch >= '0' && ch <= '9')
+            {
+                item_option << char(ch);
+            }
+        }
+        if (item_pts[index]->isOnCD())
+        {
+            return Message("Item is on CD!", -1);
+        }
+        else
+        {
+            item_pts[index]->use(protagonist);
+        }
+
+        return Message("Use item Success!", 0);
     }
-    case EventType::BUY:
+    }
+// case EventType::STORE:
+// {
+//     view = View::getInstance();
+//     Store store();
+//     store.showProducts();
+//     store.buyProduct();
+//     int ch = input->waitKeyDown();
+//     return Message("Buy product.", 0);
+// }
+case EventType::HELP:
+{
+    ifstream fin(".config/help.txt");
+    if (!fin.is_open())
     {
+        return Message("Help file not found!", -1);
     }
+    std::vector<std::string> help_msgs;
+    std::string line;
+    for (int i = 0; i < 11; i++)
+    {
+        std::getline(fin, line);
+        if (line.empty())
+            break;
+        help_msgs.push_back(line);
+    }
+    view->printOptions(help_msgs);
+}
     case EventType::NONE:
         return Message("Invalid command!", -1);
     }

@@ -12,6 +12,7 @@
 #include "InputHandler.h"
 #include "backpack.h"
 #include "View.h"
+#include "Scene.h"
 // #include "backpack.h"
 #include <set>
 #include <ctime>
@@ -53,7 +54,8 @@ public:
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
         STORE,     ///< 商店购买
-        BUY,       ///< 购买物品
+        HELP,      ///< 帮助信息
+        USE,       ///< 使用物品
         QUIT,      ///< 退出游戏
         NONE       ///< 无事件
     };
@@ -100,6 +102,7 @@ public:
     std::shared_ptr<View>         view        = nullptr;
     std::shared_ptr<InputHandler> input       = nullptr;
     std::shared_ptr<Backpack>     backpack    = nullptr;
+    std::shared_ptr<Scene> scene = nullptr;
 
     template <class Archive>
     void serialize(Archive &archive)

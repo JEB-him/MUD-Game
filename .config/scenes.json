@@ -1,13 +1,9 @@
-{
-    "center": {
-        "filename": "center.txt",
-        "NPCS": [
-            {
-                "name": 
-            }
-        ],
-        "instruments": [
-
-        ]
-    }
-}
+[
+  "Canteen",
+  "Career",
+  "Center",
+  "Classroom",
+  "Dormitory",
+  "Gym",
+  "Library"
+]

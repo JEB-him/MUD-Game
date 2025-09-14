@@ -76,6 +76,16 @@ namespace BasicValue
         CANTEEN,   ///< 食堂
         HOSPITAL,  ///< 医院
     };
+
+    /**
+     * @brief 主角buff枚举
+     * @details 定义了主角可能所在的场景,现在未完善，需要场景类完善
+     */
+    enum class Buff {
+        BUFF_ENERGY_DRINK, ///< 能量饮料buff
+        BUFF_MILK, ///< 牛奶buff
+        BUFF_VITAMINS,   ///< 维生素buff
+    };
 }
 
 class Protagonist
@@ -312,4 +322,18 @@ private:
      * @return bool true=合法，false=包含非法字符
      */
     bool isValidName(const std::string &name);
+
+    /**
+     * @brief 清理主角身上的某个buff
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message clearBuff(BasicValue::Buff buff_name);
+    
+    /**
+     * @brief 更新主角所有的buff状态
+     * @param buff_name buff对应键值
+     * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+     */
+    Message updateBuff();
 };

@@ -409,5 +409,19 @@ Message Protagonist::addGameTime(int time)
         return Message("增加的时间必须为正数", -1);
     }
     game_time += time;
+    updateBuff();
     return Message("游戏内时间增加成功", 0);
+}
+
+Message Protagonist::clearBuff(BasicValue::Buff buff_name) {
+    switch (buff_name) {
+    case BasicValue::Buff::BUFF_ENERGY_DRINK:
+        break;
+    case BasicValue::Buff::BUFF_MILK:
+        break;
+    case BasicValue::Buff::BUFF_VITAMINS:
+        break;
+    default:
+        break;
+    }
 }

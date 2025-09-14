@@ -28,7 +28,7 @@
         "options": [],
         "next": "END",
         "effect": {
-          "TIME": -2,
+          "TIME": "-2",
           "INTEL_ARTS": "5"
         }
       },
@@ -65,7 +65,7 @@
         "options": [ ],
         "next": "END",
         "effect": {
-          "TIME": -1,
+          "TIME": "-1",
           "INTEL_SCI": "-10",
           "STRENGTH": "10"
         }
@@ -173,7 +173,7 @@
           }
         ],
         "effect": {
-          "TIME": -1,
+          "TIME": "-1",
           "MONEY": "10"
         }
       },
@@ -187,7 +187,7 @@
           }
         ],
         "effect": {
-          "TIME": -1,
+          "TIME": "-1",
           "MONEY": "5"
         }
       },
@@ -312,7 +312,7 @@
           }
         ],
         "effect": {
-          "TIME": -1,
+          "TIME": "-1",
           "STRENGTH": "30",
           "MONEY": "-15"
         }
@@ -353,7 +353,7 @@
           }
         ],
         "effect": {
-          "TIME": -1,
+          "TIME": "-1",
           "INTEL_SCI": "15"
         }
       },
@@ -375,8 +375,8 @@
                 "text": "是",
                 "next": "football_result",
                 "condition": {
-                    "money": "10",
-                    "time": "1"
+                    "MONEY": "10",
+                    "TIME": "1"
                 }
             },
             {
@@ -419,8 +419,8 @@
             "text": "是",
             "next": "basketball_result",
             "condition": {
-              "money": "15",
-              "time": "1"
+              "MONEY": "15",
+              "TIME": "1"
             }
           },
           {
@@ -463,8 +463,8 @@
             "text": "是",
             "next": "badminton_result",
             "condition": {
-              "money": "5",
-              "time": "2"
+              "MONEY": "5",
+              "TIME": "2"
             }
           },
           {

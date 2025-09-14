@@ -56,6 +56,9 @@ private:
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;
     std::unordered_map<std::string, std::function<void()>> interactionCallbacks;
+
+    // 一个流用来处理输出
+    std::stringstream ss;
     bool replaceText(std::string& text);
 };
 

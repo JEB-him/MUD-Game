@@ -296,17 +296,17 @@ private:
     bool buff_energy_drink = false;	               ///< 能量饮料buff状态
     bool buff_milk = false;			               ///< 牛奶buff状态
     bool buff_vitamins = false;		               ///< 维生素buff状态
-    int t_buff_energy_drink = -10000;			   ///< 获得能量饮料buff的时间    确保大于等于0
-    int t_buff_milk = -10000;				       ///< 获得牛奶buff的时间    确保大于等于0
-    int t_buff_vitamins = -10000;			       ///< 获得维生素buff的时间    确保大于等于0
-    int t_used_compressed_cracker = -10000;	       ///< 上次使用压缩饼干的时间    确保大于等于0
-    int t_used_first_aid_kit = -10000;			   ///< 上次使用急救包的时间    确保大于等于0
+    int t_buff_energy_drink = 100000;			   ///< 获得能量饮料buff的时间    确保大于等于0
+    int t_buff_milk = 100000;				       ///< 获得牛奶buff的时间    确保大于等于0
+    int t_buff_vitamins = 100000;			       ///< 获得维生素buff的时间    确保大于等于0
+    int t_used_compressed_cracker = 100000;	       ///< 上次使用压缩饼干的时间    确保大于等于0
+    int t_used_first_aid_kit = 100000;			   ///< 上次使用急救包的时间    确保大于等于0
 
     // 隐藏属性
 
     bool isInjured = 0; ///< 受伤状态标志
 
-    int game_time = 0; ///< 游戏内时间
+    int game_time = 10000; ///< 游戏内时间
 
     Position pos; ///< 主角当前位置
 

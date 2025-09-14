@@ -434,7 +434,7 @@ Message Protagonist::addGameTime(int time)
     {
         return Message("增加的时间必须为正数", -1);
     }
-    game_time += time;
+    game_time -= time;
     ItemCreator item_creator;
     item_creator.updateBuff(*this);
     return Message("游戏内时间增加成功", 0);

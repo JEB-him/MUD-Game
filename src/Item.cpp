@@ -12,11 +12,7 @@
 #include"Item.h"
 #include<filesystem>
 #include<vector>
-
-/**
-* @brief ItemBasicInf类构造函数
-*/
-ItemBasicInf::ItemBasicInf(string name, string description, int value):name(name),description(description),value(value) { }
+#include<cmath>
 
 /**
 * @brief ItemBasicInf类构造函数
@@ -257,7 +253,7 @@ Food::Food(const string& name, const string& description, float value, float str
  * @return 是否处于冷却状态的布尔值
  */
 bool Food::isOnCD(Protagonist& protagonist)const {
-    if (have_cd && protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER] < time_cooldown)
+    if (have_cd && abs(protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER]) < time_cooldown)
         return true;
     else
         return false;
@@ -329,7 +325,7 @@ void LearningAid::use(Protagonist& protagonist) {
               protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_MILK, protagonist.getGameTime(), false);
           }
       }else{
-          if (protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK] <= punish_cd) {
+          if (abs(protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK]) <= punish_cd) {
               protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, -health_reduce, true);
           }
           if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK] == false) {
@@ -382,7 +378,7 @@ HealthItem::HealthItem(const string& name, const string& description, float valu
  * @return 是否处于冷却状态的布尔值
  */
 bool HealthItem::isOnCD(Protagonist& protagonist)const {
-    if (have_cd && protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT] < time_cooldown)
+    if (have_cd && abs(protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT]) < time_cooldown)
         return true;
     else
         return false;
@@ -582,16 +578,17 @@ Message ItemCreator::updateBuff(Protagonist& protagonist) {
     duration[0] = config_item["energy_drink"]["duration"];
     duration[1] = config_item["milk"]["duration"];
     duration[2] = config_item["vitamins"]["duration"];
-    time[0] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK];
-    time[1] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_MILK];
-    time[2] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS];
+    time[0] = protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK];
+    time[1] = protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK];
+    time[2] = protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_VITAMINS];
     for (int i = 0; i < 3; i++) {
-        if (protagonist.getGameTime() - time[i] > duration[i]) {
+        if (abs(protagonist.getGameTime() - time[i]) > duration[i]) {
             clearBuff(buff[i],protagonist);
         }
     }
-    return Message("buff更新成功");
+    return Message("buff已更新");
 }
+
 //ItemBuffInf::ItemBuffInf(const float energy_drink_intel_boost,
 //const float energy_drink_intel_boost_rate,
 //const float milk_drink_intel_boost,

@@ -32,6 +32,20 @@ using std::map;
 using std::stringstream;
 
 /**
+ * @brief 物品基础信息类，用于与其他模型之间传递信息
+ * @param name 物品名称
+ * @param description 物品描述
+ * @param value 物品价值
+ * */
+class ItemBasicInf {
+public:
+    ItemBasicInf(string name, string description, int value);
+    string name;
+    string description;
+    int value;
+};
+
+/**
  * @brief 物品类
  * @param name 物品名称
  * @param description 物品描述
@@ -209,9 +223,11 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
+    ItemBasicInf getItemInf(string& item_name)const;
     unique_ptr<Item> createItem(string item_name);
-
+    
 private:
     ifstream config_file_item;
     json config_item;
 };
+

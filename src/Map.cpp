@@ -62,7 +62,7 @@ int Map::getMaxHeight() const {
  *          1. 主角不能进入宽度小于其 width 的空间（着重注意其他宽字符）
  *          2. 主角碰撞完器械、NPC、墙壁以及进入出口后，位置不会发生改变
  */
-Message Map::moveProtagonist(const int &direction, Controller::EventType &event_type, int &id)
+Message Map::moveProtagonist(const int &direction, EventType &event_type, int &id)
 {
     if (y + 1 >= MAX_WIDTH) {
         return {"Bad position", -1};
@@ -70,7 +70,7 @@ Message Map::moveProtagonist(const int &direction, Controller::EventType &event_
     char back_code = detectCollision({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
     switch (back_code) {
         case -2:    // 墙壁/空间狭小
-            event_type = Controller::EventType::NONE;
+            event_type = EventType::NONE;
             id = -1;
             return {"不可通行：墙壁/空间狭小", 1};
             break;
@@ -80,19 +80,19 @@ Message Map::moveProtagonist(const int &direction, Controller::EventType &event_
             y += DIRECTIONS[direction][1];
             map[x][y] = '1';
         case 'i':
-            event_type = Controller::EventType::NONE;
+            event_type = EventType::NONE;
             id = -1;
             return {"Success", 0};
         case 'o':
-            event_type = Controller::EventType::JUMP;
+            event_type = EventType::JUMP;
             id = getExitId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
             return {"抵达出口", 0};
         case '9':
-            event_type = Controller::EventType::AC_NPC;
+            event_type = EventType::AC_NPC;
             id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
             return {"与 NPC 交互", 0};
         default:
-            event_type = Controller::EventType::AC_INST;
+            event_type = EventType::AC_INST;
             id = char2index(back_code);
             return {"与器械交互", 0};
     }

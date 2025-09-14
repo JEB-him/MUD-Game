@@ -10,8 +10,8 @@
 class InputHandler
 {
 public:
-    InputHandler();
-    ~InputHandler();
+    InputHandler(){};
+    ~InputHandler()=default;
     friend class Controller;
 
     /**

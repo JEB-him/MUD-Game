@@ -47,7 +47,7 @@ public:
 	 * @brief 获取背包管理物品智能指针的vector数组
 	 * @return vector数组的引用
 	 */
-	vector<unique_ptr<Item>> &getBackpackItems();
+	vector<std::shared_ptr<Item>> &getBackpackItems();
 
 	/**
 	 * @brief  获取物品的基础信息（名字、描述、价值）
@@ -61,11 +61,6 @@ public:
 	 */
 	ItemBasicInf getItemInf(string& item_name)const;
 
-	/**
-	 * @brief  获取物品的基础信息（名字、描述、价值）
-	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
-	 */
-	ItemBasicInf getItemInf(string& item_name)const;
 
 	/**
 	 * @brief  添加（生成）名为“item_name”的物品
@@ -90,6 +85,6 @@ public:
 
 private:
 	ItemCreator item_creator;
-	vector<unique_ptr<Item>> backpack_items;
+	vector<std::shared_ptr<Item>> backpack_items;
 	stringstream ss;
 };

@@ -1,6 +1,11 @@
 #include "Controller.h"
 #include "View.h"
 #include "tools.h"
+#include "Protagonist.h"
+#include "NPC.h"
+#include "InputHandler.h"
+#include "Map.h"
+#include "backpack.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -291,7 +296,7 @@ Message Controller::handleEvent(EventType &event_type)
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
-        npc = std::make_shared<NPC>(NPCname[0], NPCname.substr(1), NPCid);
+        npc = std::make_shared<NPC>(/*NPCname[0]*/"", NPCname.substr(1), NPCid);
         npc->startInteraction();
         int ch = input->waitKeyDown();
         view->printCmd("" + char(ch));
@@ -307,7 +312,7 @@ Message Controller::handleEvent(EventType &event_type)
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
-        npc = std::make_shared<NPC>(NPCname[0], NPCname.substr(1), NPCid);
+        npc = std::make_shared<NPC>("", NPCname.substr(1), NPCid);
         npc->startInteraction();
         int ch = input->waitKeyDown();
         view->printCmd("" + char(ch));
@@ -316,7 +321,7 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::OPEN_PACK:
     {
-        std::vector<std::unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
         std::vector<std::string> item_names;
         for (auto &item_pt : item_pts)
         {
@@ -354,7 +359,7 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::USE:
     {
         view = View::getInstance();
-        std::vector<std::unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
         std::vector<std::string> item_names;
         for (auto &item_pt : item_pts)
         {

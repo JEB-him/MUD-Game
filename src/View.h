@@ -13,6 +13,7 @@
 #include "json.hpp"
 #include "tools.h"
 #include "Controller.h"
+class Controller;
 /**
  * @brief 光标移动到指定坐标
  * @param line 指定行

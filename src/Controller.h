@@ -6,14 +6,6 @@
 #include <filesystem>
 #include <memory>
 #include "tools.h"
-#include "Map.h"
-#include "Protagonist.h"
-#include "NPC.h"
-#include "InputHandler.h"
-#include "backpack.h"
-#include "View.h"
-#include "Scene.h"
-// #include "backpack.h"
 #include <set>
 #include <ctime>
 
@@ -21,6 +13,14 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
+
+class View;
+class Scene;
+class Backpack;
+class InputHandler;
+class NPC;
+class Protagonist;
+class Map;
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
@@ -41,25 +41,7 @@ public:
         ERR    ///< 严重的错误，该事件发生时程序会 Crash
     };
 
-    /**
-     * @brief 事件类型
-     */
-    enum class EventType
-    {
-        MOVE,      ///< 移动主角
-        AC_NPC,    ///< 与NPC互动
-        AC_INST,   ///< 与器械互动
-        OPEN_PACK, ///< 打开背包
-        REFRESH,   ///< 刷新地图
-        STATUS,    ///< 显示状态栏
-        JUMP,      ///< 跳转场景
-        STORE,     ///< 商店购买
-        HELP,      ///< 帮助信息
-        USE,       ///< 使用物品
-        QUIT,      ///< 退出游戏
-        NONE       ///< 无事件
-    };
-
+ 
     /**
      * @brief 游戏状态
      * @details
@@ -102,7 +84,7 @@ public:
     std::shared_ptr<View>         view        = nullptr;
     std::shared_ptr<InputHandler> input       = nullptr;
     std::shared_ptr<Backpack>     backpack    = nullptr;
-    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+    std::shared_ptr<Scene> scene = nullptr;
 
     template <class Archive>
     void serialize(Archive &archive)

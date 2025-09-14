@@ -104,8 +104,11 @@ Message Map::save() const {
     }
 
     for (int i = 0; i < MAX_HEIGHT; ++i) {
-        for (int j = 0; j < MAX_WIDTH; ++j)
-            map_file << map[i][j];
+        for (int j = 0; j < MAX_WIDTH; ++j) {
+            if (map[i][j]) {
+                map_file << map[i][j];
+            }
+        }
         map_file << std::endl;
     }
 

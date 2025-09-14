@@ -152,6 +152,31 @@ std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getBaseAttrs
         {BasicValue::ProtagonistAttr::HEALTH, m_health},
     };
 }
+/**
+ * @brief 获取主角基础信息作为字符串向量
+ * @details 将主角的基础属性格式化为字符串向量，可用于选项显示
+ * @return std::vector<std::string> 包含主角基础信息的字符串向量
+ */
+std::vector<std::string> Protagonist::getStatus() const
+{
+    std::vector<std::string> info;
+    
+    // 添加基础信息
+    info.push_back("主角ID: " + m_protagonistId);
+    info.push_back("姓名: " + m_name);
+    info.push_back("智力-理: " + std::to_string(m_intelSci));
+    info.push_back("智力-文: " + std::to_string(m_intelArts));
+    info.push_back("体力: " + std::to_string(m_strength));
+    info.push_back("金钱: " + std::to_string(m_money));
+    info.push_back("健康: " + std::to_string(m_health));
+    
+    // 获取健康状态描述
+    std::string healthStateDesc;
+    getHealthState(healthStateDesc);
+    info.push_back("健康状态: " + healthStateDesc);
+    info.push_back("游戏时间: " + std::to_string(game_time));
+}
+    
 
 // 以后是隐藏值
 std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getHiddenAttrs() const

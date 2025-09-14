@@ -5,7 +5,6 @@
 #include <fstream>
 #include <regex>
 
-
 Controller::Controller(
     const LogLevel &level,
     const std::filesystem::path &log_dir,
@@ -188,80 +187,171 @@ Message Controller::getEvent(EventType &event_type) {
 
         view->printCmd(ss.str());
     }
-    // TODO 修正逻辑，只有按下 Enter 才需要处理下面的逻辑
     // 处理cmd
-    // switch (cmd)
+    if (cmd == "move")
+    {
+        event_type = EventType::MOVE;
+    }
+    else if (cmd == "ac_npc")
+    {
+        event_type = EventType::AC_NPC;
+    }
+    else if (cmd == "ac_inst")
+    {
+        event_type = EventType::AC_INST;
+    }
+    else if (cmd == "open pack" || cmd == "open_pack")
+    {
+        event_type = EventType::OPEN_PACK;
+    }
+    else if (cmd == "refresh")
+    {
+        event_type = EventType::REFRESH;
+    }
+    else if (cmd == "status")
+    {
+        event_type = EventType::STATUS;
+    }
+    else if (cmd == "jump")
+    {
+        event_type = EventType::JUMP;
+    }
+    // else if (cmd == "tp")
     // {
-    // case "move":
-    //     event_type = EventType::MOVE;
-    //     break;
-    // case "ac_npc", case "ac npc":
-    //     event_type = EventType::AC_NPC;
-    //     break;
-    // case "ac_inst", case "ac inst":
-    //     event_type = EventType::AC_INST;
-    //     break;
-    // case "open pack", case "open_pack":
-    //     event_type = EventType::OPEN_PACK;
-    //     break;
-    // case "refresh":
-    //     event_type = EventType::REFRESH;
-    //     break;
-    // case "status":
-    //     event_type = EventType::STATUS;
-    //     break;
-    // case "jump":
-    //     event_type = EventType::JUMP;
-    //     break;
-    // case "tp":
     //     event_type = EventType::TP;
-    //     break;
     // }
+    else if (cmd == "quit")
+    {
+        event_type = EventType::QUIT;
+        save();
+        exit(0);
+    }
+    else
+    {
+        event_type = EventType::NONE;
+    }
 
-    Message msg("Command: " + cmd, 0);
-    return msg;
+    return handleEvent(event_type);
 }
 
-// Message challenge::handleCmd(std::string cmd)
-// {
-//     switch (cmd)
-//     {
-//     case "help":
-//         /* code */
-//         break;
+Message Controller::handleEvent(EventType &event_type)
+{
+    switch (event_type)
+    {
+    case EventType::MOVE:
+    {
+        int ch = -1;
+        int id = -1;
+        Position pos;
+        view = View::getInstance();
+        while ((ch = input->waitKeyDown()) != 10)
+        {
+            Position last_pos = map->getPos();
+            switch (ch)
+            {
+            case 'w':
+                map->moveProtagonist(0, event_type, id);
+                break;
+            case 'a':
+                map->moveProtagonist(1, event_type, id);
+                break;
+            case 's':
+                map->moveProtagonist(2, event_type, id);
+                break;
+            case 'd':
+                map->moveProtagonist(3, event_type, id);
+                break;
+            }
+            pos = map->getPos();
+            view->drawPoMove(last_pos, pos);
+            handleEvent(event_type);
+        }
+        return Message("Move Success!", 0);
+    }
+    case EventType::AC_NPC:
+    {
+        Position position = map->getPos();
+        int npc_id = map->getNPCId(position);
+        npc->loadInteractionConfig(npc_id, "config.json");
+        npc->startInteraction();
+        npc->handleOptionSelection();
+        return (Message("AC_NPC Finished.", 0))
+    }
+    case EventType::AC_INST:
+    {
+        Position position = map->getPos();
+        int npc_id = map->getNPCId(position);
+        npc->loadInteractionConfig(npc_id, "config.json");
+        npc->startInteraction();
+        npc->handleOptionSelection();
+        return (Message("AC_INST Finished.", 0))
+    }
+    case EventType::OPEN_PACK:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
+        vector<std::string> item_names();
+        view->printOptions(item_names);
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Open Pack Success!", 0);
+    }
 
-//     case "quit":
-//         save();
-//         break;
+    case EventType::REFRESH:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->reDraw();
+        break;
+    }
 
-//     case "status":
-//         /* code */
-//         break;
+    case EventType::STATUS:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->printOptions(protagonist->getStatus());
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Show status.", 0);
+    }
+    case EventType::JUMP:
+    {
+        map = nullptr;
+        Position pos = map->getPos();
+        int exit_id = map->getExitId(pos);
+        // 从exit_id获取场景文件名，以scene_filename代替
 
-//     case "backpack":
-//         /* code */
-//         break;
+        map = std::make_shared<Map>("scene_filename", Position(1, 1));
+        view->reDraw();
+    }
+    case EventType::STORE:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->printOptions();
+    }
+    case EventType::BUY:
+    {
+    }
+    case EventType::NONE:
+        return Message("Invalid command!", -1);
+    }
+}
 
-//     default:
-//         break;
-//     }
-// }
-
-// 登录逻辑，在init()后调用
-Message Controller::playerLogin(std::string &user_name) {
+Message Controller::playerLogin(std::string &user_name)
+{
     // 用户名文件夹和名单文件路径
     std::filesystem::path saves_dir = root_dir / "saves";
     std::filesystem::path users_file = saves_dir / "users.txt";
     std::set<std::string> user_set;
 
     // 如果目录不存在，创建目录
-    if (!std::filesystem::exists(saves_dir)) {
+    if (!std::filesystem::exists(saves_dir))
+    {
         std::filesystem::create_directories(saves_dir);
         log(LogLevel::INFO, "创建用户存档目录: " + saves_dir.string());
     }
 
     // 如果名单文件不存在，创建空文件
-    if (!std::filesystem::exists(users_file)) {
+    if (!std::filesystem::exists(users_file))
+    {
         std::ofstream fout(users_file);
         fout.close();
         log(LogLevel::INFO, "创建用户名单文件: " + users_file.string());
@@ -271,35 +361,44 @@ Message Controller::playerLogin(std::string &user_name) {
     {
         std::ifstream fin(users_file);
         std::string line;
-        while (std::getline(fin, line)) {
-            if (!line.empty()) user_set.insert(line);
+        while (std::getline(fin, line))
+        {
+            if (!line.empty())
+                user_set.insert(line);
         }
         fin.close();
     }
 
     // 打印所有已存在的用户名
     std::cout << "已存在的用户目录：" << std::endl;
-    if (user_set.empty()) {
+    if (user_set.empty())
+    {
         std::cout << "（暂无用户，请新建用户名）" << std::endl;
-    } else {
-        int i=0;
-        for (const auto& name : user_set) {
+    }
+    else
+    {
+        int i = 0;
+        for (const auto &name : user_set)
+        {
             std::cout << i++ << ": " << name << std::endl;
         }
     }
 
     std::string name;
-    do {
+    do
+    {
         std::cout << "Enter username: ";
         std::getline(std::cin, name);
 
-        if (name.empty()) {
+        if (name.empty())
+        {
             std::cout << "Username cannot be empty. Please try again." << std::endl;
             std::cout << "**Empty username attempt**" << std::endl;
             continue;
         }
 
-        if (isValidUsername(name)) {
+        if (isValidUsername(name))
+        {
             break;
         } else {
             std::cout <<"\033[31m"<< "Invalid username. Only letters, numbers, underscores, and Chinese characters are allowed." << "\033[0m" << std::endl;
@@ -312,7 +411,8 @@ Message Controller::playerLogin(std::string &user_name) {
     std::cout << "Username accepted: " << name << std::endl;
 
     // 如果是新用户，写入用户名文件
-    if (user_set.find(name) == user_set.end()) {
+    if (user_set.find(name) == user_set.end())
+    {
         std::ofstream fout(users_file, std::ios::app);
         fout << name << std::endl;
         fout.close();
@@ -321,7 +421,6 @@ Message Controller::playerLogin(std::string &user_name) {
 
     return Message("Login Success!", 0);
 }
-
 
 int Controller::run()
 {
@@ -340,21 +439,7 @@ int Controller::run()
     Message msg;
     while (running && turns--) {
         log(LogLevel::DEBUG, "获取事件...");
-        // msg = getEvent(event_type);
-
-        switch (event_type)
-        {
-        case EventType::MOVE:
-            log(LogLevel::DEBUG, "移动主角...");
-            break;
-        case EventType::QUIT:
-            log(LogLevel::INFO, "退出游戏...");
-            running = false;
-            break;
-        case EventType::NONE:
-            log(LogLevel::DEBUG, "无按键响应...");
-            break;
-        }
+        msg = getEvent(event_type);
     }
 
     // 测试用
@@ -363,10 +448,70 @@ int Controller::run()
     gameSleep(500);
     view->printCmd("2 hello cat");
     view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    view->printQuestion("", "清清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....晨，你在室友的闹铃声中醒来....", "white");
+    gameSleep(1000);
     view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
     std::vector<std::string> tmp_ops {
         "1. 带一个",
-        "2. no"
+        "2. no",
+        "3. fwefew",
+        "3. fwefew",
+        "3. fWEFew",
+        "3. fWEFew",
+        "3. fWEFew",
+        "3. fWEFew",
+        "3. fWEFew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3. fWEFew",
+        "3. fwefw",
+        "3. fweew",
+        "3. fefew",
+        "3. fwefw",
+        "3.fwefew",
+        "3. fefew",
+        "3.fwfew",
+        "3. fefew",
     };
     view->printOptions(tmp_ops);
     view->printQuestion("NPC", "你好", "white");

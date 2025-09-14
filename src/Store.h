@@ -26,7 +26,7 @@ public:
      * @return msg\n
      *         status: 0 成功, 1 非有效页码
      */
-    Message showProducts(int page=-1);
+    Message showProducts(int page = -1);
     
     /**
      * @brief 购买商品
@@ -41,7 +41,7 @@ public:
     void prompt();
 
 private:
-    std::string name="带饭家";
+    std::string name = "带饭家";
     nlohmann::json items;
     size_t current_page = 0;
     static std::string get_utf_empty(const std::string& text, const int& len);

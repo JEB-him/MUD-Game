@@ -69,15 +69,17 @@ Message Store::buyProduct(int index) {
     auto view = View::getInstance();
     auto controller = Controller::getInstance();
 
-    if (actualIndex < 0 || actualIndex >= items.size()) {
+    if (index < 1 || index > 10 || actualIndex < 0 || actualIndex >= items.size()) {
         controller->log(Controller::LogLevel::ERR, "无效的商品索引");
         return {"无效的商品索引", 1};
     }
 
     view->printQuestion("", "================", "white");
     size_t i = 0;
+    string key_target;
     for (auto& [key, value] : items.items()) {
-        if (i == index) {
+        if (i == actualIndex) {
+            key_target = key;
             ss << value["name"] << " " << value["description"];
             view->printQuestion("", ss.str(), "white");
             break;
@@ -88,15 +90,30 @@ Message Store::buyProduct(int index) {
     
     // 询问是否确认购买
     std::string question = "确认购买? (Y/N)";
-    view->printQuestion("", question, "white");
+    rechose:view->printQuestion("", question, "white");
     
     // 获取用户输入
     int response = controller->input->waitKeyDown();
     
     if (response == 'Y' || response == 'y') {
-        view->printQuestion("", "购买成功! 感谢您的光临。","white");
+        if (controller->protagonist->getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] < items[key_target]["value"]) {
+            view->printQuestion("", "您的余额不足，无法购物。", "white");
+            return { "余额不足", 1 };
+        }
+        controller->protagonist->updateAttr(BasicValue::ProtagonistAttr::MONEY, -items[key_target]["value"], true);
+        controller->backpack->addItem(key_target);
+        controller->protagonist->addGameTime(2);
+
+        view->printQuestion("", "购买成功，欢迎下次光临！","white");
+        return { "Success", 0 };
+    }else if (response == 'N' || response == 'n') {
+        view->printQuestion("", "没关系，感谢您的光临！", "white");
+        return { "Refuse", 0 };
+    }else {
+        view->printQuestion("", "你思考了一会儿...", "white");
+        goto rechose;
     }
-    return {"Success", 0};
+    
 }
 
 void Store::prompt() {

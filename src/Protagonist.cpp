@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "Protagonist.h"
+#include "Item.h"
 #include "json.hpp"
 #include <fstream>
 #include <stdexcept>
@@ -151,6 +152,31 @@ std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getBaseAttrs
         {BasicValue::ProtagonistAttr::HEALTH, m_health},
     };
 }
+/**
+ * @brief 获取主角基础信息作为字符串向量
+ * @details 将主角的基础属性格式化为字符串向量，可用于选项显示
+ * @return std::vector<std::string> 包含主角基础信息的字符串向量
+ */
+std::vector<std::string> Protagonist::getStatus() const
+{
+    std::vector<std::string> info;
+    
+    // 添加基础信息
+    info.push_back("主角ID: " + m_protagonistId);
+    info.push_back("姓名: " + m_name);
+    info.push_back("智力-理: " + std::to_string(m_intelSci));
+    info.push_back("智力-文: " + std::to_string(m_intelArts));
+    info.push_back("体力: " + std::to_string(m_strength));
+    info.push_back("金钱: " + std::to_string(m_money));
+    info.push_back("健康: " + std::to_string(m_health));
+    
+    // 获取健康状态描述
+    std::string healthStateDesc;
+    getHealthState(healthStateDesc);
+    info.push_back("健康状态: " + healthStateDesc);
+    info.push_back("游戏时间: " + std::to_string(game_time));
+}
+    
 
 // 以后是隐藏值
 std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getHiddenAttrs() const
@@ -161,7 +187,17 @@ std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getHiddenAtt
         {BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intelSci_boost_rate},
         {BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intelArts_boost_rate},
         {BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, learning_time_reduction_rate},
-        {BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, learning_health_preservation_rate}};
+        {BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, learning_health_preservation_rate},
+        {BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE, vitamins_effect_rate},
+        {BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK, buff_energy_drink},
+        {BasicValue::ProtagonistAttr::BUFF_MILK, buff_milk},
+        {BasicValue::ProtagonistAttr::BUFF_VITAMINS, buff_vitamins},
+        {BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK, t_buff_energy_drink},
+        {BasicValue::ProtagonistAttr::T_BUFF_MILK, t_buff_milk},
+        {BasicValue::ProtagonistAttr::T_BUFF_VITAMINS, t_buff_vitamins},
+        {BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER, t_used_compressed_cracker},
+        {BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT, t_used_first_aid_kit}
+    };
 }
 
 // 获取当前健康状态
@@ -202,7 +238,7 @@ Position Protagonist::getPosition() const
 }
 
 // 通用属性修改接口
-Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd)
+Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, float val, bool isAdd)
 {
     // 辅助函数：处理int类型属性
     auto processIntAttr = [&](int &member)
@@ -252,6 +288,27 @@ Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool 
         return processFloatAttr(learning_time_reduction_rate);
     case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
         return processFloatAttr(learning_health_preservation_rate);
+    case BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE:
+        return processFloatAttr(vitamins_effect_rate);
+    case BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK:
+        buff_energy_drink = (val != 0);
+        return Message("能量饮料buff状态更新成功", 0);
+    case BasicValue::ProtagonistAttr::BUFF_MILK:
+        buff_milk = (val != 0);
+        return Message("牛奶buff状态更新成功", 0);
+    case BasicValue::ProtagonistAttr::BUFF_VITAMINS:
+        buff_vitamins = (val != 0);
+        return Message("维生素buff状态更新成功", 0);
+    case BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK:
+        return processIntAttr(t_buff_energy_drink);
+    case BasicValue::ProtagonistAttr::T_BUFF_MILK:
+        return processIntAttr(t_buff_milk);
+    case BasicValue::ProtagonistAttr::T_BUFF_VITAMINS:
+        return processIntAttr(t_buff_vitamins);
+    case BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER:
+        return processIntAttr(t_used_compressed_cracker);
+    case BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT:
+        return processIntAttr(t_used_first_aid_kit);
     case BasicValue::ProtagonistAttr::IS_INJURED:
         isInjured = (val != 0);
         return Message("受伤状态更新成功", 0);
@@ -302,6 +359,18 @@ bool Protagonist::isValidAttr(BasicValue::ProtagonistAttr attr, int val) const
         return val >= 0 && val <= 1; // 时间消耗减少比率只能在0~1之间
     case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
         return val >= 0 && val <= 1; // 健康损失保护比率只能在0~1之间
+    case BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE:
+        return val == 1 || val == 0; // 维生素作用系数只能等于0或1
+    case BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK:
+        return val >= 0; // 能量饮料buff获得时间只能大于等于0
+    case BasicValue::ProtagonistAttr::T_BUFF_MILK:
+        return val >= 0; // 牛奶buff获得时间只能大于等于0
+    case BasicValue::ProtagonistAttr::T_BUFF_VITAMINS:
+        return val >= 0; // 维生素buff获得时间只能大于等于0
+    case BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER:
+        return val >= 0; // 压缩饼干上次使用时间只能大于等于0
+    case BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT:
+        return val >= 0; // 维生素上次使用时间只能大于等于0
     default:
         return false; // 非法属性
     }
@@ -366,5 +435,7 @@ Message Protagonist::addGameTime(int time)
         return Message("增加的时间必须为正数", -1);
     }
     game_time += time;
+    ItemCreator item_creator;
+    item_creator.updateBuff(*this);
     return Message("游戏内时间增加成功", 0);
 }

@@ -11,6 +11,7 @@
 
 #include"Item.h"
 #include<filesystem>
+#include<vector>
 
 /**
 * @brief ItemBasicInf类构造函数
@@ -165,7 +166,7 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
         }
-        // TODO: 需要实现视图输出
+        // TODO: view
         ss << "\"" << name << "\"" << "已装备。";
         //view->gameoutput(ss.str());
         ss.str("");
@@ -179,7 +180,7 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
         }
-        // TODO: 需要实现视图输出
+        // TODO: view
         ss << "\"" << name << "\"" << "已取消装备。";
         //view->gameoutput(ss.str());
         ss.str("");
@@ -213,7 +214,7 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
           */
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, -time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, -health_preservation_rate, true);
-        // TODO: 需要实现视图输出
+        // TODO: view
         ss << "\"" << name << "\"" << "已装备。";
         //view->gameoutput(ss.str());
         ss.str("");
@@ -225,7 +226,7 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
         equip_state = false;
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, health_preservation_rate, true);
-        // TODO: 需要实现视图输出
+        // TODO: view
         ss << "\"" << name << "\"" << "已取消装备。";
         //view->gameoutput(ss.str());
         ss.str("");
@@ -251,11 +252,10 @@ Food::Food(const string& name, const string& description, float value, float str
  * @return 是否处于冷却状态的布尔值
  */
 bool Food::isOnCD(Protagonist& protagonist)const {
-    // TODO: 需要实现冷却时间检查逻辑
-    //if (have_cd && /*now()*/ - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TUsedCompressedCracker] > time_cooldown)
-    //    return true;
-    //else
-          return false;
+    if (have_cd && protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER] < time_cooldown)
+        return true;
+    else
+        return false;
 }
 
 /**
@@ -264,14 +264,13 @@ bool Food::isOnCD(Protagonist& protagonist)const {
  * @param protagonist 主角对象引用
  */
 void Food::use(Protagonist& protagonist) {
-    /**
-    * @note 恢复主角一定体力和健康
-    */
+    
+    //恢复主角一定体力和健康
     protagonist.updateAttr(BasicValue::ProtagonistAttr::STRENGTH, strength_restore, true);
     protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, health_restore, true);
 
-    // TODO: 需要实现使用时间记录
-    //protagonist.updateAttr(BasicValue::ProtagonistAttr::TUsedCompressedCracker, /*now()*/, false);
+    // 记录使用时间
+    protagonist.updateAttr(BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER, protagonist.getGameTime(), false);
 
     /**
     * @note feedback
@@ -292,9 +291,10 @@ void Food::use(Protagonist& protagonist) {
  * @param duration 效果持续时间
  * @param have_abuse_punish 是否有滥用惩罚
  * @param health_reduce 健康减少值（滥用惩罚）
+ * @param punish_cd 防止滥用的最低时间间隔
  */
-LearningAid::LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce) :
-    Consumable(name, description, value), intel_boost(intel_boost), intel_boost_rate(intel_boost_rate), duration(duration), have_abuse_punish(have_abuse_punish), health_reduce(health_reduce) { }
+LearningAid::LearningAid(const string& name, const string& description, float value, float intel_boost, float intel_boost_rate, float duration, bool have_abuse_punish, float health_reduce, int punish_cd) :
+    Consumable(name, description, value), intel_boost(intel_boost), intel_boost_rate(intel_boost_rate), duration(duration), have_abuse_punish(have_abuse_punish), health_reduce(health_reduce), punish_cd(punish_cd){ }
 
 /**
  * @brief 使用学习辅助物品
@@ -303,51 +303,51 @@ LearningAid::LearningAid(const string& name, const string& description, float va
  */
 void LearningAid::use(Protagonist& protagonist) {
       if(have_abuse_punish == false){
-          //if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BuffMilk] == false) {
-          //    /**
-          //      * @note 提高主角学习效率
-          //      */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
-          //    
-          //    /**
-          //    * @note 记录buff已生效及其生效时间
-          //    */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffMilk, true, false);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffMilk, /*now()*/, false);
-          //} else {
-          //    /**
-          //    * @note 重新记录buff生效时间
-          //    */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffMilk, /*now()*/, false);
-          //}
+          if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_MILK] == false) {
+              /**
+                * @note 提高主角学习效率
+                */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
+              
+              /**
+              * @note 记录buff已生效及其生效时间
+              */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_MILK, true, false);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_MILK, protagonist.getGameTime(), false);
+          } else {
+              /**
+              * @note 重新记录buff生效时间
+              */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_MILK, protagonist.getGameTime(), false);
+          }
       }else{
-          //if (/*now*/ -protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TBuffEnergyDrink] <= duration) {
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, -health_reduce, true);
-          //}
-          //if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BuffEnergyDrink] == false) {
-          //    /**
-          //      * @note 提高主角学习效率
-          //      */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
+          if (protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK] <= punish_cd) {
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, -health_reduce, true);
+          }
+          if (protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK] == false) {
+              /**
+                * @note 提高主角学习效率
+                */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, intel_boost, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, intel_boost, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, intel_boost_rate, true);
 
-          //    /**
-          //    * @note 记录buff已生效及其生效时间
-          //    */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffEnergyDrink, true, false);
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffEnergyDrink, /*now()*/, false);
-          //}
-          //else {
-          //    /**
-          //    * @note 重新记录buff生效时间
-          //    */
-          //    protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffEnergyDrink, /*now()*/, false);
-          //}
+              /**
+              * @note 记录buff已生效及其生效时间
+              */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK, true, false);
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK, protagonist.getGameTime(), false);
+          }
+          else {
+              /**
+              * @note 重新记录buff生效时间
+              */
+              protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK, protagonist.getGameTime(), false);
+          }
     }
       /**
       * @note feedback
@@ -377,11 +377,10 @@ HealthItem::HealthItem(const string& name, const string& description, float valu
  * @return 是否处于冷却状态的布尔值
  */
 bool HealthItem::isOnCD(Protagonist& protagonist)const {
-    // TODO: 需要实现冷却时间检查逻辑
-    //if (have_cd && /*now()*/ - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::TUsedFirstAidKit] > time_cooldown)
-    //    return true;
-    //else
-    return false;
+    if (have_cd && protagonist.getGameTime() - protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT] < time_cooldown)
+        return true;
+    else
+        return false;
 }
 
 /**
@@ -393,19 +392,19 @@ void HealthItem::use(Protagonist& protagonist) {
     if (have_cd) {
         // 直接恢复健康值
         protagonist.updateAttr(BasicValue::ProtagonistAttr::HEALTH, health_restore, true);
-        // TODO: 需要实现使用时间记录
-        //protagonist.updateAttr(BasicValue::ProtagonistAttr::TUsedFirstAidKit, /*now()*/, false);
+
+        // 记录使用时间
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT, protagonist.getGameTime(), false);
     }
     else {
         // 提供健康保护效果
-        // TODO: 需要实现维生素效果逻辑
-        //protagonist.updateAttr(BasicValue::ProtagonistAttr::VitminEffectRate, 0, false);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE, 0, false);
 
         //记录维生素buff生效及其生效时间
-        //protagonist.updateAttr(BasicValue::ProtagonistAttr::BuffVitamins, true, false);
-        //protagonist.updateAttr(BasicValue::ProtagonistAttr::TBuffVitamins, /*now()*/, false);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_VITAMINS, true, false);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_VITAMINS, protagonist.getGameTime(), false);
     }
-    // TODO: 需要实现视图输出
+    // TODO: view
     ss << "\"" << name << "\"" << "已使用消耗品";
     //view->gameoutput(ss.str());
     ss.str("");
@@ -447,7 +446,7 @@ ItemBasicInf ItemCreator::getItemInf(string& item_name)const {
  * @param item_name 物品名称
  * @return 物品对象的unique_ptr
  */
-unique_ptr<Item> ItemCreator::createItem(string item_name) {
+unique_ptr<Item> ItemCreator::createItem(string& item_name) {
      //读取该物品所属类，并将string类型的类名转化为enum类型
     ItemType item_class = getItemType((string)config_item[item_name]["class"]);
 
@@ -503,10 +502,11 @@ unique_ptr<Item> ItemCreator::createItem(string item_name) {
         float intel_boost_rate = (float)config_item[item_name]["intel_boost_rate"];
         float duration = (float)config_item[item_name]["duration"];
         float health_reduce = (float)config_item[item_name]["health_reduce"];
+        int punish_cd = (int)config_item[item_name]["punish_cd"];
         bool have_abuse_punish = (bool)config_item[item_name]["have_abuse_punish"];
 
         //创建物品对象并返回
-        return make_unique<LearningAid>(name, description, value, intel_boost, intel_boost_rate, duration, health_reduce, have_abuse_punish);
+        return make_unique<LearningAid>(name, description, value, intel_boost, intel_boost_rate, duration, have_abuse_punish, health_reduce, punish_cd);
 
         break;
     }
@@ -530,3 +530,74 @@ unique_ptr<Item> ItemCreator::createItem(string item_name) {
         break;
     }
 }
+
+/**
+ * @brief 清理主角身上的某个buff
+ * @param buff_name buff对应键值
+ * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
+ */
+Message ItemCreator::clearBuff(BasicValue::Buff buff_name, Protagonist& protagonist) {
+    switch (buff_name) {
+    case BasicValue::Buff::BUFF_ENERGY_DRINK: {
+        float intel_boost = config_item["energy_drink"]["intel_boost"];
+        float intel_boost_rate = config_item["energy_drink"]["intel_boost_rate"];
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK, false, false);
+        return Message("能量饮料buff已解除", 0);
+    }
+    case BasicValue::Buff::BUFF_MILK: {
+        float intel_boost = config_item["milk"]["intel_boost"];
+        float intel_boost_rate = config_item["milk"]["intel_boost_rate"];
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST, -intel_boost, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE, -intel_boost_rate, true);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_MILK, false, false);
+        return Message("牛奶buff已解除", 0);
+    }
+    case BasicValue::Buff::BUFF_VITAMINS: {
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE, 1, false);
+        protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_VITAMINS, false, false);
+        return Message("维生素buff已解除", 0);
+    }
+    default:
+        return Message("错误的buff键值", -1);
+    }
+}
+
+Message ItemCreator::updateBuff(Protagonist& protagonist) {
+    std::vector<BasicValue::Buff> buff(3);
+    std::vector<int> duration(3), time(3);
+    buff[0] = BasicValue::Buff::BUFF_ENERGY_DRINK;
+    buff[1] = BasicValue::Buff::BUFF_MILK;
+    buff[2] = BasicValue::Buff::BUFF_VITAMINS;
+    duration[0] = config_item["energy_drink"]["duration"];
+    duration[1] = config_item["milk"]["duration"];
+    duration[2] = config_item["vitamins"]["duration"];
+    time[0] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK];
+    time[1] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_MILK];
+    time[2] = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::BUFF_VITAMINS];
+    for (int i = 0; i < 3; i++) {
+        if (protagonist.getGameTime() - time[i] > duration[i]) {
+            clearBuff(buff[i],protagonist);
+        }
+    }
+    return Message("buff更新成功");
+}
+//ItemBuffInf::ItemBuffInf(const float energy_drink_intel_boost,
+//const float energy_drink_intel_boost_rate,
+//const float milk_drink_intel_boost,
+//const float milk_drink_intel_boost_rate,
+//const int energy_drink_duration,
+//const int milk_duration,
+//const int vitamins_duration):
+//    energy_drink_intel_boost(energy_drink_intel_boost),
+//    energy_drink_intel_boost_rate(energy_drink_intel_boost_rate),
+//    milk_drink_intel_boost(milk_drink_intel_boost),
+//    milk_drink_intel_boost_rate(milk_drink_intel_boost_rate),
+//    energy_drink_duration(energy_drink_duration),
+//    milk_duration(milk_duration),
+//    vitamins_duration(vitamins_duration){ }

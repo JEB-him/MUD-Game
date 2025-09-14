@@ -51,7 +51,6 @@ private:
     std::string first_name;
     std::string last_name;
     std::string name;
-
     int id;
     std::string currentInteractionId;
     std::unordered_map<std::string, InteractionNode> interactionTree;

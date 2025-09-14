@@ -15,6 +15,8 @@
 #include   <cereal/types/string.hpp>
 // 9月9日更改：添加默认构造函数，类内基础属性初始化，移除const限定符，添加隐藏属性
 
+class ItemCreator;
+
 /**
  * @brief 主角属性枚举及健康状态枚举
  * @details ProtagonistAttr枚举定义了所有可修改的属性，HealthState枚举定义了健康状态
@@ -42,6 +44,15 @@ namespace BasicValue
         NAME,                              ///< 主角姓名
         LEARNING_TIME_REDUCTION_RATE,      ///< 学习时间消耗减少比率
         LEARNING_HEALTH_PRESERVATION_RATE, ///< 学习健康保留率
+        VITMIN_EFFECT_RATE,                ///< 维生素作用系数    
+        BUFF_ENERGY_DRINK,                 ///< 能量饮料buff状态
+        BUFF_MILK,                         ///< 牛奶buff状态
+        BUFF_VITAMINS,                     ///< 维生素buff状态
+        T_BUFF_ENERGY_DRINK,               ///< 获得能量饮料buff的时间
+        T_BUFF_MILK,                       ///< 获得牛奶buff的时间
+        T_BUFF_VITAMINS,                   ///< 获得维生素buff的时间
+        T_USED_COMPRESSED_CRACKER,         ///< 上次使用压缩饼干的时间
+        T_USED_FIRST_AID_KIT,              ///< 上次使用急救包的时间
         IS_INJURED,                        ///< 受伤状态标志
         GAME_TIME                          ///< 游戏内时间
     };
@@ -65,7 +76,17 @@ namespace BasicValue
         DORMITORY, ///< 宿舍
         CLASSROOM, ///< 教室
         CANTEEN,   ///< 食堂
-        HOSPITAL, ///< 医院
+        HOSPITAL,  ///< 医院
+    };
+
+    /**
+     * @brief 主角buff枚举
+     * @details 定义了主角可能所在的场景,现在未完善，需要场景类完善
+     */
+    enum class Buff {
+        BUFF_ENERGY_DRINK, ///< 能量饮料buff
+        BUFF_MILK, ///< 牛奶buff
+        BUFF_VITAMINS,   ///< 维生素buff
     };
 }
 
@@ -109,6 +130,11 @@ public:
      */
     std::unordered_map<BasicValue::ProtagonistAttr, float> getBaseAttrs() const;
 
+
+
+    std::vector<std::string> getBaseInfoAsVector() const;
+
+
     /**
      * @brief 获取所有隐藏属性（供Controller同步UI/存档）
      * @return std::unordered_map 键值对：key=BasicValue::ProtagonistAttr，value=当前值
@@ -142,6 +168,9 @@ public:
      */
     Position getPosition() const;
 
+    std::vector<std::string> getStatus() const;
+
+
     // -------------------------- 2. 属性修改接口（供Controller/Item类交互） --------------------------
     /**
      * @brief 通用属性修改（供Controller和Item类调用，如学习/打工导致的属性变化）
@@ -151,7 +180,7 @@ public:
      * @return Message 操作结果：status=0（成功）/-1（属性名错误）/1（值越界）；msg=结果描述
      * @note 对于受伤状态（IS_INJURED），val=1表示受伤，val=0表示恢复 isAdd参数为false
      */
-    Message updateAttr(BasicValue::ProtagonistAttr attr, int val, bool isAdd = true);
+    Message updateAttr(BasicValue::ProtagonistAttr attr, float val, bool isAdd = true);
 
     /**
      * @brief 设置主角姓名
@@ -218,9 +247,18 @@ public:
              CEREAL_NVP(intelArts_boost_rate),
              CEREAL_NVP(learning_time_reduction_rate),
              CEREAL_NVP(learning_health_preservation_rate),
+             CEREAL_NVP(vitamins_effect_rate),
+             CEREAL_NVP(buff_energy_drink),
+             CEREAL_NVP(buff_milk),
+             CEREAL_NVP(buff_vitamins),
+             CEREAL_NVP(t_buff_energy_drink),
+             CEREAL_NVP(t_buff_milk),
+             CEREAL_NVP(t_buff_vitamins),
+             CEREAL_NVP(t_used_compressed_cracker),
+             CEREAL_NVP(t_used_first_aid_kit),
              CEREAL_NVP(isInjured),
              CEREAL_NVP(game_time),
-            CEREAL_NVP(pos),
+             CEREAL_NVP(pos),
              CEREAL_NVP(current_scene));
     }
   
@@ -254,6 +292,15 @@ private:
     float intelArts_boost_rate = 1.0;              ///< 文科智力比例增量	确保大于等于1
     float learning_time_reduction_rate = 1.0;      ///< 时间消耗减少比率(学)	确保大于等于0，小于等于1
     float learning_health_preservation_rate = 1.0; ///< 健康损失保护比率(学)	确保大于等于0，小于等于1
+    float vitamins_effect_rate = 1.0;	           ///< 维生素作用系数    确保等于0或1
+    bool buff_energy_drink = false;	               ///< 能量饮料buff状态
+    bool buff_milk = false;			               ///< 牛奶buff状态
+    bool buff_vitamins = false;		               ///< 维生素buff状态
+    int t_buff_energy_drink = -10000;			   ///< 获得能量饮料buff的时间    确保大于等于0
+    int t_buff_milk = -10000;				       ///< 获得牛奶buff的时间    确保大于等于0
+    int t_buff_vitamins = -10000;			       ///< 获得维生素buff的时间    确保大于等于0
+    int t_used_compressed_cracker = -10000;	       ///< 上次使用压缩饼干的时间    确保大于等于0
+    int t_used_first_aid_kit = -10000;			   ///< 上次使用急救包的时间    确保大于等于0
 
     // 隐藏属性
 

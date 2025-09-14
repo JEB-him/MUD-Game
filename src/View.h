@@ -71,7 +71,7 @@ public:
      * @brief 地图中的主角移动
      * @note 该函数应被声明为 Map 的友元
      * @param last_pos 主角移动前的位置
-     * #param pos 主角移动后的位置
+     * @param pos 主角移动后的位置
      */
     Message drawPoMove(const Position& last_pos, const Position& pos);
 

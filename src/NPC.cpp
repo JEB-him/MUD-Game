@@ -220,6 +220,10 @@ void NPC::startInteraction() {
     if (!(controller->input)) {
         controller->log(Controller::LogLevel::ERR, "悬空指针： input");
     }
+    if (!(controller->backpack)) {
+        controller->log(Controller::LogLevel::ERR, "悬空指针： backpack");
+    }
+    auto backpack = controller->backpack;
     auto input = controller->input;
     auto protagonist = controller -> protagonist;
     auto base_attrs = controller -> protagonist -> getBaseAttrs();
@@ -268,7 +272,7 @@ void NPC::startInteraction() {
             } else if (type == "TIME") {
                 ss << "时间" << (changeValue > 0 ? "逆流" : "流逝") << std::abs(changeValue) << "小时";
             } else if (type == "OBJ") {
-                ss << "获得物品" << "XXX";
+                ss << "获得物品" << backpack->getItemInf(value).name;
             }
                 view->printQuestion("", ss.str(), "white");
             

@@ -539,7 +539,7 @@
   },
 
   "Bed": {
-    "initial": "save_if",
+    "initial": "train_running_if",
     "interactions": {
       "train_running_if": {
         "prompt": "参加跑步锻炼无需金币，但会消耗3点时间，获得20体力。你确定要参加吗？",
@@ -579,5 +579,4 @@
       }
     }
   }
-
 }

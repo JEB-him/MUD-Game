@@ -18,6 +18,11 @@
 */
 ItemBasicInf::ItemBasicInf(string name, string description, int value):name(name),description(description),value(value) { }
 
+/**
+* @brief ItemBasicInf类构造函数
+*/
+ItemBasicInf::ItemBasicInf(string name, string description, int value):name(name),description(description),value(value) { }
+
   /**
     * @brief 物品类型枚举定义
     * @details 包含五种物品细分类型（学习资料、学习辅助工具、食品、学习辅助食品、健康类物品）及未知类型

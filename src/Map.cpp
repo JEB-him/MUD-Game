@@ -3,6 +3,7 @@
  * @author Jie Jiang
  */
 #include "Map.h"
+#include "Controller.h"
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
@@ -112,6 +113,8 @@ Message Map::save() const {
         }
         map_file << std::endl;
     }
+    auto controller = Controller::getInstance();
+    controller->log(Controller::LogLevel::DEBUG, map_path);
 
     return {"Success", 0};
 }

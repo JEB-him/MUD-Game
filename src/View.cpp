@@ -312,9 +312,15 @@ void View::colorPrint(
         size_t insert_len = cutUTFString(text, index, width);
         if (insert_len > static_cast<size_t>(width)) {
             controller->log(Controller::LogLevel::ERR, "消息打印错误");
+            gameSleep(1500);
             return;
         }
         ss << text.substr(old_index, index - old_index);
+        size_t len = index - old_index;
+        while(len < static_cast<size_t>(width)) {
+            len++;
+            ss << " ";
+        };
         old_index = index;
         // 转换为默认格式
         ss << "\x1b[0m";
@@ -391,7 +397,7 @@ std::string View::gotoXY(const int& x, const int& y) const {
 size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int& width) {
     // 该函数适用于绝大多数常用字符，但对一些偏僻字符可能会出错
     size_t length = 0;
-    for (; index < utf8_str.length() && length <= static_cast<size_t>(width); ) {
+    for (; index < utf8_str.length() && length < static_cast<size_t>(width) - 1; ) {
         unsigned char c = static_cast<unsigned char>(utf8_str[index]);
         if (c < 0x80) {
             // ASCII 字符（英文字母、数字等）
@@ -403,6 +409,7 @@ size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int&
             ++length;
         } else if ((c & 0xF0) == 0xE0) {
             // 3字节 UTF-8 字符（包括大部分中文）
+            // 字节3 UTF
             index += 3;
             length += 2;
         } else {
@@ -410,6 +417,7 @@ size_t View::cutUTFString(const std::string& utf8_str, size_t& index, const int&
             return 0xFFFF;
         }
     }
+
     return length;
 }
 

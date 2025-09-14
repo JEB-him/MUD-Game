@@ -162,15 +162,15 @@ std::unordered_map<BasicValue::ProtagonistAttr, float> Protagonist::getHiddenAtt
         {BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intelArts_boost_rate},
         {BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, learning_time_reduction_rate},
         {BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, learning_health_preservation_rate},
-        {BasicValue::ProtagonistAttr::VitminEffectRate, vitamins_effect_rate},
-        {BasicValue::ProtagonistAttr::BuffEnergyDrink, buff_energy_drink},
-        {BasicValue::ProtagonistAttr::BuffMilk, buff_milk},
-        {BasicValue::ProtagonistAttr::BuffVitamins, buff_vitamins},
-        {BasicValue::ProtagonistAttr::TBuffEnergyDrink, t_buff_energy_drink},
-        {BasicValue::ProtagonistAttr::TBuffMilk, t_buff_milk},
-        {BasicValue::ProtagonistAttr::TBuffVitamins, t_buff_vitamins},
-        {BasicValue::ProtagonistAttr::TUsedCompressedCracker, t_used_compressed_cracker},
-        {BasicValue::ProtagonistAttr::TUsedFirstAidKit, t_used_first_aid_kit}
+        {BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE, vitamins_effect_rate},
+        {BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK, buff_energy_drink},
+        {BasicValue::ProtagonistAttr::BUFF_MILK, buff_milk},
+        {BasicValue::ProtagonistAttr::BUFF_VITAMINS, buff_vitamins},
+        {BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK, t_buff_energy_drink},
+        {BasicValue::ProtagonistAttr::T_BUFF_MILK, t_buff_milk},
+        {BasicValue::ProtagonistAttr::T_BUFF_VITAMINS, t_buff_vitamins},
+        {BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER, t_used_compressed_cracker},
+        {BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT, t_used_first_aid_kit}
     };
 }
 
@@ -262,26 +262,26 @@ Message Protagonist::updateAttr(BasicValue::ProtagonistAttr attr, int val, bool 
         return processFloatAttr(learning_time_reduction_rate);
     case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
         return processFloatAttr(learning_health_preservation_rate);
-    case BasicValue::ProtagonistAttr::VitminEffectRate:
+    case BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE:
         return processFloatAttr(vitamins_effect_rate);
-    case BasicValue::ProtagonistAttr::BuffEnergyDrink:
+    case BasicValue::ProtagonistAttr::BUFF_ENERGY_DRINK:
         buff_energy_drink = (val != 0);
         return Message("能量饮料buff状态更新成功", 0);
-    case BasicValue::ProtagonistAttr::BuffMilk:
+    case BasicValue::ProtagonistAttr::BUFF_MILK:
         buff_milk = (val != 0);
         return Message("牛奶buff状态更新成功", 0);
-    case BasicValue::ProtagonistAttr::BuffVitamins:
+    case BasicValue::ProtagonistAttr::BUFF_VITAMINS:
         buff_vitamins = (val != 0);
         return Message("维生素buff状态更新成功", 0);
-    case BasicValue::ProtagonistAttr::TBuffEnergyDrink:
+    case BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK:
         return processIntAttr(t_buff_energy_drink);
-    case BasicValue::ProtagonistAttr::TBuffMilk:
+    case BasicValue::ProtagonistAttr::T_BUFF_MILK:
         return processIntAttr(t_buff_milk);
-    case BasicValue::ProtagonistAttr::TBuffVitamins:
+    case BasicValue::ProtagonistAttr::T_BUFF_VITAMINS:
         return processIntAttr(t_buff_vitamins);
-    case BasicValue::ProtagonistAttr::TUsedCompressedCracker:
+    case BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER:
         return processIntAttr(t_used_compressed_cracker);
-    case BasicValue::ProtagonistAttr::TUsedFirstAidKit:
+    case BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT:
         return processIntAttr(t_used_first_aid_kit);
     case BasicValue::ProtagonistAttr::IS_INJURED:
         isInjured = (val != 0);
@@ -333,17 +333,17 @@ bool Protagonist::isValidAttr(BasicValue::ProtagonistAttr attr, int val) const
         return val >= 0 && val <= 1; // 时间消耗减少比率只能在0~1之间
     case BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE:
         return val >= 0 && val <= 1; // 健康损失保护比率只能在0~1之间
-    case BasicValue::ProtagonistAttr::VitminEffectRate:
+    case BasicValue::ProtagonistAttr::VITMIN_EFFECT_RATE:
         return val == 1 || val == 0; // 维生素作用系数只能等于0或1
-    case BasicValue::ProtagonistAttr::TBuffEnergyDrink:
+    case BasicValue::ProtagonistAttr::T_BUFF_ENERGY_DRINK:
         return val >= 0; // 能量饮料buff获得时间只能大于等于0
-    case BasicValue::ProtagonistAttr::TBuffMilk:
+    case BasicValue::ProtagonistAttr::T_BUFF_MILK:
         return val >= 0; // 牛奶buff获得时间只能大于等于0
-    case BasicValue::ProtagonistAttr::TBuffVitamins:
+    case BasicValue::ProtagonistAttr::T_BUFF_VITAMINS:
         return val >= 0; // 维生素buff获得时间只能大于等于0
-    case BasicValue::ProtagonistAttr::TUsedCompressedCracker:
+    case BasicValue::ProtagonistAttr::T_USED_COMPRESSED_CRACKER:
         return val >= 0; // 压缩饼干上次使用时间只能大于等于0
-    case BasicValue::ProtagonistAttr::TUsedFirstAidKit:
+    case BasicValue::ProtagonistAttr::T_USED_FIRST_AID_KIT:
         return val >= 0; // 维生素上次使用时间只能大于等于0
     default:
         return false; // 非法属性

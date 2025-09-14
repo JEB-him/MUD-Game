@@ -42,15 +42,15 @@ namespace BasicValue
         NAME,                              ///< 主角姓名
         LEARNING_TIME_REDUCTION_RATE,      ///< 学习时间消耗减少比率
         LEARNING_HEALTH_PRESERVATION_RATE, ///< 学习健康保留率
-        VitminEffectRate,                  ///< 维生素作用系数    
-        BuffEnergyDrink,                   ///< 能量饮料buff状态
-        BuffMilk,                          ///< 牛奶buff状态
-        BuffVitamins,                      ///< 维生素buff状态
-        TBuffEnergyDrink,                  ///< 获得能量饮料buff的时间
-        TBuffMilk,                         ///< 获得牛奶buff的时间
-        TBuffVitamins,                     ///< 获得维生素buff的时间
-        TUsedCompressedCracker,            ///< 上次使用压缩饼干的时间
-        TUsedFirstAidKit,                  ///< 上次使用急救包的时间
+        VITMIN_EFFECT_RATE,                ///< 维生素作用系数    
+        BUFF_ENERGY_DRINK,                 ///< 能量饮料buff状态
+        BUFF_MILK,                         ///< 牛奶buff状态
+        BUFF_VITAMINS,                     ///< 维生素buff状态
+        T_BUFF_ENERGY_DRINK,               ///< 获得能量饮料buff的时间
+        T_BUFF_MILK,                       ///< 获得牛奶buff的时间
+        T_BUFF_VITAMINS,                   ///< 获得维生素buff的时间
+        T_USED_COMPRESSED_CRACKER,         ///< 上次使用压缩饼干的时间
+        T_USED_FIRST_AID_KIT,              ///< 上次使用急救包的时间
         IS_INJURED,                        ///< 受伤状态标志
         GAME_TIME                          ///< 游戏内时间
     };
@@ -226,8 +226,8 @@ public:
              CEREAL_NVP(intelSci_boost_rate),
              CEREAL_NVP(intelArts_boost_rate),
              CEREAL_NVP(learning_time_reduction_rate),
-             CEREAL_NVP(vitamins_effect_rate),
              CEREAL_NVP(learning_health_preservation_rate),
+             CEREAL_NVP(vitamins_effect_rate),
              CEREAL_NVP(buff_energy_drink),
              CEREAL_NVP(buff_milk),
              CEREAL_NVP(buff_vitamins),
@@ -281,7 +281,6 @@ private:
     int t_buff_vitamins = -10000;			       ///< 获得维生素buff的时间    确保大于等于0
     int t_used_compressed_cracker = -10000;	       ///< 上次使用压缩饼干的时间    确保大于等于0
     int t_used_first_aid_kit = -10000;			   ///< 上次使用急救包的时间    确保大于等于0
-
 
     // 隐藏属性
 

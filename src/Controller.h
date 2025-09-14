@@ -43,7 +43,8 @@ public:
     /**
      * @brief 事件类型
      */
-    enum class EventType {
+    enum class EventType
+    {
         MOVE,      ///< 移动主角
         AC_NPC,    ///< 与NPC互动
         AC_INST,   ///< 与器械互动
@@ -51,9 +52,9 @@ public:
         REFRESH,   ///< 刷新地图
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
-        TP,        ///< 传送到 NPC 附近
-        QUIT,      ///< 退出游戏
-        NONE       ///< 无事件
+        // TP,        ///< 传送到 NPC 附近
+        QUIT,    ///< 退出游戏
+        NONE     ///< 无事件
     };
 
     /**
@@ -142,7 +143,8 @@ private:
      */
     Message init();
 
-        Message load(std::string username);
+    
+    Message load(std::string username);
 
     /**
      * @brief 保存游戏

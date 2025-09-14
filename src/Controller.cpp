@@ -6,6 +6,7 @@
 #include <regex>
 // #include "Store.h"
 #include <fstream>
+#include <string>
 #include "scene.h"
 
 Controller::Controller(
@@ -283,13 +284,35 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::AC_NPC:
     {
+        view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        Scene scene();
-        scene.getNPCname(NPCid);
+        std::string NPCname = scene->getNPCname(NPCid);
+        if (NPCname.empty())
+            return Message("Invalid NPC id!", -1);
+        npc = nullptr;
+        npc = std::make_shared<NPC>(NPCname[0], NPCname.substr(1), NPCid);
+        npc->startInteraction();
+        int ch = input->waitKeyDown();
+        view->printCmd("" + char(ch));
+        npc->handleOptionSelection(ch - '0');
+        return Message("NPC interaction Success!", 0);
     }
     case EventType::AC_INST:
     {
+        view = View::getInstance();
+        if (NPCid == -1)
+            return Message("Invalid NPC id!", -1);
+        std::string NPCname = scene->getNPCname(NPCid);
+        if (NPCname.empty())
+            return Message("Invalid NPC id!", -1);
+        npc = nullptr;
+        npc = std::make_shared<NPC>(NPCname[0], NPCname.substr(1), NPCid);
+        npc->startInteraction();
+        int ch = input->waitKeyDown();
+        view->printCmd("" + char(ch));
+        npc->handleOptionSelection(ch - '0');
+        return Message("NPC interaction Success!", 0);
     }
     case EventType::OPEN_PACK:
     {
@@ -318,8 +341,13 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::JUMP:
     {
         map = nullptr;
-
-        map = std::make_shared<Map>("scene_filename", Position(1, 1));
+        if (NPCid == -1)
+        {
+            map = std::make_shared<Map>();
+            return Message("Jump to default map.", 0);
+        }
+        std::string scene_filename = scene->getSceneName(NPCid) + ".txt";
+        map = std::make_shared<Map>(scene_filename, Position(1, 1));
         view->reDraw();
         return Message("Jump Success!", 0);
     }
@@ -360,17 +388,16 @@ Message Controller::handleEvent(EventType &event_type)
                 item_option << char(ch);
             }
         }
-        if (item_pts[index]->isOnCD())
+        if (item_pts[index]->isOnCD(*protagonist))
         {
             return Message("Item is on CD!", -1);
         }
         else
         {
-            item_pts[index]->use(protagonist);
+            item_pts[index]->use(*protagonist);
         }
 
         return Message("Use item Success!", 0);
-    }
     }
 // case EventType::STORE:
 // {
@@ -591,7 +618,8 @@ int Controller::run()
     log(LogLevel::DEBUG, ss.str());
     ss.str("");
     gameSleep(500);
-    map->moveProtagonist(0, map_event, id);
+    EventType event_type_1 = EventType::NONE;
+    map->moveProtagonist(0, event_type_1, id);
     Position pos = map->getPos();
     protagonist->setPosition(pos);
     view->drawPoMove(old_pos, pos);

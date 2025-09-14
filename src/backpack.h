@@ -53,6 +53,12 @@ public:
 	 * @brief  获取物品的基础信息（名字、描述、价值）
 	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
 	 */
+	static std::shared_ptr<Backpack> getInstance();
+
+	/**
+	 * @brief  获取物品的基础信息（名字、描述、价值）
+	 * @param item_name 一个物品的特异标识符，如"advanced_mathematics"。
+	 */
 	ItemBasicInf getItemInf(string& item_name)const;
 
 	/**

@@ -22,6 +22,7 @@ using json = nlohmann::json;
  * @brief 将NPCType枚举转换为字符串
  * @param type NPC类型
  * @return 对应的字符串表示
+ * @deprecated Controller 将直接使用字符串创建 NPC
  */
 const std::string& NPCTypeToString(NPCType type) {
     static const std::unordered_map<NPCType, std::string> typeMap {

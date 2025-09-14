@@ -1,26 +1,60 @@
 /**
  * @file Scene.h
- * @author Jie Jiang && Haozhe Tang
+ * @author Jie Jiang 
  */
-
+#pragma once
 #include <vector>
 #include <memory>
+#include <map>
+#include <string>
+#include <fstream>
+#include <filesystem>
 #include "json.hpp"
 
 /**
  * @brief 场景类    
- * @details 场景类管理场景中应该存在的 NPC, 随机物品, 器械，入口，出口\n
- *          以及用于初始化的地图文件的文件名
+ * @details 
  */
 class Scene {
 public:
+    using json = nlohmann::json;
+
     std::string name;   //< 场景名称
-    std::map<int, std::string> exit; // < 场景中的出口列表，key为出口的唯一ID
-    
-    Scene() = default;
+    std::map<int, std::string> exits;  //< 场景出口映射
+    std::filesystem::path scene_file;  //< 场景配置文件路径
+   
+    nlohmann::json scenes_json;  //< 存储解析后的JSON数据
+
     /**
-     * @brief 从 JSON 对象中加载场景数据
+     * @brief 默认构造函数
      */
-    static std::shared_ptr<std::vector<std::string>> getScenes();
-private:
+    Scene();
+    
+    /**
+     * @brief 带参数的构造函数
+     * @param scene_name 场景名称
+     * @param file_path 场景配置文件路径
+     */
+    Scene(const std::string& scene_name, const std::filesystem::path& file_path);
+    
+    /**
+     * @brief 析构函数
+     */
+    ~Scene();
+
+    /**
+     * @brief 获取当前场景的出口信息
+     */
+    void loadExits();
+    
+    /**
+     * @brief 加载场景配置文件
+     * @return 成功返回true，失败返回false
+     */
+    bool loadSceneFile();
+    /**
+     * @brief 根据出口键获取目标场景名称
+     * @param key 出口id
+     */
+    std::string getSceneName(int key);
 };

@@ -88,3 +88,10 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
             }
     }
 }
+
+/**
+ * @brief 获取item_creator的引用
+ */
+ItemCreator& Backpack::getItemCreator() {
+    return item_creator;
+}

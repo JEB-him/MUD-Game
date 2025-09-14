@@ -77,6 +77,11 @@ public:
 	 */
 	void useFunctionOfItem(int order, Protagonist& protagonist);
 
+	/**
+	 * @brief 获取item_creator的引用
+	 */
+	ItemCreator& getItemCreator();
+
 private:
 	ItemCreator item_creator;
 	vector<unique_ptr<Item>> backpack_items;

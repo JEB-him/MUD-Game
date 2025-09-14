@@ -27,21 +27,26 @@ void Controller::log(const LogLevel& level, const std::string& msg) {
     std::ofstream info_log(log_dir / INFO_FILE, std::ios::app);
     std::ofstream warn_log(log_dir / WARN_FILE, std::ios::app);
     std::ofstream error_log(log_dir / ERROR_FILE, std::ios::app);
-    if (view != nullptr)
+    if (view != nullptr) {
+        Rgb rgb_color = {0 , 0, 0};
         switch (level) {
-            case LogLevel::DEBUG:
-                view->printLog(msg, "", Rgb(120, 120, 120));
-                break;
-            case LogLevel::INFO:
-                view->printLog(msg, "white", Rgb(255, 255, 255));
-                break;
-            case LogLevel::WARN:
-                view->printLog(msg, "", Rgb(219, 162, 0));
-                break;
             case LogLevel::ERR:
-                view->printLog(msg, "red", Rgb(255, 0, 0));
+                rgb_color = {255, 0, 0};
+                if(this->level == LogLevel::ERR) view->printLog(msg, "", rgb_color);
+            case LogLevel::WARN:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(219, 162, 0);
+                if(this->level == LogLevel::WARN) view->printLog(msg, "", rgb_color);
+            case LogLevel::INFO:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(255, 255, 255);
+                if(this->level == LogLevel::INFO) view->printLog(msg, "", rgb_color);
+            case LogLevel::DEBUG:
+                if(rgb_color.r + rgb_color.g + rgb_color.b == 0) rgb_color = Rgb(120, 120, 120);
+                if(this->level == LogLevel::DEBUG) view->printLog(msg, "", rgb_color);
                 break;
         }
+    } else {
+        error_log << "未初始化 View 下调用 View::printLog" << std::endl;
+    }
     if (this->level == LogLevel::INFO && level != LogLevel::DEBUG)
         info_log << msg << std::endl;
     if (this->level == LogLevel::WARN && level != LogLevel::INFO && level != LogLevel::DEBUG)
@@ -67,8 +72,10 @@ Message Controller::load(std::string username) {
     std::filesystem::path file_name = root_dir / "saves" / (username + ".bin");
     std::ifstream ifile(file_name, std::ios::binary);
     Position init_pos {-1, -1};
+    // 设置默认出生点
+    // TODO 修改逻辑，应当通过默认场景类获得默认文件名
+    std::string map_filename = "center.txt";
     Message msg;
-    std::string map_filename;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {
         if(!std::filesystem::exists(file_name)){
@@ -86,8 +93,6 @@ Message Controller::load(std::string username) {
 
         protagonist = std::make_shared<Protagonist>(playerID, username);
         msg = Message("Create a new account", 0);
-        // 设置默认出生点
-        map_filename = "???";
     } else {
         // 使用cereal进行反序列化
         {
@@ -108,10 +113,10 @@ Message Controller::load(std::string username) {
     // 初始化地图数据
     if (init_pos.x != -1) {
         // 使用 init_pos 填入下面的参数列表中
-        map = std::make_shared<Map>();
+        map = std::make_shared<Map>(map_filename);
     } else {
         // 仅使用地图文件初始化
-        map = std::make_shared<Map>();
+        map = std::make_shared<Map>(map_filename);
     }
     std::cout << msg.msg << std::endl;
     view->reDraw();
@@ -321,6 +326,7 @@ Message Controller::playerLogin(std::string &user_name) {
 int Controller::run()
 {
     init();
+    std::cout << "初始化成功" << std::endl;
     std::string user_name;
     playerLogin(user_name);
     load(user_name);
@@ -381,8 +387,8 @@ int Controller::run()
     // 测试结束
 
 
-    log(LogLevel::INFO, "正在保存游戏...");
-    gameSleep(2000);
+    // 保存游戏
+    save();
 
     // 保持界面完整性
     std::cout << "\n\n";

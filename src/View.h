@@ -134,8 +134,8 @@ private:
     std::shared_ptr<Controller> controller;
 
     // 设置日志和游戏输出的最大尺寸
-    int min_win_width;
-    int min_win_height;
+    int min_win_width = 0;
+    int min_win_height = 0;
 
     // 设置留白
     static constexpr int TOP_MARGIN    = 0;

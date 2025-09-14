@@ -104,19 +104,7 @@ std::shared_ptr<View> View::getInstance() {
 }
 
 View::View():
-    controller(Controller::getInstance()),
-    min_win_width(controller->map->getMaxWidth() +
-                  40 +
-                  LEFT_MARGIN +
-                  RIGHT_MARGIN +
-                  LEFT_PADDING +
-                  RIGHT_PADDING),
-    min_win_height(controller->map->getMaxHeight() +
-                   10 +
-                   TOP_MARGIN +
-                   BOTTOM_MARGIN +
-                   TOP_PADDING +
-                   BOTTOM_PADDING) {
+    controller(Controller::getInstance()) {
     disableCursor();
 }
 
@@ -138,6 +126,20 @@ bool View::reDraw() {
     if (controller->map == nullptr) {
         return false;
     }
+
+    min_win_width = controller->map->getMaxWidth() +
+                  40 +
+                  LEFT_MARGIN +
+                  RIGHT_MARGIN +
+                  LEFT_PADDING +
+                  RIGHT_PADDING;
+    min_win_height = controller->map->getMaxHeight() +
+                   10 +
+                   TOP_MARGIN +
+                   BOTTOM_MARGIN +
+                   TOP_PADDING +
+                   BOTTOM_PADDING;
+
     if (width < min_win_width || height < min_win_height) {
         return false;
     }

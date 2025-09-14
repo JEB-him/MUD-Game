@@ -232,7 +232,7 @@ private:
 
     /**
      * @brief 设置 NPC 和出口等的 ID
-     * @parm rows 扫描的行数
+     * @param rows 扫描的行数
      * @return 返回索引建立是否成功
      */
     bool indexInit(const int &rows);

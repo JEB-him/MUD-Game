@@ -52,9 +52,10 @@ public:
         REFRESH,   ///< 刷新地图
         STATUS,    ///< 显示状态栏
         JUMP,      ///< 跳转场景
-        // TP,        ///< 传送到 NPC 附近
-        QUIT,    ///< 退出游戏
-        NONE     ///< 无事件
+        STORE,     ///< 商店购买
+        BUY,       ///< 购买物品
+        QUIT,      ///< 退出游戏
+        NONE       ///< 无事件
     };
 
     /**

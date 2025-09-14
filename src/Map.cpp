@@ -91,7 +91,7 @@ Message Map::moveProtagonist(const int &direction, Controller::EventType &event_
             id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
             return {"与 NPC 交互", 0};
         default:
-            event_type = 3;
+            event_type = Controller::EventType::AC_INST;
             id = char2index(back_code);
             return {"与器械交互", 0};
     }

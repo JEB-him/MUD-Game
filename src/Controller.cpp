@@ -266,7 +266,7 @@ Message Controller::handleEvent(EventType &event_type)
             view->drawPoMove(last_pos, pos);
             handleEvent(event_type);
         }
-        break;
+        return Message("Move Success!", 0);
     }
     case EventType::AC_NPC:
     {
@@ -275,7 +275,7 @@ Message Controller::handleEvent(EventType &event_type)
         npc->loadInteractionConfig(npc_id, "config.json");
         npc->startInteraction();
         npc->handleOptionSelection();
-        break;
+        return (Message("AC_NPC Finished.", 0))
     }
     case EventType::AC_INST:
     {
@@ -284,35 +284,52 @@ Message Controller::handleEvent(EventType &event_type)
         npc->loadInteractionConfig(npc_id, "config.json");
         npc->startInteraction();
         npc->handleOptionSelection();
-        break;
+        return (Message("AC_INST Finished.", 0))
     }
     case EventType::OPEN_PACK:
     {
         std::shared_ptr<View> view = View::getInstance();
         vector<unique_ptr<Item>> item_pts = backpack->getBackpackItems();
         vector<std::string> item_names();
-        for (auto &item_ptr : item_pts)
-        {
-                }
-        break;
+        view->printOptions(item_names);
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Open Pack Success!", 0);
     }
 
     case EventType::REFRESH:
     {
-
+        std::shared_ptr<View> view = View::getInstance();
+        view->reDraw();
         break;
     }
 
     case EventType::STATUS:
     {
         std::shared_ptr<View> view = View::getInstance();
-        return (view->printOptions(protagonist->getstatus()));
+        view->printOptions(protagonist->getStatus());
+        // 按下任意键退出
+        int ch = input->waitKeyDown();
+        return Message("Show status.", 0);
     }
     case EventType::JUMP:
+    {
+        map = nullptr;
+        Position pos = map->getPos();
+        int exit_id = map->getExitId(pos);
+        // 从exit_id获取场景文件名，以scene_filename代替
 
-        break;
-    // case EventType::TP:
-    //     break;
+        map = std::make_shared<Map>("scene_filename", Position(1, 1));
+        view->reDraw();
+    }
+    case EventType::STORE:
+    {
+        std::shared_ptr<View> view = View::getInstance();
+        view->printOptions();
+    }
+    case EventType::BUY:
+    {
+    }
     case EventType::NONE:
         return Message("Invalid command!", -1);
     }
@@ -422,21 +439,7 @@ int Controller::run()
     Message msg;
     while (running && turns--) {
         log(LogLevel::DEBUG, "获取事件...");
-        // msg = getEvent(event_type);
-
-        switch (event_type)
-        {
-        case EventType::MOVE:
-            log(LogLevel::DEBUG, "移动主角...");
-            break;
-        case EventType::QUIT:
-            log(LogLevel::INFO, "退出游戏...");
-            running = false;
-            break;
-        case EventType::NONE:
-            log(LogLevel::DEBUG, "无按键响应...");
-            break;
-        }
+        msg = getEvent(event_type);
     }
 
     // 测试用

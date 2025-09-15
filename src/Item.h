@@ -24,7 +24,7 @@
 using std::string;
 using std::cout;
 using std::endl;
-using std::unique_ptr;
+using std::shared_ptr;
 using std::make_unique;
 using std::move;
 using nlohmann::json;
@@ -224,7 +224,9 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
-    std::shared_ptr<Item> createItem(string &item_name);
+    shared_ptr<Item> createItem(string& item_name);
+
+    ItemBasicInf getItemInf(string& item_name)const;
     /**
      * @brief 清理主角身上的某个buff
      * @param buff_name buff对应键值

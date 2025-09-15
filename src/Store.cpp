@@ -1,6 +1,9 @@
 #include "Store.h"
 #include "Controller.h"
 #include "View.h"
+#include "InputHandler.h"
+#include "backpack.h"
+#include "Protagonist.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -76,7 +79,7 @@ Message Store::buyProduct(int index) {
 
     view->printQuestion("", "================", "white");
     size_t i = 0;
-    string key_target;
+    std::string key_target;
     for (auto& [key, value] : items.items()) {
         if (i == actualIndex) {
             key_target = key;
@@ -100,7 +103,7 @@ Message Store::buyProduct(int index) {
             view->printQuestion("", "您的余额不足，无法购物。", "white");
             return { "余额不足", 1 };
         }
-        controller->protagonist->updateAttr(BasicValue::ProtagonistAttr::MONEY, -items[key_target]["value"], true);
+        controller->protagonist->updateAttr(BasicValue::ProtagonistAttr::MONEY, -(items[key_target]["value"].get<int>()), true);
         controller->backpack->addItem(key_target);
         controller->protagonist->addGameTime(2);
 

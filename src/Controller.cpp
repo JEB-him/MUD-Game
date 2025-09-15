@@ -76,6 +76,8 @@ Message Controller::init() {
     log(LogLevel::DEBUG, "Init: input");
     view = View::getInstance();
     log(LogLevel::DEBUG, "Init view");
+    scene = std::make_shared<Scene>();
+    log(LogLevel::DEBUG, "Init scene");
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -191,7 +193,10 @@ Message Controller::getEvent(EventType &event_type)
         {
             if (ss.str().length() > 0)
             {
-                ss.str(ss.str().substr(0, ss.str().length() - 1));
+                std::string str = ss.str().substr(0, ss.str().length() - 1);
+                ss.str("");
+                ss.clear();
+                ss << str;
                 view->printCmd(ss.str());
             }
             continue;
@@ -238,10 +243,6 @@ Message Controller::getEvent(EventType &event_type)
     {
         event_type = EventType::STATUS;
     }
-    else if (cmd == "jump")
-    {
-        event_type = EventType::JUMP;
-    }
     else if (cmd == "quit")
     {
         event_type = EventType::QUIT;
@@ -263,7 +264,8 @@ Message Controller::getEvent(EventType &event_type)
     else
     {
         view = View::getInstance();
-        view->printQuestion("", "", "Enter \"help\" to get help.", Rgb(0, 0, 0));
+        view->reDraw();
+        view->printQuestion("", "Enter \"help\" to get help.", "", Rgb(255, 255, 0));
         event_type = EventType::NONE;
     }
     return handleEvent(event_type);
@@ -312,15 +314,17 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::AC_NPC:
     {
+        // 从move 拿到NPCid -> 借助Scene获取名称 -> 创建NPC对象 -> 顺序调用即可
         log(LogLevel::DEBUG, "AC_NPC");
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname(NPCid);
+        std::string NPCname = scene->getNPCname('s');
+        log(LogLevel::DEBUG, "Got name!");
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
-        npc = std::make_shared<NPC>(/*NPCname[0]*/"", NPCname.substr(1), NPCid);
+        npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
         npc->startInteraction();
         int ch = input->waitKeyDown();
         view->printCmd("" + char(ch));
@@ -382,21 +386,25 @@ Message Controller::handleEvent(EventType &event_type)
     {
         view = View::getInstance();
         view->printOptions(protagonist->getStatus());
-        // 按下任意键退出
-        int ch = input->waitKeyDown();
         return Message("Show status.", 0);
     }
     case EventType::JUMP:
     {
         // 拿到map.move的NPCid->给Scene对象->拿到场景文件名->重新创建Scene(新场景)->创建Map(新地图)->初始化地图数据->重新绘制地图->提示用户场景名称
-        map = nullptr;
         if (NPCid == -1)
         {
-            map = std::make_shared<Map>();
             return Message("Jump to default map.", 0);
         }
-        std::string scene_filename = scene->getSceneName(NPCid) + ".txt";
-        map = std::make_shared<Map>(scene_filename, Position(1, 1));
+        std::string scene_name = scene->getSceneName(NPCid);
+        if (scene_name.empty())
+        {
+            return Message("Invalid NPC id!", -1);
+        }
+        scene = nullptr;
+        scene = std::make_shared<Scene>(scene_name);
+        map = nullptr;
+        map = std::make_shared<Map>(scene_name, Position(1, 1));
+        view = View::getInstance();
         view->reDraw();
         return Message("Jump Success!", 0);
     }
@@ -582,6 +590,8 @@ int Controller::run()
     static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;
+    view->printQuestion("", "Welcome to OUCSurvSim!", "", Rgb(255, 255, 0));
+    view->printQuestion("", "Enter \"help\" to get help.", "", Rgb(255, 255, 0));
     while (running && turns--)
     {
         msg = getEvent(event_type);

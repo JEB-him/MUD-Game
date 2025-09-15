@@ -224,9 +224,8 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
-    shared_ptr<Item> createItem(string& item_name);
 
-    ItemBasicInf getItemInf(string& item_name)const;
+    shared_ptr<Item> createItem(string& item_name);
     /**
      * @brief 清理主角身上的某个buff
      * @param buff_name buff对应键值

@@ -4,8 +4,7 @@ AC_INST,    与器械互动
 OPEN_PACK,  打开背包
 REFRESH,    刷新地图
 STATUS,     显示状态栏
-JUMP,       跳转场景
-STORE,      商店购买z
+STORE,      商店购买
 HELP,       帮助信息
 USE,        使用物品
 QUIT,       退出游戏

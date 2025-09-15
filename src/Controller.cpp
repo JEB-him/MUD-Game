@@ -6,10 +6,10 @@
 #include "InputHandler.h"
 #include "Map.h"
 #include "backpack.h"
+#include "Store.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
-// #include "Store.h"
 #include <fstream>
 #include <string>
 #include "Scene.h"

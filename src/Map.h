@@ -183,6 +183,13 @@ public:
     static int char2index(const char &ch);
 
 private:
+
+    // 新增：存储出口、入口、NPC位置（ID为索引）
+    //haozhe Tang
+    std::vector<Position> exits;    // 出口位置列表
+    std::vector<Position> entries;  // 入口位置列表
+    std::vector<Position> npcs;     // NPC位置列表
+    std::vector<Position> instruments;  // 器械位置列表（按SPECIAL_CHARS索引）
     enum class LineType
     {
         WALL,        // 墙壁

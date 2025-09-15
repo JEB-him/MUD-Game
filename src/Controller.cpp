@@ -444,7 +444,7 @@ Message Controller::handleEvent(EventType &event_type)
         }
         else
             return Message("Use item canceled.", 0);
-        viewv > reDraw();
+        view->reDraw();
     }
     case EventType::STORE:
     {

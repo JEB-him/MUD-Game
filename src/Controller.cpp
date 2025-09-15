@@ -9,8 +9,6 @@
 #include "Store.h"
 #include <iostream>
 #include <fstream>
-#include <regex>
-#include <fstream>
 #include <string>
 #include "Scene.h"
 #if (defined(_WIN32) || defined(_WIN64))
@@ -246,8 +244,7 @@ Message Controller::getEvent(EventType &event_type)
     else if (cmd == "quit")
     {
         event_type = EventType::QUIT;
-        save();
-        exit(0);
+        return {"正常退出", 0};
     }
     else if (cmd == "store")
     {
@@ -281,6 +278,7 @@ Message Controller::handleEvent(EventType &event_type)
         int ch = -1;
         Position pos;
         view = View::getInstance();
+        gameSleep(3);
         while ((ch = input->waitKeyDown()) != 10)
         {
             Position last_pos = map->getPos();
@@ -596,6 +594,9 @@ int Controller::run()
     while (running && turns--)
     {
         msg = getEvent(event_type);
+        if (event_type == EventType::QUIT) {
+            break;
+        }
     }
 
     // 保存游戏

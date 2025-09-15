@@ -82,7 +82,7 @@ public:
      * @param filename String 类型
      * @param pos 设置主角的初始坐标
      */
-    Map(const std::string &filename, const Position &pos = Position());
+    Map(const std::string &filename, const Position &pos = {-1, -1});
 
     /**
      * @brief 析构函数，Map 应当将当前地图下的所有修改保存到文件中

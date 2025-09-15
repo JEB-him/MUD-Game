@@ -26,9 +26,12 @@ Map::Map(const std::string &filename, const Position &pos) : modified(false),
         this->is_valid = true;
         this->valid_msg = "";
     }
-    if (x == -1) {
+    if (pos.x != -1 && pos.y != -1) {
         this->x = pos.x;
         this->y = pos.y;
+        map[this->x][this->y] = '1';
+    } else {
+        map[x][y] = '1';
     }
 }
 
@@ -95,14 +98,9 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
             id = getExitId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
             Controller::getInstance()->log(Controller::LogLevel::DEBUG, "e");
             return {"抵达出口", 0};
-        case '9':
-            event_type = EventType::AC_NPC;
-            id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
-            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "9");
-            return {"与 NPC 交互", 0};
         default:
             event_type = EventType::AC_INST;
-            id = char2index(back_code);
+            id = back_code;
             Controller::getInstance()->log(Controller::LogLevel::DEBUG, "default");
             return {"与器械交互", 0};
     }
@@ -110,6 +108,7 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
 }
 
 Message Map::save() const {
+    /*
     std::ofstream map_file(map_path.c_str());
     if (!map_file.is_open()){
         return {"无法打开: " + map_path, -1};
@@ -117,7 +116,9 @@ Message Map::save() const {
 
     for (int i = 0; i < MAX_HEIGHT; ++i) {
         for (int j = 0; j < MAX_WIDTH; ++j) {
-            if (map[i][j]) {
+            if (map[i][j] == '1') {
+                map_file << " ";
+            } else if (map[i][j]) {
                 map_file << map[i][j];
             }
         }
@@ -125,6 +126,8 @@ Message Map::save() const {
     }
     auto controller = Controller::getInstance();
     controller->log(Controller::LogLevel::DEBUG, map_path);
+    */
+    // TODO 若有地图变化的机制，再考虑开启
 
     return {"Success", 0};
 }
@@ -151,14 +154,34 @@ char Map::detectCollision(const Position& pos) const {
     if (pos.x != x) {
         /* 检查是否到横的exit/entry */
         for (int i = std::max(0, pos.y - 3); i <= std::min(MAX_WIDTH, pos.y + SPECIAL_CHARS[1].width - 1); ++i) {
-            if (map[pos.x][i] == 'o') return 'o';
-            if (map[pos.x][i] == 'i') return 'i';
+            if (map[pos.x][i] == 'o') {
+                if (i + 4 < MAX_WIDTH && map[pos.x][i + 4] == '#')
+                    return 'o';
+            }
+            if (map[pos.x][i] == 'i') {
+                if (i + 4 < MAX_WIDTH && map[pos.x][i + 4] == '#')
+                    return 'i';
+            }
         }
     } else {
         /* 检查是否到竖的exit/entry */
         for (int i = std::max(0, pos.x - 1); i <= pos.x; ++i) {
-            if (map[i][pos.y] == 'o' || map[i][pos.y + 1] == 'o') return 'o';
-            if (map[i][pos.y] == 'i' || map[i][pos.y + 1] == 'i') return 'i';
+            if (map[i][pos.y] == 'o') {
+                if (i + 2 < MAX_WIDTH && map[i + 2][pos.y] == '#')
+                    return 'o';
+            }
+            if (map[i][pos.y + 1] == 'o') {
+                if (i + 2 < MAX_WIDTH && map[i + 2][pos.y + 1] == '#')
+                    return 'o';
+            }
+            if (map[i][pos.y] == 'i') {
+                if (i + 2 < MAX_WIDTH && map[i + 2][pos.y] == '#')
+                    return 'i';
+            }
+            if (map[i][pos.y + 1] == 'i') {
+                if (i + 2 < MAX_WIDTH && map[i + 2][pos.y + 1] == '#')
+                    return 'i';
+            }
         }
     }
 
@@ -257,6 +280,7 @@ Message Map::loadMap(const std::string& filename) {
     bool approved = processMap();
     if (approved) {
         // 设置出口和 NPC 的 Id
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG, "Load the fucking Map");
         if (!indexInit(rows)) {
             return {"地图索引建立，主角生成失败", -1};
         }
@@ -270,13 +294,10 @@ bool Map::indexInit(const int& rows) {
         for (int j = 0;j < MAX_WIDTH; ++ j) {
             if (!map[i][j]) break;
             if (map[i][j] == 'o') {
-                // TODO 添加出口 ID
                 exits.emplace_back(i, j);
             } else if (map[i][j] == 'i') {
-                // TODO 添加入口 ID
                 entries.emplace_back(i, j);
             } else if (map[i][j] == '9') {
-                // TODO 添加 NPC ID
                 npcs.emplace_back(i, j);
             } else if (map[i][j] == '1') {
                 if (x != -1 || y != -1) {
@@ -284,15 +305,11 @@ bool Map::indexInit(const int& rows) {
                 }
                 x = i;
                 y = j;
+                map[x][y] = ' ';
             }
         }
     }
-      // 若未找到主角且初始pos无效，默认放置在第一个入口内侧中点
-    if (x == -1 && y == -1 && !entries.empty()) {
-        Position entry = entries[0];
-        x = entry.x + 1;  // 入口内侧（假设入口高度2，内侧为下方）
-        y = entry.y + 2;  // 入口宽度4，中点位置
-    }
+
     return true;
 }
 

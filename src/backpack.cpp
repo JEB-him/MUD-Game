@@ -5,6 +5,7 @@
 */
 
 #include"backpack.h"
+#include "Controller.h"
 
 /**
  * @brief 背包类构造函数
@@ -45,14 +46,17 @@ void Backpack::addItem(string item_name) {
  */
 void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
     //排除小于1和大于最大物品序号的输入值
+    Controller::getInstance()->log(Controller::LogLevel::INFO, "进入使用");
     if (order > backpack_items.size() || order < 1) {
         throw std::runtime_error("输入了无效序号。");
     }
     else{
+        Controller::getInstance()->log(Controller::LogLevel::INFO, "序号有效");
         int index = order - 1;
             //消耗品类
             if (backpack_items[index].get()->getIsConsumable()) {
                 //冷却判定
+                Controller::getInstance()->log(Controller::LogLevel::INFO, "是消耗品");
                 if (backpack_items[index].get()->isOnCD(protagonist)) {
                     /**
                     * @note feedback    TODO view
@@ -64,6 +68,7 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
                     /**
                     * @note feedback    TODO view
                     */
+                    Controller::getInstance()->log(Controller::LogLevel::INFO, "不在CD");
                     ss << "消耗品" << "\"" << backpack_items[index].get()->getName() << "\"" << "已被使用。";
                     //view->gameoutput(ss.str());
                     ss.str("");
@@ -85,6 +90,7 @@ void Backpack::useFunctionOfItem(int order, Protagonist& protagonist) {
 
                 //装备该用具
                 backpack_items[index].get()->equipAndUnequip(protagonist);
+                Controller::getInstance()->log(Controller::LogLevel::INFO, "装备成功");
             }
     }
 }

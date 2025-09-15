@@ -75,7 +75,6 @@ Message Controller::init() {
     input = std::make_shared<InputHandler>();
     log(LogLevel::DEBUG, "Init: input");
     view = View::getInstance();
-    log(LogLevel::DEBUG, "Init view");
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -677,10 +676,15 @@ int Controller::run()
     // ss.str("");
     // // 测试结束
 
+
     // 保存游戏
     save();
 
     // 保持界面完整性
     std::cout << "\n\n";
     return 0;
+}
+
+std::filesystem::path Controller::getRootDir() const {
+    return root_dir;
 }

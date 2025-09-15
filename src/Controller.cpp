@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
-// #include "Store.h"
+#include "Store.h"
 #include <fstream>
 #include <string>
 #include "Scene.h"
@@ -78,6 +78,7 @@ Message Controller::init() {
     log(LogLevel::DEBUG, "Init view");
     scene = std::make_shared<Scene>();
     log(LogLevel::DEBUG, "Init scene");
+    store = std::make_shared<Store>();
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -273,7 +274,7 @@ Message Controller::getEvent(EventType &event_type)
 
 Message Controller::handleEvent(EventType &event_type)
 {
-    int NPCid = -1;
+    static int NPCid = -1;
     switch (event_type)
     {
     case EventType::MOVE:
@@ -281,6 +282,7 @@ Message Controller::handleEvent(EventType &event_type)
         int ch = -1;
         Position pos;
         view = View::getInstance();
+        view->printQuestion("", "按下ESC键退出移动模式。", "", Rgb(255, 255, 0));
         while ((ch = input->waitKeyDown()) != 10)
         {
             Position last_pos = map->getPos();
@@ -321,38 +323,29 @@ Message Controller::handleEvent(EventType &event_type)
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
         std::string NPCname = scene->getNPCname('s');
-        log(LogLevel::DEBUG, "Got name!");
+        log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
         npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
+        npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
         npc->startInteraction();
-        int ch = input->waitKeyDown();
-        view->printCmd("" + char(ch));
-        npc->handleOptionSelection(ch - '0');
         return Message("NPC interaction Success!", 0);
     }
     case EventType::AC_INST:
     {
-        log(LogLevel::DEBUG, "AC_INST");
+        log(LogLevel::DEBUG, "AC_NPC");
         view = View::getInstance();
-        log(LogLevel::DEBUG, "getInstance!");
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname(NPCid);
-        log(LogLevel::DEBUG, "getNPCname!" + NPCname);
+        std::string NPCname = scene->getNPCname('s');
+        log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
-        npc = std::make_shared<NPC>("", NPCname.substr(1), NPCid);
-        log(LogLevel::DEBUG, "create NPC!");
+        npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
+        npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
         npc->startInteraction();
-        log(LogLevel::DEBUG, "StartInteraction");
-        int ch = input->waitKeyDown();
-        log(LogLevel::DEBUG, "waitkeydown: " + ch);
-        view->printCmd("" + char(ch));
-        npc->handleOptionSelection(ch - '0');
-        log(LogLevel::DEBUG, "HandleOptionSelection!" + ch);
         return Message("NPC interaction Success!", 0);
     }
     case EventType::OPEN_PACK:
@@ -382,7 +375,6 @@ Message Controller::handleEvent(EventType &event_type)
         view->reDraw();
         return Message("Refresh Success!", 0);
     }
-
     case EventType::STATUS:
     {
         view = View::getInstance();
@@ -404,7 +396,7 @@ Message Controller::handleEvent(EventType &event_type)
         scene = nullptr;
         scene = std::make_shared<Scene>(scene_name);
         map = nullptr;
-        map = std::make_shared<Map>(scene_name, Position(1, 1));
+        map = std::make_shared<Map>(scene_name, Position(-1, -1));
         view = View::getInstance();
         view->reDraw();
         return Message("Jump Success!", 0);
@@ -412,60 +404,106 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::USE:
     {
         view = View::getInstance();
-        std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
+        backpack->addItem("energy_drink");
+        std::vector<std::shared_ptr<Item>>
+            item_pts = backpack->getBackpackItems();
         std::vector<std::string> item_names;
+        int i = 1;
         for (auto &item_pt : item_pts)
         {
-            item_names.push_back(item_pt->getName());
+            item_names.push_back(std::to_string(i) + ". " + item_pt->getName());
+            i++;
         }
         view->printOptions(item_names);
-        std::stringstream item_option;
-        item_option.str("");
+        view->printQuestion("", "Enter the number of the item you want to use.", "", Rgb(255, 255, 0));
+        view->printQuestion("", "Enter ESC to cancel.", "", Rgb(255, 255, 0));
+        int ch = -1;
+        while (1)
+        {
+            ch = input->waitKeyDown();
+            if (ch >= '0' && ch <= '9')
+            {
+                ch = ch - '0';
+                break;
+            }
+            else if (ch == 27)
+            {
+                ch = -1;
+                break;
+            }
+            else
+            {
+                view->printQuestion("", "Invalid input. Please enter a number.", "", Rgb(255, 255, 0));
+            }
+        }
+        log(LogLevel::DEBUG, "Got index: " + std::to_string(ch));
+        if (ch != -1)
+        {
+            backpack->useFunctionOfItem(ch, *protagonist);
+            return Message("Use item Success!", 0);
+        }
+        else
+            return Message("Use item canceled.", 0);
+        viewv > reDraw();
+    }
+    case EventType::STORE:
+    {
+        view = View::getInstance();
+        log(LogLevel::DEBUG, "getInstance!");
+        store->showProducts(0);
+        log(LogLevel::DEBUG, "Show products.");
+        std::stringstream s1;
+        s1.str("");
+        s1.clear();
+        std::string option = "";
         int index = -1;
         while (1)
         {
             int ch = input->waitKeyDown();
-            if (ch == 10) // Enter
+            // Enter
+            if (ch == 10)
             {
-                if (item_option.str().empty())
+                option = s1.str();
+                s1.str("");
+                s1.clear();
+                index = std::stoi(option);
+                break;
+            }
+            // Backspace
+            else if (ch == 8)
+            {
+                if (s1.str().length() > 0)
                 {
-                    return Message("Invalid item option!", -1);
+                    std::string str = s1.str().substr(0, s1.str().length() - 1);
+                    s1.str("");
+                    s1.clear();
+                    s1 << str;
+                    view->printCmd(s1.str());
                 }
-                int size = item_option.str().size();
-                for (int i = size; i > 0; i--)
-                {
-                    index += (item_option.str()[i] - '0') * pow(10, size - i);
-                }
-                if (index > item_names.size() - 1)
-                {
-                    return Message("Invalid item option!", -1);
-                }
+                continue;
+            }
+            else if (ch == 27)
+            {
+                index = -1;
+                view->printCmd("");
+                break;
             }
             else if (ch >= '0' && ch <= '9')
             {
-                item_option << char(ch);
+                s1 << char(ch);
             }
+            view->printCmd(s1.str());
         }
-        if (item_pts[index]->isOnCD(*protagonist))
+        view->reDraw();
+        log(LogLevel::DEBUG, "get index: " + std::to_string(index));
+        if (index == -1)
         {
-            return Message("Item is on CD!", -1);
+            return Message("Store closed.", 0);
         }
-        else
-        {
-            item_pts[index]->use(*protagonist);
-        }
-
-        return Message("Use item Success!", 0);
+        store->buyProduct(index);
+        log(LogLevel::DEBUG, "buyProduct");
+        return Message("Buy product.", 0);
     }
-        // case EventType::STORE:
-        // {
-        //     view = View::getInstance();
-        //     Store store();
-        //     store.showProducts();
-        //     store.buyProduct();
-        //     int ch = input->waitKeyDown();
-        //     return Message("Buy product.", 0);
-        // }
     case EventType::HELP:
     {
         ifstream fin(".config/help.txt");
@@ -485,7 +523,9 @@ Message Controller::handleEvent(EventType &event_type)
         view->printOptions(help_msgs);
     }
     case EventType::NONE:
+    {
         return Message("Invalid command!", -1);
+    }
     }
 }
 
@@ -596,6 +636,7 @@ int Controller::run()
     while (running && turns--)
     {
         msg = getEvent(event_type);
+        event_type = EventType::NONE;
     }
 
     // 保存游戏

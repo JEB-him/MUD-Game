@@ -22,6 +22,7 @@ class InputHandler;
 class NPC;
 class Protagonist;
 class Map;
+class Store;
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n

@@ -22,8 +22,8 @@ class Scene {
 public:
     std::string name;   //< 场景名称
     std::map<int, std::string> exits;  //< 场景出口映射
-    std::filesystem::path scene_file=".config/";  //< 场景配置文件路径
-    
+    std::filesystem::path scene_file = Controller::getInstance()->getRootDir() / ".config/"; //< 场景配置文件路径
+
     Scene();
     
     /**

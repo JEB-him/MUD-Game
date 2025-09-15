@@ -267,7 +267,8 @@ Message View::printLog(const std::string& msg, const std::string& simple_color, 
     return {"Success", 0};
 }
 
-Message View::printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color) {
+Message View::printQuestion(const std::string &person, const std::string &msg, const std::string &simple_color, const Rgb &rgb_color)
+{
     if (logs_width <= 0) {
         return {"窗口过小", 1};
     }

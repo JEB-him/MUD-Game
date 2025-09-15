@@ -12,7 +12,7 @@
 // #include "Store.h"
 #include <fstream>
 #include <string>
-#include "scene.h"
+#include "Scene.h"
 #if (defined(_WIN32) || defined(_WIN64))
 #include <Windows.h>
 #endif
@@ -353,25 +353,23 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::OPEN_PACK:
     {
         view = View::getInstance();
-        log(LogLevel::DEBUG, "Open Pack! clear");
         std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
-        log(LogLevel::DEBUG, "Get backpack items!");
         std::vector<std::string> item_names;
         if (item_pts.empty())
         {
-            log(LogLevel::DEBUG, "Backpack is empty!");
-            view->printOptions(std::vector<std::string>{"Your backpack is empty."});
+            view->printQuestion("", "Your backpack is empty.", "", Rgb(255, 255, 0));
+            // std::string bookname = "advanced_mathematics";
+            // (backpack->getBackpackItems()).push_back((backpack->getItemCreator()).createItem(bookname));
+            // log(LogLevel::DEBUG, "Add item!");
         }
         else
         {
-            log(LogLevel::DEBUG, "Get item names!");
             for (auto &item_pt : item_pts)
             {
                 item_names.push_back(item_pt->getName());
             }
         }
         view->printOptions(item_names);
-        log(LogLevel::DEBUG, "PrintSuccess!");
         return Message("Open Pack Success!", 0);
     }
     case EventType::REFRESH:

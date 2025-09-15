@@ -128,7 +128,7 @@ int InputHandler::waitKeyDown()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        Sleep(10);
+        Sleep(1);
     }
 
     // 清理钩子
@@ -207,7 +207,7 @@ int InputHandler::waitKeyDown()
             break;
         }
 
-        usleep(10000); // 睡10ms，减少CPU占用
+        usleep(1); // 睡1ms，减少CPU占用
     }
 
     // 清理ncurses

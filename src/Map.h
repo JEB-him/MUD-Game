@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include "tools.h"
-#include "Controller.h"
+class Controller;
 
 class View;
 /**
@@ -143,7 +143,7 @@ public:
      * @return a Message.
      *
      */
-    Message moveProtagonist(const int &direction, Controller::EventType &event_type, int &id);
+    Message moveProtagonist(const int &direction, EventType &event_type, int &id);
 
     /**
      * @brief 传送主角到某一个地点
@@ -267,7 +267,7 @@ private:
     /**
      * @brief 获取NPC ID
      */
-    NPCType getNPCId(const Position& pos);
+    int getNPCId(const Position& pos);
 
     /**
      * @brief 储存行到地图中，并检查是否含有非法字符

@@ -239,6 +239,7 @@ public:
      * @return 操作结果：status=0（成功）/-1（数据无效/格式错误）；msg=结果描述
      */
     Message updateBuff(Protagonist& protagonist);
+    ItemBasicInf getItemInf(string& item_name)const;
 
 private:
     ifstream config_file_item;

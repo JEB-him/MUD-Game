@@ -5,6 +5,9 @@
 #include "Protagonist.h"
 #include "Controller.h"
 #include "View.h"
+#include "backpack.h"
+#include "InputHandler.h"
+
 #include <fstream>
 #include <algorithm>
 #include <string>

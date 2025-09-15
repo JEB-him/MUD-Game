@@ -60,6 +60,7 @@ Message Controller::init() {
     // backpack = std::make_shared<Backpack>();
     input = std::make_shared<InputHandler>();
     view = View::getInstance();
+    store = std::make_shared<Store>();
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -529,6 +530,7 @@ int Controller::run()
     ss << "当前位置: " << pos.x << " " << pos.y;
     log(LogLevel::DEBUG, ss.str());
     ss.str("");
+    store->showProducts();
     // 测试结束
 
 
@@ -538,4 +540,8 @@ int Controller::run()
     // 保持界面完整性
     std::cout << "\n\n";
     return 0;
+}
+
+std::filesystem::path Controller::getRootDir() const {
+    return root_dir;
 }

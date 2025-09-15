@@ -4,6 +4,9 @@
 #include "InputHandler.h"
 #include "backpack.h"
 #include "View.h"
+#include "InputHandler.h"
+#include "backpack.h"
+#include "Protagonist.h"
 #include <vector>
 #include <string>
 #include <fstream>

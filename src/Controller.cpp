@@ -6,6 +6,7 @@
 #include "InputHandler.h"
 #include "Map.h"
 #include "backpack.h"
+#include "Store.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -247,8 +248,7 @@ Message Controller::getEvent(EventType &event_type)
     else if (cmd == "quit")
     {
         event_type = EventType::QUIT;
-        save();
-        exit(0);
+        return {"正常退出", 0};
     }
     else if (cmd == "store")
     {
@@ -636,6 +636,9 @@ int Controller::run()
     while (running && turns--)
     {
         msg = getEvent(event_type);
+        if (event_type == EventType::QUIT) {
+            break;
+        }
         event_type = EventType::NONE;
     }
 

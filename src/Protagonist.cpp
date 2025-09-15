@@ -175,6 +175,7 @@ std::vector<std::string> Protagonist::getStatus() const
     getHealthState(healthStateDesc);
     info.push_back("健康状态: " + healthStateDesc);
     info.push_back("游戏时间: " + std::to_string(game_time));
+    return info;
 }
     
 

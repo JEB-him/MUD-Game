@@ -164,8 +164,6 @@ Message FinalExam::examing(Protagonist& protagonist) {
 		view->printQuestion("", "请作答：", "white");
 		int response = controller->input->waitKeyDown() - '0';
 		
-		view->printQuestion("", std::to_string(response), "white");
-		view->printQuestion("", std::to_string(answer), "white");
 		//判断正误
 		if (response == answer) {
 			view->printQuestion("", "回答正确！", "white");

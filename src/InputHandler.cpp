@@ -1,33 +1,11 @@
-/**
- * @brief 等待并获取键盘输入
- * @author Yang
- *
- * 调用 waitKeyDown 函数可获取键盘输入，支持数字、字母、空格、Esc、Enter、方向、退格键、_ 等按键。
- * 函数会阻塞直到有符合条件的按键被按下。
- *
- * @return int 返回数字的原始值/字母和ESC的ASCII码值
- * @retval '0'-'9' 数字键0-9
- * @retval 10 回车键(Enter)
- * @retval 27 Esc键
- * @retval 8 退格键
- * @retval 95 '_'
- * @retval 'a'-'z' 字母键a-z(小写)
- * @retval "wsad" 对应 "上下左右"
- * @retval -1 获取按键失败
- *
- * @note 此函数跨平台支持Windows和Linux系统
- * @note Windows使用键盘钩子实现，Linux使用ncurses库实现
- *
- * @see vkToAscii()
- */
-
 #include "InputHandler.h"
 
-std::atomic<int> capturedKey(-1);
-std::atomic<bool> keyCaptured(false);
-
 #if defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
+
+// Windows 实现
+std::atomic<int> InputHandler::capturedKey(-1);
+std::atomic<bool> InputHandler::keyCaptured(false);
+HHOOK InputHandler::hKeyboardHook = nullptr;
 
 std::map<int, char> vkToAsciiMap = {
     {0x30, '0'},
@@ -68,15 +46,15 @@ std::map<int, char> vkToAsciiMap = {
     {0x5A, 'z'},
     {VK_OEM_MINUS, '_'}, // 95
     {VK_SPACE, ' '},     // 32
-    {VK_RETURN, '\n'},   // 10
+    {VK_RETURN, 10},     // 10
     {VK_ESCAPE, 27},
-    {VK_BACK, '\b'}, // 8
+    {VK_BACK, 8}, // 8
     {VK_UP, 'w'},
     {VK_DOWN, 's'},
     {VK_LEFT, 'a'},
     {VK_RIGHT, 'd'}};
 
-int vkToAscii(int vkCode)
+int InputHandler::vkToAscii(int vkCode)
 {
     if (vkToAsciiMap.find(vkCode) != vkToAsciiMap.end())
     {
@@ -86,23 +64,53 @@ int vkToAscii(int vkCode)
     return '\0';
 }
 
-HHOOK hKeyboardHook = nullptr;
-
 /* 钩子回调函数 */
-LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK InputHandler::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-    if (nCode >= 0)
-    {
-        if (wParam == WM_KEYDOWN)
-        {
+    // 只有 nCode >= 0 时才处理消息
+    if (nCode == HC_ACTION) {
+        if (wParam == WM_KEYDOWN) {
             KBDLLHOOKSTRUCT *pKeyBoard = (KBDLLHOOKSTRUCT *)lParam;
-            capturedKey = vkToAscii(pKeyBoard->vkCode);
-            keyCaptured = true;
+            
+            // 1. 捕获我们感兴趣的键
+            int key = vkToAscii(pKeyBoard->vkCode);
+            if (key != '\0') { // 只处理我们映射表中的键
+                capturedKey = key;
+                keyCaptured = true;
+                
+                // 2. 关键步骤：返回 1 以阻止此消息继续传播
+                return 1;
+            }
+            
+            // 对于其他未映射的键（如Ctrl, Alt, F1等），可以选择不拦截
+            // 这样它们就能正常到达终端/其他程序
         }
     }
 
-    // 调用下一个钩子处理程序
+    // 对于我们不处理的消息，调用下一个钩子
     return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+//    if (nCode >= 0)
+//    {
+//        if (wParam == WM_KEYDOWN)
+//        {
+//            KBDLLHOOKSTRUCT *pKeyBoard = (KBDLLHOOKSTRUCT *)lParam;
+//            capturedKey = vkToAscii(pKeyBoard->vkCode);
+//            keyCaptured = true;
+//        }
+//    }
+//
+//    // 调用下一个钩子处理程序
+//    return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+}
+
+InputHandler::InputHandler()
+{
+    // Windows 不需要特殊初始化
+}
+
+InputHandler::~InputHandler()
+{
+    // Windows 不需要特殊清理
 }
 
 int InputHandler::waitKeyDown()
@@ -128,7 +136,6 @@ int InputHandler::waitKeyDown()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        Sleep(1);
     }
 
     // 清理钩子
@@ -142,77 +149,143 @@ int InputHandler::waitKeyDown()
 }
 
 #else
-#include <ncurses.h>
-#include <unistd.h>
-#include <cstdlib>
 
-int vkToAscii(int keyCode)
+// Linux 实现 (使用 termios)
+InputHandler::InputHandler() : raw_mode_enabled(false)
 {
-    // 处理特殊功能键
-    switch (keyCode)
+    // 保存原始终端设置
+    tcgetattr(STDIN_FILENO, &orig_termios);
+}
+
+InputHandler::~InputHandler()
+{
+    // 确保退出时恢复终端设置
+    if (raw_mode_enabled)
     {
-    case KEY_UP:
-        return 'w';
-    case KEY_DOWN:
-        return 's';
-    case KEY_LEFT:
-        return 'a';
-    case KEY_RIGHT:
-        return 'd';
-    case 127: // 在某些终端中Backspace是127
-        return 8;
-    default:
-        return keyCode;
+        disableRawMode();
     }
+}
+
+void InputHandler::enableRawMode()
+{
+    if (raw_mode_enabled)
+        return;
+
+    struct termios raw = orig_termios;
+
+    // 修改终端设置
+    raw.c_lflag &= ~(ICANON | ECHO | ISIG); // 禁用规范模式、回显和信号处理
+    raw.c_iflag &= ~(IXON | ICRNL);         // 禁用软件流控制和CR到NL的转换
+    raw.c_oflag &= ~(OPOST);                // 禁用输出处理
+    raw.c_cc[VMIN] = 0;                     // 最小字符数为0（非阻塞）
+    raw.c_cc[VTIME] = 1;                    // 超时时间为0.1秒
+
+    // 应用新设置
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+    raw_mode_enabled = true;
+}
+
+void InputHandler::disableRawMode()
+{
+    if (!raw_mode_enabled)
+        return;
+
+    // 恢复原始终端设置
+    tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+    raw_mode_enabled = false;
+}
+
+int InputHandler::readEscapeSequence()
+{
+    char seq[2];
+
+    // 读取转义序列的后续字符
+    if (read(STDIN_FILENO, &seq[0], 1) != 1)
+        return KEY_ESC;
+    if (read(STDIN_FILENO, &seq[1], 1) != 1)
+        return KEY_ESC;
+
+    // 解析转义序列
+    if (seq[0] == '[')
+    {
+        switch (seq[1])
+        {
+        case 'A':
+            return KEY_UP; // 上箭头
+        case 'B':
+            return KEY_DOWN; // 下箭头
+        case 'C':
+            return KEY_RIGHT; // 右箭头
+        case 'D':
+            return KEY_LEFT; // 左箭头
+        }
+    }
+
+    return KEY_ESC; // 未知转义序列
 }
 
 int InputHandler::waitKeyDown()
 {
-    capturedKey = -1;
-    keyCaptured = false;
+    enableRawMode();
 
-    // 初始化ncurses
-    initscr();             // 初始化ncurses模式
-    cbreak();              // 禁用行缓冲，使按键立即可用
-    noecho();              // 不显示输入的字符
-    nodelay(stdscr, TRUE); // 非阻塞输入
-    keypad(stdscr, TRUE);  // 启用功能键
-
-    int ch = -1;
+    int c = -1;
+    fd_set fds;
+    struct timeval tv;
 
     // 等待按键
-    while (!keyCaptured)
+    while (true)
     {
-        ch = getch(); // 获取按键
+        FD_ZERO(&fds);
+        FD_SET(STDIN_FILENO, &fds);
 
-        // 处理所有支持的按键类型
-        if (ch == KEY_UP || ch == KEY_DOWN ||
-            ch == KEY_LEFT || ch == KEY_RIGHT || ch == 127)
+        // 设置超时时间为100毫秒
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+
+        // 检查是否有输入
+        if (select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) > 0)
         {
-            capturedKey = vkToAscii(ch);
-            keyCaptured = true;
-            break;
+            // 读取一个字符
+            char ch;
+            if (read(STDIN_FILENO, &ch, 1) == 1)
+            {
+                // 处理转义序列（功能键）
+                if (ch == '\033')
+                { // ESC字符
+                    c = readEscapeSequence();
+                    break;
+                }
+                // 处理Backspace键
+                else if (ch == 127 || ch == 8)
+                {
+                    c = KEY_BACKSPACE;
+                    break;
+                }
+                // 处理Enter键
+                else if (ch == '\r' || ch == '\n')
+                {
+                    c = KEY_ENTER;
+                    break;
+                }
+                // 处理普通字符
+                else if (ch >= 32 && ch <= 126)
+                {
+                    // 转换为小写字母
+                    if (ch >= 'A' && ch <= 'Z')
+                    {
+                        ch += 32;
+                    }
+                    c = ch;
+                    break;
+                }
+            }
         }
 
-        // 返回小写字母
-        if (ch >= 'A' && ch <= 'Z')
-        {
-            ch += 32;
-        }
-
-        if (ch == 27 || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') || ch == '_') // 如果有按键按下
-        {
-            capturedKey = ch;
-            keyCaptured = true;
-            break;
-        }
-
-        usleep(1); // 睡1ms，减少CPU占用
+        // 可以在这里添加其他处理，如检查退出条件等
     }
 
-    // 清理ncurses
-    endwin();
-
-    return capturedKey;
+    disableRawMode();
+    return c;
 }
+
 #endif

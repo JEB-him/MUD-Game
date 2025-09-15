@@ -1,9 +1,12 @@
 #include "Store.h"
 #include "Controller.h"
-#include"Protagonist.h"
-#include"backpack.h"
-#include"InputHandler.h"
+#include "Protagonist.h"
+#include "InputHandler.h"
+#include "backpack.h"
 #include "View.h"
+#include "InputHandler.h"
+#include "backpack.h"
+#include "Protagonist.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -14,7 +17,6 @@ Store::Store() {
     // 初始化商品列表
     auto controller = Controller::getInstance();
     std::filesystem::path items_path = controller->getRootDir() / ".config/Item.json";
-    std::cout << items_path << std::endl;
     std::ifstream items_file(items_path.c_str());
     if (!items_file.is_open()) {
         controller->log(Controller::LogLevel::ERR, "项目配置异常");
@@ -72,7 +74,8 @@ Message Store::buyProduct(int index) {
     auto view = View::getInstance();
     auto controller = Controller::getInstance();
 
-    if (index < 1 || index > 10 || actualIndex < 0 || actualIndex >= items.size()) {
+    if (index < 0 || index > 10 || actualIndex < 0 || actualIndex >= items.size())
+    {
         controller->log(Controller::LogLevel::ERR, "无效的商品索引");
         return {"无效的商品索引", 1};
     }
@@ -83,7 +86,7 @@ Message Store::buyProduct(int index) {
     for (auto& [key, value] : items.items()) {
         if (i == actualIndex) {
             key_target = key;
-            ss << value["name"] << " " << value["description"];
+            ss << value["name"].get<std::string>() << " : " << value["description"].get<std::string>();
             view->printQuestion("", ss.str(), "white");
             break;
         }
@@ -92,42 +95,49 @@ Message Store::buyProduct(int index) {
     view->printQuestion("", "================", "white");
     
     // 询问是否确认购买
-    std::string question = "确认购买? (Y/N)";
-    rechose:view->printQuestion("", question, "white");
-    
+    view->printQuestion("", "确认购买? (Y/N)", "white");
+    controller->log(Controller::LogLevel::DEBUG, "用户输入：1");
+
     // 获取用户输入
-    int response = controller->input->waitKeyDown();
-    
-    if (response == 'Y' || response == 'y') {
-        if (controller->protagonist->getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] < items[key_target]["value"]) {
-            view->printQuestion("", "您的余额不足，无法购物。", "white");
-            return { "余额不足", 1 };
+
+    int response = Controller::getInstance()->input->waitKeyDown();
+    view->reDraw();
+
+    controller->log(Controller::LogLevel::DEBUG, "用户输入：2" + std::to_string(response));
+    if (response == 'y')
+    {
+        if (controller->protagonist->getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] < items[key_target]["value"].get<float>())
+        {
+            view->printQuestion("", "您的余额不足，无法购物。", "white", Rgb(255, 255, 0));
+            return {"余额不足", 0};
         }
-        controller->protagonist->updateAttr(BasicValue::ProtagonistAttr::MONEY, -(int)(items[key_target]["value"]), true);
+        controller->protagonist->updateAttr(BasicValue::ProtagonistAttr::MONEY, 0 - items[key_target]["value"].get<float>(), true);
         controller->backpack->addItem(key_target);
         controller->protagonist->addGameTime(2);
 
-        view->printQuestion("", "购买成功，欢迎下次光临！","white");
-        return { "Success", 0 };
-    }else if (response == 'N' || response == 'n') {
-        view->printQuestion("", "没关系，感谢您的光临！", "white");
-        return { "Refuse", 0 };
-    }else {
-        view->printQuestion("", "你思考了一会儿...", "white");
-        goto rechose;
+        view->printQuestion("", "购买成功，欢迎下次光临！", "white");
+        return {"Success", 0};
     }
-    
+    else if (response == 'n')
+    {
+        view->printQuestion("", "感谢您的光临！", "white");
+        return {"Refuse", 0};
+    }
+    else
+    {
+        view->printQuestion("", "输入错误，已退出商店.", "white");
+        return {"Invalid input", 0};
+    }
 }
 
 void Store::prompt() {
     auto view = View::getInstance();
-    std::vector<std::string> prompts {
-        ""
+    std::vector<std::string> prompts{
+        "",
         "欢迎来到带饭家！想买点什么呢？",
         "============ Help ============",
         "使用 store [页码] 翻页",
-        "使用 buy [索引] 购买"
-    };
+        "使用 buy [索引] 购买"};
     view->printOptions(prompts);
 }
 

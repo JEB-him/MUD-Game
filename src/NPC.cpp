@@ -202,18 +202,15 @@ void NPC::startInteraction() {
         throw std::runtime_error("找不到交互节点: " + currentInteractionId);
     }
     auto& node = it->second;
+    auto view = View::getInstance();
 
-    // 显示交互提示和选项
-    if (node.options.empty()) {
-        std::cout << "***" << node.prompt << std::endl;
-        return;
-    }
+    view->printQuestion("", node.prompt, "white");
 
     auto controller = Controller::getInstance();
     if (!controller) {
         controller->log(Controller::LogLevel::ERR, "悬空指针： controller");
     }
-    auto view = View::getInstance();
+
     if (!view) {
         controller->log(Controller::LogLevel::ERR, "悬空指针： view");
     }
@@ -297,14 +294,28 @@ void NPC::startInteraction() {
     view->printOptions(outputs_options);
 
     int choice = -1;
+    controller->log(Controller::LogLevel::DEBUG, "node.options.size()=" + std::to_string(node.options.size()));
+    if (node.options.size() == 0)
+    {
+        controller->log(Controller::LogLevel::DEBUG, "Exit node");
+        return;
+    }
 
     while (true) {
         auto press_ascii = input->waitKeyDown();
+        view->reDraw();
         press_ascii -= '0';
+        choice = press_ascii;
+        controller->log(Controller::LogLevel::DEBUG, "用户输入：" + std::to_string(press_ascii));
         if (press_ascii < 0 || press_ascii > 9) {
             controller->log(Controller::LogLevel::ERR, "非法选项输入");
             continue;
         }
+
+        if (choice < 0)
+            controller->log(Controller::LogLevel::DEBUG, "choice < 0!");
+        if (static_cast<size_t>(choice) >= node.options.size())
+            controller->log(Controller::LogLevel::DEBUG, "static_cast<size_t>(choice) >= node.options.size()");
 
         // 检查选项范围
         if (choice >= 0 && static_cast<size_t>(choice) < node.options.size()) {
@@ -339,13 +350,16 @@ void NPC::startInteraction() {
                 controller->log(Controller::LogLevel::ERR, ss.str());
                 continue;
             }
+            controller->log(Controller::LogLevel::DEBUG, "有效选项已选择：" + std::to_string(choice));
             break; // 有效输入，退出循环
         } else {
-            std::cout << "选择超出范围，请输入有效选项编号" << std::endl;
+            view->printQuestion("", "选择超出范围，请输入有效选项编号", "white");
         }
     }
 
+    view->reDraw();
     handleOptionSelection(choice);
+    return;
 }
 /**
  * @brief 处理选项选择
@@ -354,17 +368,43 @@ void NPC::startInteraction() {
  * @throws std::runtime_error 选项索引超出范围、下一个节点不存在
  */
 void NPC::handleOptionSelection(int optionIndex) {
-    if (!interactionTree[currentInteractionId].options.empty() 
-        && interactionTree[currentInteractionId].options.size() > optionIndex) {
-        auto& option = interactionTree[currentInteractionId].options[optionIndex];
+    if (!interactionTree[currentInteractionId].options.empty() && interactionTree[currentInteractionId].options.size() > optionIndex)
+    {
+        auto &option = interactionTree[currentInteractionId].options[optionIndex];
         currentInteractionId = option.next;
+
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG, "选项已完成！即将进入下一个节点：");
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG, "optionIndex: " + std::to_string(optionIndex) + " next: " + currentInteractionId);
         startInteraction();
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("选项索引超出范围");
     }
-
-    
 }
+
+// void NPC::handleOptionSelection(int optionIndex) {
+//     if (!interactionTree[currentInteractionId].options.empty()
+//         && interactionTree[currentInteractionId].options.size() > optionIndex) {
+//         auto& option = interactionTree[currentInteractionId].options[optionIndex];
+
+//         // 检查是否是退出选项
+//         if (option.next == "END")
+//         {
+//             auto view = View::getInstance();
+//             view->printQuestion("", "对话结束，再见！", "white");
+//             Controller::getInstance()->log(Controller::LogLevel::DEBUG, "对话结束，NPC离开...");
+//             currentInteractionId = "END"; // 设置为结束状态
+//             return;
+//         }
+
+//         currentInteractionId = option.next;
+//         startInteraction(); // 继续下一个节点
+//         // ... 日志输出 ...
+//     } else {
+//         throw std::runtime_error("选项索引超出范围");
+//     }
+// }
 
 bool NPC::replaceText(std::string& text) {
     // 定义占位符和对应的替换值

@@ -37,9 +37,9 @@ TEST_CASE("npc test", "[npc][test]") {
     // Professor.loadInteractionConfig(NPCType::PROFESSOR, "tests/unit/NPCs.json");
     // Professor.startInteraction();
 
-    NPC Coach("教练", 1009);
-    Coach.loadInteractionConfig(NPCType::COACH, ".config/NPCs.json");
-    Coach.startInteraction();
+    // NPC Coach("教练", "",1009);
+    // Coach.loadInteractionConfig(NPCType::COACH, ".config/NPCs.json");
+    // Coach.startInteraction();
 
     // // Important!!! 这种表达式必须使用一个大括号括起来
     // REQUIRE((SeniorStudent.getTitle() == "aaa"));

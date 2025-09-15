@@ -11,26 +11,26 @@ TEST_CASE("Item function test", "[item]") {
 
     //背包当前物品总量(size)测试
     backpack.addItem("advanced_mathematics");
-    CHECK(backpack.getBackpack‌Items().size() == 1);
+    CHECK(backpack.getBackpackItems().size() == 1);
 
     backpack.addItem("eye_protector_lamps");
-    CHECK(backpack.getBackpack‌Items().size() == 2);
+    CHECK(backpack.getBackpackItems().size() == 2);
 
     backpack.addItem("nutritious_meals");
-    CHECK(backpack.getBackpack‌Items().size() == 3);
+    CHECK(backpack.getBackpackItems().size() == 3);
 
     backpack.addItem("milk");
-    CHECK(backpack.getBackpack‌Items().size() == 4);
+    CHECK(backpack.getBackpackItems().size() == 4);
 
     backpack.addItem("vitamins");
-    REQUIRE(backpack.getBackpack‌Items().size() == 5);
+    REQUIRE(backpack.getBackpackItems().size() == 5);
 
     //物品基础属性获取测试
-    cout << backpack.getBackpack‌Items()[0].get()->getName();
-    cout << backpack.getBackpack‌Items()[0].get()->getDescription();
-    CHECK(backpack.getBackpack‌Items()[0].get()->getValue() == 30);
-    REQUIRE(backpack.getBackpack‌Items()[0].get()->getValue() == 30);
-    REQUIRE(backpack.getBackpack‌Items()[0].get()->getIsConsumable() == false);
+    cout << backpack.getBackpackItems()[0].get()->getName();
+    cout << backpack.getBackpackItems()[0].get()->getDescription();
+    CHECK(backpack.getBackpackItems()[0].get()->getValue() == 30);
+    REQUIRE(backpack.getBackpackItems()[0].get()->getValue() == 30);
+    REQUIRE(backpack.getBackpackItems()[0].get()->getIsConsumable() == false);
 
 
     SECTION("compressed_crackers") { // CD
@@ -130,7 +130,7 @@ TEST_CASE("Item function test", "[item]") {
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST_RATE] == 1.0f);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE] == 1.0f);
         backpack.useFunctionOfItem(4, protagonist);
-        REQUIRE(backpack.getBackpack‌Items().size() == 4);
+        REQUIRE(backpack.getBackpackItems().size() == 4);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::T_BUFF_MILK] == 10000-0);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELSCI_BOOST] == 3);
         CHECK(protagonist.getHiddenAttrs()[BasicValue::ProtagonistAttr::INTELARTS_BOOST] == 3);

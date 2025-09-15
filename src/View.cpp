@@ -2,6 +2,14 @@
  * @file View.cpp
  * @author Jie Jiang
  */
+
+#include "Controller.h"
+#include "tools.h"
+#include "Protagonist.h"
+#include "NPC.h"
+#include "InputHandler.h"
+#include "Map.h"
+#include "backpack.h"
 #include "View.h"
 #if defined(__linux__)
 #   include <unistd.h>

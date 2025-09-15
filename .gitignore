@@ -9,6 +9,7 @@ logs/
 .idea/
 out/
 logs/
+saves/
 
 build.bat
 compile_commands.json

@@ -30,7 +30,6 @@
         NONE       ///< 无事件
     };
 
-
 /**
  * @brief 游戏睡眠函数，兼容多平台
  * @param time 时间(ms)
@@ -144,3 +143,5 @@ public:
  * @return 合法返回 true，否则返回 false
  */
 bool isValidUsername(const std::string& username);
+
+std::string getStr(EventType type);

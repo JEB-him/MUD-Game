@@ -6,13 +6,16 @@
 #include "InputHandler.h"
 #include "Map.h"
 #include "backpack.h"
-#include "Store.h"
-#include "scene.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
+// #include "Store.h"
 #include <fstream>
 #include <string>
+#include "Scene.h"
+#if (defined(_WIN32) || defined(_WIN64))
+#include <Windows.h>
+#endif
 
 Controller::Controller(
     const LogLevel &level,
@@ -66,10 +69,12 @@ void Controller::log(const LogLevel& level, const std::string& msg) {
 
 Message Controller::init() {
     protagonist = std::make_shared<Protagonist>();
-    // backpack = std::make_shared<Backpack>();
+    log(LogLevel::DEBUG, "Init: Pro");
+    backpack = std::make_shared<Backpack>();
+    log(LogLevel::DEBUG, "Init: back");
     input = std::make_shared<InputHandler>();
+    log(LogLevel::DEBUG, "Init: input");
     view = View::getInstance();
-    store = std::make_shared<Store>();
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -280,17 +285,24 @@ Message Controller::handleEvent(EventType &event_type)
             {
             case 'w':
                 map->moveProtagonist(0, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
                 break;
             case 'd':
                 map->moveProtagonist(1, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
                 break;
             case 's':
                 map->moveProtagonist(2, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
                 break;
             case 'a':
                 map->moveProtagonist(3, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
                 break;
+            case 27:
+                return Message("Escape key pressed!", 0);
             }
+            log(LogLevel::DEBUG, "------------------");
             pos = map->getPos();
             view->drawPoMove(last_pos, pos);
             log(LogLevel::DEBUG, "Move Success!");
@@ -319,26 +331,43 @@ Message Controller::handleEvent(EventType &event_type)
     {
         log(LogLevel::DEBUG, "AC_INST");
         view = View::getInstance();
+        log(LogLevel::DEBUG, "getInstance!");
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
         std::string NPCname = scene->getNPCname(NPCid);
+        log(LogLevel::DEBUG, "getNPCname!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
         npc = nullptr;
         npc = std::make_shared<NPC>("", NPCname.substr(1), NPCid);
+        log(LogLevel::DEBUG, "create NPC!");
         npc->startInteraction();
+        log(LogLevel::DEBUG, "StartInteraction");
         int ch = input->waitKeyDown();
+        log(LogLevel::DEBUG, "waitkeydown: " + ch);
         view->printCmd("" + char(ch));
         npc->handleOptionSelection(ch - '0');
+        log(LogLevel::DEBUG, "HandleOptionSelection!" + ch);
         return Message("NPC interaction Success!", 0);
     }
     case EventType::OPEN_PACK:
     {
+        view = View::getInstance();
         std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
         std::vector<std::string> item_names;
-        for (auto &item_pt : item_pts)
+        if (item_pts.empty())
         {
-            item_names.push_back(item_pt->getName());
+            view->printQuestion("", "Your backpack is empty.", "", Rgb(255, 255, 0));
+            // std::string bookname = "advanced_mathematics";
+            // (backpack->getBackpackItems()).push_back((backpack->getItemCreator()).createItem(bookname));
+            // log(LogLevel::DEBUG, "Add item!");
+        }
+        else
+        {
+            for (auto &item_pt : item_pts)
+            {
+                item_names.push_back(item_pt->getName());
+            }
         }
         view->printOptions(item_names);
         return Message("Open Pack Success!", 0);
@@ -359,6 +388,7 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::JUMP:
     {
+        // 拿到map.move的NPCid->给Scene对象->拿到场景文件名->重新创建Scene(新场景)->创建Map(新地图)->初始化地图数据->重新绘制地图->提示用户场景名称
         map = nullptr;
         if (NPCid == -1)
         {
@@ -418,30 +448,32 @@ Message Controller::handleEvent(EventType &event_type)
 
         return Message("Use item Success!", 0);
     }
-// case EventType::STORE:
-// {
-//     view = View::getInstance();
-//     Store store();
-//     store.showProducts();
-//     store.buyProduct();
-//     int ch = input->waitKeyDown();
-//     return Message("Buy product.", 0);
-// }
-case EventType::HELP:
-{
-    ifstream fin(".config/help.txt");
-    if (!fin.is_open())
+        // case EventType::STORE:
+        // {
+        //     view = View::getInstance();
+        //     Store store();
+        //     store.showProducts();
+        //     store.buyProduct();
+        //     int ch = input->waitKeyDown();
+        //     return Message("Buy product.", 0);
+        // }
+    case EventType::HELP:
     {
-        return Message("Help file not found!", -1);
-    }
-    std::vector<std::string> help_msgs;
-    std::string line;
-    for (int i = 0; i < 11; i++)
-    {
-        std::getline(fin, line);
-        if (line.empty())
-            break;
-        help_msgs.push_back(line);
+        ifstream fin(".config/help.txt");
+        if (!fin.is_open())
+        {
+            return Message("Help file not found!", -1);
+        }
+        std::vector<std::string> help_msgs;
+        std::string line;
+        for (int i = 0; i < 11; i++)
+        {
+            std::getline(fin, line);
+            if (line.empty())
+                break;
+            help_msgs.push_back(line);
+        }
+        view->printOptions(help_msgs);
     }
     view->printOptions(help_msgs);
 }
@@ -552,8 +584,8 @@ int Controller::run()
     static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;
-    while (running && turns--) {
-        log(LogLevel::DEBUG, "获取事件...");
+    while (running && turns--)
+    {
         msg = getEvent(event_type);
     }
 

@@ -8,6 +8,7 @@
 #include "tools.h"
 #include <set>
 #include <ctime>
+#include <vector>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -92,7 +93,6 @@ public:
     std::shared_ptr<Backpack>     backpack    = nullptr;
     std::shared_ptr<Scene>        scene       = nullptr;
     std::shared_ptr<Store>        store       = nullptr;
-
     template <class Archive>
     void serialize(Archive &archive)
     {

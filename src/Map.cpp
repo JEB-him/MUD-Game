@@ -253,7 +253,7 @@ Message Map::loadMap(const std::string& filename) {
         return {"", 0};
     } else return {"地图未封闭，宽字符放置不合理或未知异常", -1};
 }
-
+//haozhe tang
 bool Map::indexInit(const int& rows) {
     int times = std::min(MAX_HEIGHT, rows + 1);
     for (int i = 0; i < times; ++i) {
@@ -261,11 +261,13 @@ bool Map::indexInit(const int& rows) {
             if (!map[i][j]) break;
             if (map[i][j] == 'o') {
                 // TODO 添加出口 ID
+                exits.emplace_back(i, j);
             } else if (map[i][j] == 'i') {
                 // TODO 添加入口 ID
+                entries.emplace_back(i, j);
             } else if (map[i][j] == '9') {
                 // TODO 添加 NPC ID
-
+                npcs.emplace_back(i, j);
             } else if (map[i][j] == '1') {
                 if (x != -1 || y != -1) {
                     return false;
@@ -274,6 +276,12 @@ bool Map::indexInit(const int& rows) {
                 y = j;
             }
         }
+    }
+      // 若未找到主角且初始pos无效，默认放置在第一个入口内侧中点
+    if (x == -1 && y == -1 && !entries.empty()) {
+        Position entry = entries[0];
+        x = entry.x + 1;  // 入口内侧（假设入口高度2，内侧为下方）
+        y = entry.y + 2;  // 入口宽度4，中点位置
     }
     return true;
 }
@@ -458,11 +466,24 @@ bool Map::checkWideChar(const int& x, const int& y) {
 }
 
 int Map::getExitId(const Position& pos) {
-    // TODO: 等待场景类实现
-    return -1;
+    // 查找pos是否在出口列表中（考虑出口宽度4，高度2的范围）
+    for (size_t i = 0; i < exits.size(); ++i) {
+        const auto& exit_pos = exits[i];
+        // 出口区域：x在[exit_pos.x, exit_pos.x+1]，y在[exit_pos.y, exit_pos.y+3]
+        if (pos.x >= exit_pos.x && pos.x <= exit_pos.x + 1 &&
+            pos.y >= exit_pos.y && pos.y <= exit_pos.y + 3) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;  // 未找到
 }
 
 int Map::getNPCId(const Position& pos) {
-    // TODO: 等待 NPC 类实现
-    return -1;
+    // 精确匹配NPC位置（NPC为单个字符）
+    for (size_t i = 0; i < npcs.size(); ++i) {
+        if (npcs[i].x == pos.x && npcs[i].y == pos.y) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;  // 未找到
 }

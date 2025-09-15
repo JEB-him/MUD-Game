@@ -20,9 +20,10 @@
 */
 class Question {
 public:
-	Question(int index, nlohmann::json& questions); ///< 构造函数，通过json文件和json题号初始化问题对象
+	Question(); ///< 默认构造函数
 	~Question() = default;  ///< 默认析构
 	Message showQuestion(int index); ///< 格式化输出问题,index为输出的问题序号
+	Message readQuestions(int index, nlohmann::json& questions);
 	std::string getAnswer()const; ///< 获取答案的文本
 	int getAnswerOrder()const; ///< 获取答案的序号
 	bool getIsSci()const; ///< 获取该题是否为理科题
@@ -49,6 +50,7 @@ public:
 	Message printFinalResult()const; ///< 打印期末考试成绩（结算画面）
 private:
 	std::vector<Question> exam_paper;
+	int num_questions;
 	int num_right;
 	int num_wrong;
 };

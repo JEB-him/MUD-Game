@@ -5,14 +5,15 @@
 
 #include"FinalExam.h"
 #include "InputHandler.h"
-#include<sstream>
 #include "json.hpp"
+#include"View.h"
+#include "tools.h"
 #include<filesystem>
 #include<string>
-#include<View.h>
 #include <ctime>
 #include <cstdlib>
 #include <fstream>
+#include<sstream>
 
 //不重复随机数组接口
 std::vector<int> GenerateDiffNumber(int min, int max, int num) {
@@ -38,24 +39,28 @@ std::vector<int> GenerateDiffNumber(int min, int max, int num) {
  * @param index 题库中的题目序号
  * @param questions 题库引用
  */
-Question::Question(int index, nlohmann::json& questions):choices(0){
-	std::stringstream ss_i;
-	ss_i << "\"" << index << "\"";
-	question = questions[ss_i.str()]["question"];
+Question::Question():choices(0){ }
 
+Message Question::readQuestions(int index, nlohmann::json& questions) {
+	std::stringstream ss_i;
+	ss_i << index;
+	question = questions[ss_i.str()]["question"];
 	answer = questions[ss_i.str()]["answer"];
 	is_sci = questions[ss_i.str()]["is_sci"];
 
 	///> 初始化选项
 	std::stringstream ss;
 	int i = 1;
-	ss << "\"choice" << i << "\"";
-	while (questions.contains(ss.str())) {
+	ss << "choice" << i ;
+	while (questions[ss_i.str()].contains(ss.str())) {
 		choices.push_back(questions[ss_i.str()][ss.str()]);
 		if (questions[ss_i.str()][ss.str()] == answer)answer_order = i;
 		i++;
-		ss << "\"choice" << i << "\"";
+		ss.str("");
+		ss << "choice" << i;
 	}
+
+	return { "成功从题库中读取题目",0 };
 }
 
 /**
@@ -68,12 +73,14 @@ Message Question::showQuestion(int index) {
 	view->printQuestion("", "================", "white");
 	ss << "问题" << index << ": " << question;
 	view->printQuestion("", ss.str(), "white");
-	ss.clear();
+	std::vector<std::string> ops;
 	for (int i = 0; i < choices.size(); i++) {
-		ss << "选项" << i << ": " << choices[i];
-		view->printQuestion("", ss.str(), "white");
+		ss.str("");
+		ss << "选项" << i+1 << ": " << choices[i];
+		ops.push_back(ss.str());
 	}
-	view->printQuestion("", "================", "white");
+	view->printOptions(ops);
+	view->printQuestion("", "=======ffffff=========", "white");
 
 	return { "成功输出问题。",0 };
 }
@@ -91,7 +98,9 @@ bool Question::getIsSci()const {
 /**
  * @brief 期末考试类构造函数
  */
-FinalExam::FinalExam(): num_right(0), num_wrong(0) {}
+FinalExam::FinalExam() : num_questions(0), num_right(0), num_wrong(0) {
+	exam_paper.resize(10);
+}
 
 /**
  * @brief 从题库中随机选择num道题
@@ -119,9 +128,12 @@ Message FinalExam::selectQuestionsInRandom(int num) {
 	//生成[1,num_questions]随机整数数组，长度为num	
 	std::vector<int> questions_index = GenerateDiffNumber(1, num_questions, num);
 
-	//读取试题
+	////读取试题
 	for (int i = 0; i < num; i++) {
-		exam_paper.push_back(Question(questions_index[i], questions));
+		if (exam_paper.size() <= i) {
+			exam_paper.resize(exam_paper.size() * 10);
+		}
+		exam_paper[i].readQuestions(questions_index[i], questions);
 	}
 	return  { "成功随机读取试题",0 };
 }
@@ -150,8 +162,10 @@ Message FinalExam::examing(Protagonist& protagonist) {
 
 		//等待玩家输入答案
 		view->printQuestion("", "请作答：", "white");
-		int response = controller->input->waitKeyDown();
-
+		int response = controller->input->waitKeyDown() - '0';
+		
+		view->printQuestion("", std::to_string(response), "white");
+		view->printQuestion("", std::to_string(answer), "white");
 		//判断正误
 		if (response == answer) {
 			view->printQuestion("", "回答正确！", "white");
@@ -160,7 +174,7 @@ Message FinalExam::examing(Protagonist& protagonist) {
 		{
 			if (exam_paper[i].getIsSci()) {
 				if (intel_sci > 0) {
-					ss << "你原本想要选" << response << "，但最后改成了" << answer << "，回答正确！";
+					ss << "你原本想要选" << std::to_string(response) << "，但最后改成了" << std::to_string(answer) << "，回答正确！";
 					view->printQuestion("", ss.str(), "white");
 					num_right++;
 					intel_sci--; ///< 理科覆盖机会-1
@@ -173,7 +187,7 @@ Message FinalExam::examing(Protagonist& protagonist) {
 
 			}else{
 				if (intel_arts > 0) {
-					ss << "你原本想要选" << response << "，但最后改成了" << answer << "，回答正确！";
+					ss << "你原本想要选" << std::to_string(response) << "，但最后改成了" << std::to_string(answer) << "，回答正确！";
 					view->printQuestion("", ss.str(), "white");
 					num_right++;
 					intel_arts--; ///< 文科覆盖机会-1

@@ -93,7 +93,7 @@ Message Controller::load(std::string username) {
     Position init_pos {-1, -1};
     // 设置默认出生点
     // TODO 修改逻辑，应当通过默认场景类获得默认文件名
-    std::string map_filename = "center.txt";
+    std::string map_filename = "Dormitory.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {
@@ -309,7 +309,7 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname('s');
+        std::string NPCname = scene->getNPCname(NPCid);
         log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
@@ -325,7 +325,7 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname('s');
+        std::string NPCname = scene->getNPCname(NPCid);
         log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);

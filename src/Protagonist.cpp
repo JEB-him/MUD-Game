@@ -22,7 +22,7 @@ Protagonist::Protagonist(const std::string &protagonistId, const std::string &na
         ; ///< 读取成功
     else
     {
-        std::cout << jsonReader().msg << std::endl;
+        // std::cout << jsonReader().msg << std::endl;
         // 读取失败，使用默认值
     }
 }

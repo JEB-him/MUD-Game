@@ -117,28 +117,15 @@ Message Controller::load(std::string username) {
         // 使用cereal进行反序列化
         {
             cereal::BinaryInputArchive iarchive(ifile);
-            iarchive(CEREAL_NVP(*protagonist));
-            //  CEREAL_NVP(*backpack),
-            // CEREAL_NVP(*map));
+            iarchive(CEREAL_NVP(*protagonist),
+                        CEREAL_NVP(*backpack));
             ifile.close();
         }
-
-        // 向场景类获取地图文件，向主角获取坐标
-        init_pos = protagonist->getPosition();
-        map_filename = "???";
-
+        backpack->namesToPointers();
         ifile.close();
         msg = Message("Load Success!", 0);
     }
-    // 初始化地图数据
-    if (init_pos.x != -1) {
-        // 使用 init_pos 填入下面的参数列表中
-        map = std::make_shared<Map>(map_filename);
-    } else {
-        // 仅使用地图文件初始化
-        map = std::make_shared<Map>(map_filename);
-    }
-    std::cout << msg.msg << std::endl;
+    map=std::make_shared<Map>(map_filename);
     view->reDraw();
     return msg;
 }
@@ -159,8 +146,8 @@ Message Controller::save() {
     {
         cereal::BinaryOutputArchive oarchive(ofile);
         oarchive(
-            CEREAL_NVP(*protagonist));
-
+            CEREAL_NVP(*protagonist),
+            CEREAL_NVP(*backpack));
         ofile.close();
     }
     map->save();

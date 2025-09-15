@@ -447,8 +447,9 @@ ItemBasicInf ItemCreator::getItemInf(string& item_name)const {
  * @param item_name 物品名称
  * @return 物品对象的unique_ptr
  */
-unique_ptr<Item> ItemCreator::createItem(string& item_name) {
-     //读取该物品所属类，并将string类型的类名转化为enum类型
+std::shared_ptr<Item> ItemCreator::createItem(string &item_name)
+{
+    // 读取该物品所属类，并将string类型的类名转化为enum类型
     ItemType item_class = getItemType((string)config_item[item_name]["class"]);
 
     //根据物品所属类获取物品参数，动态创建对象

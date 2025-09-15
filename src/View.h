@@ -97,7 +97,7 @@ public:
      * @param simple_color 颜色，参见 ANSI Escape 表, 该参数传递空值时使用 rgb_color
      * @return Message 消息
      */
-    Message printQuestion(const std::string& person, const std::string& msg, const std::string& simple_color, const Rgb& rgb_color=Rgb(0,0,0));
+    Message printQuestion(const std::string &person, const std::string &msg, const std::string &simple_color = "", const Rgb &rgb_color = Rgb(0, 0, 0));
 
     /**
      * @brief 输出选项

@@ -7,9 +7,13 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include "tools.h"
 
-Map::Map(const std::string& filename, const Position& pos):
-    modified(false), map(), x(-1), y(-1) {
+class Controller;
+
+Map::Map(const std::string &filename, const Position &pos) : modified(false),
+                                                             map(), x(-1), y(-1)
+{
     // 这个地方被搞到了，由于我是在测试中写了很多次 Map，而释放 Map 再创建一个
     // Map 的对象时，C++ 让 map 数组重新使用了原来的内存区域，巧合的导致了一些
     // 没有赋值的地方储存了旧的垃圾值，导致程序出现了异常判断，因此需要在初始
@@ -72,6 +76,7 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
         case -2:    // 墙壁/空间狭小
             event_type = EventType::NONE;
             id = -1;
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "墙壁/空间狭小");
             return {"不可通行：墙壁/空间狭小", 1};
             break;
         case -1:    // 普通移动
@@ -79,21 +84,26 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
             x += DIRECTIONS[direction][0];
             y += DIRECTIONS[direction][1];
             map[x][y] = '1';
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "普通移动");
         case 'i':
             event_type = EventType::NONE;
             id = -1;
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "i");
             return {"Success", 0};
         case 'o':
             event_type = EventType::JUMP;
             id = getExitId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "e");
             return {"抵达出口", 0};
         case '9':
             event_type = EventType::AC_NPC;
             id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "9");
             return {"与 NPC 交互", 0};
         default:
             event_type = EventType::AC_INST;
             id = char2index(back_code);
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "default");
             return {"与器械交互", 0};
     }
     return {"", 0};
@@ -253,7 +263,7 @@ Message Map::loadMap(const std::string& filename) {
         return {"", 0};
     } else return {"地图未封闭，宽字符放置不合理或未知异常", -1};
 }
-
+//haozhe tang
 bool Map::indexInit(const int& rows) {
     int times = std::min(MAX_HEIGHT, rows + 1);
     for (int i = 0; i < times; ++i) {
@@ -261,11 +271,13 @@ bool Map::indexInit(const int& rows) {
             if (!map[i][j]) break;
             if (map[i][j] == 'o') {
                 // TODO 添加出口 ID
+                exits.emplace_back(i, j);
             } else if (map[i][j] == 'i') {
                 // TODO 添加入口 ID
+                entries.emplace_back(i, j);
             } else if (map[i][j] == '9') {
                 // TODO 添加 NPC ID
-
+                npcs.emplace_back(i, j);
             } else if (map[i][j] == '1') {
                 if (x != -1 || y != -1) {
                     return false;
@@ -274,6 +286,12 @@ bool Map::indexInit(const int& rows) {
                 y = j;
             }
         }
+    }
+      // 若未找到主角且初始pos无效，默认放置在第一个入口内侧中点
+    if (x == -1 && y == -1 && !entries.empty()) {
+        Position entry = entries[0];
+        x = entry.x + 1;  // 入口内侧（假设入口高度2，内侧为下方）
+        y = entry.y + 2;  // 入口宽度4，中点位置
     }
     return true;
 }
@@ -458,11 +476,24 @@ bool Map::checkWideChar(const int& x, const int& y) {
 }
 
 int Map::getExitId(const Position& pos) {
-    // TODO: 等待场景类实现
-    return -1;
+    // 查找pos是否在出口列表中（考虑出口宽度4，高度2的范围）
+    for (size_t i = 0; i < exits.size(); ++i) {
+        const auto& exit_pos = exits[i];
+        // 出口区域：x在[exit_pos.x, exit_pos.x+1]，y在[exit_pos.y, exit_pos.y+3]
+        if (pos.x >= exit_pos.x && pos.x <= exit_pos.x + 1 &&
+            pos.y >= exit_pos.y && pos.y <= exit_pos.y + 3) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;  // 未找到
 }
 
 int Map::getNPCId(const Position& pos) {
-    // TODO: 等待 NPC 类实现
-    return -1;
+    // 精确匹配NPC位置（NPC为单个字符）
+    for (size_t i = 0; i < npcs.size(); ++i) {
+        if (npcs[i].x == pos.x && npcs[i].y == pos.y) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;  // 未找到
 }

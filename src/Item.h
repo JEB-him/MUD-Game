@@ -224,7 +224,7 @@ class ItemCreator
 public:
     ItemCreator();
     ~ItemCreator() = default;
-    unique_ptr<Item> createItem(string& item_name);
+    std::shared_ptr<Item> createItem(string &item_name);
     /**
      * @brief 清理主角身上的某个buff
      * @param buff_name buff对应键值

@@ -55,3 +55,36 @@ bool isValidUsername(const std::string& username) {
     static const std::regex pattern("^[A-Za-z0-9_\u4e00-\u9fa5]+$");;
     return std::regex_match(username, pattern);
 }
+
+std::string getStr(EventType type)
+{
+    switch (type)
+    {
+    case EventType::MOVE:
+        return "移动主角";
+    case EventType::AC_NPC:
+        return "与NPC互动";
+    case EventType::AC_INST:
+        return "与器械互动";
+    case EventType::OPEN_PACK:
+        return "打开背包";
+    case EventType::REFRESH:
+        return "刷新地图";
+    case EventType::STATUS:
+        return "显示状态栏";
+    case EventType::JUMP:
+        return "跳转场景";
+    case EventType::STORE:
+        return "商店购买";
+    case EventType::HELP:
+        return "帮助信息";
+    case EventType::USE:
+        return "使用物品";
+    case EventType::QUIT:
+        return "退出游戏";
+    case EventType::NONE:
+        return "无事件";
+    default:
+        return "未知事件";
+    }
+}

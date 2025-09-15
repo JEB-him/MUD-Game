@@ -6,13 +6,13 @@
 #include "InputHandler.h"
 #include "Map.h"
 #include "backpack.h"
+#include "Store.h"
+#include "scene.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
-// #include "Store.h"
 #include <fstream>
 #include <string>
-#include "scene.h"
 
 Controller::Controller(
     const LogLevel &level,
@@ -69,6 +69,7 @@ Message Controller::init() {
     // backpack = std::make_shared<Backpack>();
     input = std::make_shared<InputHandler>();
     view = View::getInstance();
+    store = std::make_shared<Store>();
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -556,100 +557,14 @@ int Controller::run()
         msg = getEvent(event_type);
     }
 
-    // // 测试用
-    // std::stringstream ss;
-    // view->printCmd("测试命令");
-    // gameSleep(500);
-    // view->printCmd("2 hello cat");
-    // view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
-    // view->printQuestion("", "清清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....晨，你在室友的闹铃声中醒来....", "white");
-    // gameSleep(1000);
-    // view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
-    // std::vector<std::string> tmp_ops {
-    //     "1. 带一个",
-    //     "2. no",
-    //     "3. fwefew",
-    //     "3. fwefew",
-    //     "3. fWEFew",
-    //     "3. fWEFew",
-    //     "3. fWEFew",
-    //     "3. fWEFew",
-    //     "3. fWEFew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3. fWEFew",
-    //     "3. fwefw",
-    //     "3. fweew",
-    //     "3. fefew",
-    //     "3. fwefw",
-    //     "3.fwefew",
-    //     "3. fefew",
-    //     "3.fwfew",
-    //     "3. fefew",
-    // };
-    // view->printOptions(tmp_ops);
-    // view->printQuestion("NPC", "你好", "white");
-    // log(LogLevel::DEBUG, "移动主角");
-    // int map_event, id;
-    // Position old_pos = map->getPos();
-    // ss << "初始位置: " << old_pos.x << " " << old_pos.y;
-    // log(LogLevel::DEBUG, ss.str());
-    // ss.str("");
-    // gameSleep(500);
-    // EventType event_type_1 = EventType::NONE;
-    // map->moveProtagonist(0, event_type_1, id);
-    // Position pos = map->getPos();
-    // protagonist->setPosition(pos);
-    // view->drawPoMove(old_pos, pos);
-    // ss << "当前位置: " << pos.x << " " << pos.y;
-    // log(LogLevel::DEBUG, ss.str());
-    // ss.str("");
-    // // 测试结束
-
     // 保存游戏
     save();
 
     // 保持界面完整性
     std::cout << "\n\n";
     return 0;
+}
+
+std::filesystem::path Controller::getRootDir() const {
+    return root_dir;
 }

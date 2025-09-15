@@ -159,8 +159,8 @@ Message Controller::save() {
     return msg;
 }
 
-Message Controller::getEvent(EventType &event_type) {
-    view->enableCursor();
+Message Controller::getEvent(EventType &event_type)
+{
     std::stringstream ss;
     ss.str("");
     ss.clear();
@@ -173,14 +173,20 @@ Message Controller::getEvent(EventType &event_type) {
         if (ch == 10)
         {
             cmd = ss.str();
+            ss.str("");
+            ss.clear();
+            view->printCmd(cmd);
             break;
         }
 
         // Backspace
         else if (ch == 8)
         {
-            char tmp_ch;
-            ss >> tmp_ch;
+            if (ss.str().length() > 0)
+            {
+                ss.str(ss.str().substr(0, ss.str().length() - 1));
+                view->printCmd(ss.str());
+            }
             continue;
         }
 
@@ -197,7 +203,9 @@ Message Controller::getEvent(EventType &event_type) {
 
         view->printCmd(ss.str());
     }
-    view->disableCursor();
+    view = View::getInstance();
+    view->reDraw();
+    log(LogLevel::DEBUG, "Get event: " + cmd);
     // 处理cmd
     if (cmd == "move")
     {
@@ -247,9 +255,10 @@ Message Controller::getEvent(EventType &event_type) {
     }
     else
     {
+        view = View::getInstance();
+        view->printQuestion("", "", "Enter \"help\" to get help.", Rgb(0, 0, 0));
         event_type = EventType::NONE;
     }
-
     return handleEvent(event_type);
 }
 
@@ -271,24 +280,26 @@ Message Controller::handleEvent(EventType &event_type)
             case 'w':
                 map->moveProtagonist(0, event_type, NPCid);
                 break;
-            case 'a':
+            case 'd':
                 map->moveProtagonist(1, event_type, NPCid);
                 break;
             case 's':
                 map->moveProtagonist(2, event_type, NPCid);
                 break;
-            case 'd':
+            case 'a':
                 map->moveProtagonist(3, event_type, NPCid);
                 break;
             }
             pos = map->getPos();
             view->drawPoMove(last_pos, pos);
+            log(LogLevel::DEBUG, "Move Success!");
             handleEvent(event_type);
         }
         return Message("Move Success!", 0);
     }
     case EventType::AC_NPC:
     {
+        log(LogLevel::DEBUG, "AC_NPC");
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
@@ -305,6 +316,7 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::AC_INST:
     {
+        log(LogLevel::DEBUG, "AC_INST");
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
@@ -338,6 +350,7 @@ Message Controller::handleEvent(EventType &event_type)
 
     case EventType::STATUS:
     {
+        view = View::getInstance();
         view->printOptions(protagonist->getStatus());
         // 按下任意键退出
         int ch = input->waitKeyDown();
@@ -535,7 +548,7 @@ int Controller::run()
     bool running = true;
     // 防止死循环
     // TODO 修改回合次数
-    static int turns = 1;
+    static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;
     while (running && turns--) {
@@ -543,96 +556,95 @@ int Controller::run()
         msg = getEvent(event_type);
     }
 
-    // 测试用
-    std::stringstream ss;
-    view->printCmd("测试命令");
-    gameSleep(500);
-    view->printCmd("2 hello cat");
-    view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
-    view->printQuestion("", "清清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....晨，你在室友的闹铃声中醒来....", "white");
-    gameSleep(1000);
-    view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
-    std::vector<std::string> tmp_ops {
-        "1. 带一个",
-        "2. no",
-        "3. fwefew",
-        "3. fwefew",
-        "3. fWEFew",
-        "3. fWEFew",
-        "3. fWEFew",
-        "3. fWEFew",
-        "3. fWEFew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3. fWEFew",
-        "3. fwefw",
-        "3. fweew",
-        "3. fefew",
-        "3. fwefw",
-        "3.fwefew",
-        "3. fefew",
-        "3.fwfew",
-        "3. fefew",
-    };
-    view->printOptions(tmp_ops);
-    view->printQuestion("NPC", "你好", "white");
-    log(LogLevel::DEBUG, "移动主角");
-    int map_event, id;
-    Position old_pos = map->getPos();
-    ss << "初始位置: " << old_pos.x << " " << old_pos.y;
-    log(LogLevel::DEBUG, ss.str());
-    ss.str("");
-    gameSleep(500);
-    EventType event_type_1 = EventType::NONE;
-    map->moveProtagonist(0, event_type_1, id);
-    Position pos = map->getPos();
-    protagonist->setPosition(pos);
-    view->drawPoMove(old_pos, pos);
-    ss << "当前位置: " << pos.x << " " << pos.y;
-    log(LogLevel::DEBUG, ss.str());
-    ss.str("");
-    // 测试结束
-
+    // // 测试用
+    // std::stringstream ss;
+    // view->printCmd("测试命令");
+    // gameSleep(500);
+    // view->printCmd("2 hello cat");
+    // view->printQuestion("", "清晨，你在室友的闹铃声中醒来....", "white");
+    // view->printQuestion("", "清清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....清晨，你在室友的闹铃声中醒来....晨，你在室友的闹铃声中醒来....", "white");
+    // gameSleep(1000);
+    // view->printQuestion("室友", "大爹带份饭可以吗？", "cyan");
+    // std::vector<std::string> tmp_ops {
+    //     "1. 带一个",
+    //     "2. no",
+    //     "3. fwefew",
+    //     "3. fwefew",
+    //     "3. fWEFew",
+    //     "3. fWEFew",
+    //     "3. fWEFew",
+    //     "3. fWEFew",
+    //     "3. fWEFew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3. fWEFew",
+    //     "3. fwefw",
+    //     "3. fweew",
+    //     "3. fefew",
+    //     "3. fwefw",
+    //     "3.fwefew",
+    //     "3. fefew",
+    //     "3.fwfew",
+    //     "3. fefew",
+    // };
+    // view->printOptions(tmp_ops);
+    // view->printQuestion("NPC", "你好", "white");
+    // log(LogLevel::DEBUG, "移动主角");
+    // int map_event, id;
+    // Position old_pos = map->getPos();
+    // ss << "初始位置: " << old_pos.x << " " << old_pos.y;
+    // log(LogLevel::DEBUG, ss.str());
+    // ss.str("");
+    // gameSleep(500);
+    // EventType event_type_1 = EventType::NONE;
+    // map->moveProtagonist(0, event_type_1, id);
+    // Position pos = map->getPos();
+    // protagonist->setPosition(pos);
+    // view->drawPoMove(old_pos, pos);
+    // ss << "当前位置: " << pos.x << " " << pos.y;
+    // log(LogLevel::DEBUG, ss.str());
+    // ss.str("");
+    // // 测试结束
 
     // 保存游戏
     save();

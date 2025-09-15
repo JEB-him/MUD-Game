@@ -91,10 +91,8 @@ public:
     std::shared_ptr<View>         view        = nullptr;
     std::shared_ptr<InputHandler> input       = nullptr;
     std::shared_ptr<Backpack>     backpack    = nullptr;
-
-    std::shared_ptr<Scene> scene = nullptr;
-
-
+    std::shared_ptr<Scene>        scene       = nullptr;
+    std::shared_ptr<Store>        store       = nullptr;
     template <class Archive>
     void serialize(Archive &archive)
     {

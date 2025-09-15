@@ -8,6 +8,7 @@
 #include "tools.h"
 #include <set>
 #include <ctime>
+#include <vector>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>

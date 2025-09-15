@@ -7,9 +7,13 @@
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
+#include "tools.h"
 
-Map::Map(const std::string& filename, const Position& pos):
-    modified(false), map(), x(-1), y(-1) {
+class Controller;
+
+Map::Map(const std::string &filename, const Position &pos) : modified(false),
+                                                             map(), x(-1), y(-1)
+{
     // 这个地方被搞到了，由于我是在测试中写了很多次 Map，而释放 Map 再创建一个
     // Map 的对象时，C++ 让 map 数组重新使用了原来的内存区域，巧合的导致了一些
     // 没有赋值的地方储存了旧的垃圾值，导致程序出现了异常判断，因此需要在初始
@@ -72,6 +76,7 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
         case -2:    // 墙壁/空间狭小
             event_type = EventType::NONE;
             id = -1;
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "墙壁/空间狭小");
             return {"不可通行：墙壁/空间狭小", 1};
             break;
         case -1:    // 普通移动
@@ -79,21 +84,26 @@ Message Map::moveProtagonist(const int &direction, EventType &event_type, int &i
             x += DIRECTIONS[direction][0];
             y += DIRECTIONS[direction][1];
             map[x][y] = '1';
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "普通移动");
         case 'i':
             event_type = EventType::NONE;
             id = -1;
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "i");
             return {"Success", 0};
         case 'o':
             event_type = EventType::JUMP;
             id = getExitId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "e");
             return {"抵达出口", 0};
         case '9':
             event_type = EventType::AC_NPC;
             id = getNPCId({x + DIRECTIONS[direction][0], y + DIRECTIONS[direction][1]});
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "9");
             return {"与 NPC 交互", 0};
         default:
             event_type = EventType::AC_INST;
             id = char2index(back_code);
+            Controller::getInstance()->log(Controller::LogLevel::DEBUG, "default");
             return {"与器械交互", 0};
     }
     return {"", 0};

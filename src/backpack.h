@@ -16,6 +16,8 @@
 #include<memory>
 #include<vector>
 #include"Item.h"
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/vector.hpp>
 
 using std::string;
 using std::cout;
@@ -83,8 +85,44 @@ public:
 	 */
 	ItemCreator& getItemCreator();
 
+	/**
+     * @brief Cereal序列化支持
+     * @tparam Archive Cereal归档类型 以binary形式存储
+     */
+    template <class Archive>
+    void serialize(Archive &arch)
+    {	item_names=itemToName();
+        arch(CEREAL_NVP(item_names));
+    }
+    
+    /**
+     * @brief 获取背包中所有物品的名称列表
+     * @return 包含所有物品名称的vector
+     */
+    std::vector<std::string> itemToName()
+    {
+        std::vector<std::string> names;
+        for(auto it = backpack_items.begin(); it != backpack_items.end(); ++it)
+        {
+            if(*it != nullptr) {
+                names.push_back((*it)->getName());
+            }
+        }
+        return names;
+	}
+
+		void namesToPointers(){
+		 for(auto it = item_names.begin(); it != item_names.end(); ++it)
+        {
+            if(*it != "") {
+                backpack_items.push_back(item_creator.createItem(*it));
+            }
+        }
+	}
 private:
 	ItemCreator item_creator;
 	vector<std::shared_ptr<Item>> backpack_items;
 	stringstream ss;
+	std::vector <std::string> item_names;
+
 };

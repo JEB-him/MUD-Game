@@ -9,6 +9,7 @@
 #include <set>
 #include <ctime>
 #include <vector>
+#include"Store.h"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>

@@ -93,7 +93,7 @@ Message Controller::load(std::string username) {
     std::ifstream ifile(file_name, std::ios::binary);
     Position init_pos {-1, -1};
     // 设置默认出生点
-    std::string map_filename = "Dormitory.txt";
+    std::string map_filename = "center.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {
@@ -262,254 +262,257 @@ Message Controller::handleEvent(EventType &event_type)
     static int NPCid = -1;
     switch (event_type)
     {
-        case EventType::MOVE:
+    case EventType::MOVE:
+    {
+        int ch = -1;
+        Position pos;
+        view = View::getInstance();
+        view->printQuestion("", "按下ESC键退出移动模式。", "", Rgb(255, 255, 0));
+        while ((ch = input->waitKeyDown()) != 10)
         {
-            int ch = -1;
-            Position pos;
-            view = View::getInstance();
-            view->printQuestion("", "按下ESC键退出移动模式。", "", Rgb(255, 255, 0));
-            while ((ch = input->waitKeyDown()) != 10)
+            Position last_pos = map->getPos();
+            switch (ch)
             {
-                Position last_pos = map->getPos();
-                switch (ch)
-                {
-                case 'w':
-                    map->moveProtagonist(0, event_type, NPCid);
-                    log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
-                    break;
-                case 'd':
-                    map->moveProtagonist(1, event_type, NPCid);
-                    log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
-                    break;
-                case 's':
-                    map->moveProtagonist(2, event_type, NPCid);
-                    log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
-                    break;
-                case 'a':
-                    map->moveProtagonist(3, event_type, NPCid);
-                    log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
-                    break;
-                case 27:
-                    return Message("Escape key pressed!", 0);
-                }
-                log(LogLevel::DEBUG, "------------------");
-                pos = map->getPos();
-                view->drawPoMove(last_pos, pos);
-                log(LogLevel::DEBUG, "Move Success!");
-                handleEvent(event_type);
+            case 'w':
+                map->moveProtagonist(0, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
+                break;
+            case 'd':
+                map->moveProtagonist(1, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
+                break;
+            case 's':
+                map->moveProtagonist(2, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
+                break;
+            case 'a':
+                map->moveProtagonist(3, event_type, NPCid);
+                log(LogLevel::DEBUG, "NPCid: " + std::to_string(NPCid));
+                break;
+            case 27:
+                return Message("Escape key pressed!", 0);
             }
-            return Message("Move Success!", 0);
+            log(LogLevel::DEBUG, "------------------");
+            pos = map->getPos();
+            view->drawPoMove(last_pos, pos);
+            log(LogLevel::DEBUG, "Move Success!");
+            handleEvent(event_type);
         }
-        case EventType::AC_NPC:
+        return Message("Move Success!", 0);
+    }
+    case EventType::AC_NPC:
+    {
+        // 从move 拿到NPCid -> 借助Scene获取名称 -> 创建NPC对象 -> 顺序调用即可
+        log(LogLevel::DEBUG, "AC_NPC");
+        view = View::getInstance();
+        if (NPCid == -1)
+            return Message("Invalid NPC id!", -1);
+        std::string NPCname = scene->getNPCname(NPCid);
+        log(LogLevel::DEBUG, "Got name!" + NPCname);
+        if (NPCname.empty())
+            return Message("Invalid NPC id!", -1);
+        npc = nullptr;
+        npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
+        npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
+        npc->startInteraction();
+        return Message("NPC interaction Success!", 0);
+    }
+    case EventType::AC_INST:
+    {
+        log(LogLevel::DEBUG, "AC_NPC");
+        view = View::getInstance();
+        if (NPCid == -1)
+            return Message("Invalid NPC id!", -1);
+        std::string NPCname = scene->getNPCname(NPCid);
+        log(LogLevel::DEBUG, "Got name!" + NPCname);
+        if (NPCname.empty())
+            return Message("Invalid NPC id!", -1);
+        npc = nullptr;
+        npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
+        npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
+        npc->startInteraction();
+        return Message("NPC interaction Success!", 0);
+    }
+    case EventType::OPEN_PACK:
+    {
+        view = View::getInstance();
+        std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
+        std::vector<std::string> item_names;
+        if (item_pts.empty())
         {
-            // 从move 拿到NPCid -> 借助Scene获取名称 -> 创建NPC对象 -> 顺序调用即可
-            log(LogLevel::DEBUG, "AC_NPC");
-            view = View::getInstance();
-            if (NPCid == -1)
-                return Message("Invalid NPC id!", -1);
-            std::string NPCname = scene->getNPCname('s');
-            log(LogLevel::DEBUG, "Got name!" + NPCname);
-            if (NPCname.empty())
-                return Message("Invalid NPC id!", -1);
-            npc = nullptr;
-            npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
-            npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
-            npc->startInteraction();
-            return Message("NPC interaction Success!", 0);
+            view->printQuestion("", "Your backpack is empty.", "", Rgb(255, 255, 0));
+            // std::string bookname = "advanced_mathematics";
+            // (backpack->getBackpackItems()).push_back((backpack->getItemCreator()).createItem(bookname));
+            // log(LogLevel::DEBUG, "Add item!");
         }
-        case EventType::AC_INST:
+        else
         {
-            log(LogLevel::DEBUG, "AC_NPC");
-            view = View::getInstance();
-            if (NPCid == -1)
-                return Message("Invalid NPC id!", -1);
-            std::string NPCname = scene->getNPCname('s');
-            log(LogLevel::DEBUG, "Got name!" + NPCname);
-            if (NPCname.empty())
-                return Message("Invalid NPC id!", -1);
-            npc = nullptr;
-            npc = std::make_shared<NPC>(std::to_string(NPCname[0]), NPCname.substr(1), NPCid);
-            npc->loadInteractionConfig(NPCname, (getRootDir() / ".config/NPCs.json").string());
-            npc->startInteraction();
-            return Message("NPC interaction Success!", 0);
-        }
-        case EventType::OPEN_PACK:
-        {
-            view = View::getInstance();
-            std::vector<std::shared_ptr<Item>> item_pts = backpack->getBackpackItems();
-            std::vector<std::string> item_names;
-            if (item_pts.empty())
-            {
-                view->printQuestion("", "Your backpack is empty.", "", Rgb(255, 255, 0));
-                // std::string bookname = "advanced_mathematics";
-                // (backpack->getBackpackItems()).push_back((backpack->getItemCreator()).createItem(bookname));
-                // log(LogLevel::DEBUG, "Add item!");
-            }
-            else
-            {
-                for (auto &item_pt : item_pts)
-                {
-                    item_names.push_back(item_pt->getName());
-                }
-            }
-            view->printOptions(item_names);
-            return Message("Open Pack Success!", 0);
-        }
-        case EventType::REFRESH:
-        {
-            view->reDraw();
-            return Message("Refresh Success!", 0);
-        }
-        case EventType::STATUS:
-        {
-            view = View::getInstance();
-            view->printOptions(protagonist->getStatus());
-            return Message("Show status.", 0);
-        }
-        case EventType::JUMP:
-        {
-            // 拿到map.move的NPCid->给Scene对象->拿到场景文件名->重新创建Scene(新场景)->创建Map(新地图)->初始化地图数据->重新绘制地图->提示用户场景名称
-            if (NPCid == -1)
-            {
-                return Message("Jump to default map.", 0);
-            }
-            std::string scene_name = scene->getSceneName(NPCid);
-            if (scene_name.empty())
-            {
-                return Message("Invalid NPC id!", -1);
-            }
-            scene = nullptr;
-            scene = std::make_shared<Scene>(scene_name);
-            map = nullptr;
-            map = std::make_shared<Map>(scene_name, Position(-1, -1));
-            view = View::getInstance();
-            view->reDraw();
-            return Message("Jump Success!", 0);
-        }
-        case EventType::USE:
-        {
-            view = View::getInstance();
-            backpack->addItem("energy_drink");
-            std::vector<std::shared_ptr<Item>>
-                item_pts = backpack->getBackpackItems();
-            std::vector<std::string> item_names;
-            int i = 1;
             for (auto &item_pt : item_pts)
             {
-                item_names.push_back(std::to_string(i) + ". " + item_pt->getName());
-                i++;
+                item_names.push_back(item_pt->getName());
             }
-            view->printOptions(item_names);
-            view->printQuestion("", "Enter the number of the item you want to use.", "", Rgb(255, 255, 0));
-            view->printQuestion("", "Enter ESC to cancel.", "", Rgb(255, 255, 0));
-            int ch = -1;
-            while (1)
+        }
+        view->printOptions(item_names);
+        return Message("Open Pack Success!", 0);
+    }
+    case EventType::REFRESH:
+    {
+        view->reDraw();
+        return Message("Refresh Success!", 0);
+    }
+    case EventType::STATUS:
+    {
+        view = View::getInstance();
+        view->printOptions(protagonist->getStatus());
+        return Message("Show status.", 0);
+    }
+    case EventType::JUMP:
+    {
+        log(LogLevel::DEBUG,"JUMP"+std::to_string(NPCid));
+        // 拿到map.move的NPCid->给Scene对象->拿到场景文件名->重新创建Scene(新场景)->创建Map(新地图)->初始化地图数据->重新绘制地图->提示用户场景名称
+        if (NPCid == -1)
+        {
+            return Message("Jump to default map.", 0);
+        }
+        std::string scene_name = scene->getSceneName(NPCid+1);
+        log(LogLevel::DEBUG,"scene"+scene_name);
+        if (scene_name.empty())
+        {
+            return Message("Invalid NPC id!", -1);
+        }
+        scene = std::make_shared<Scene>(scene_name);
+        map = std::make_shared<Map>(scene_name+".txt", Position(-1, -1));
+        view = View::getInstance();
+        view->reDraw();
+        return Message("Jump Success!", 0);
+    }
+    case EventType::USE:
+    {
+        view = View::getInstance();
+        backpack->addItem("energy_drink");
+        std::vector<std::shared_ptr<Item>>
+            item_pts = backpack->getBackpackItems();
+        std::vector<std::string> item_names;
+        int i = 1;
+        for (auto &item_pt : item_pts)
+        {
+            item_names.push_back(std::to_string(i) + ". " + item_pt->getName());
+            i++;
+        }
+        view->printOptions(item_names);
+        view->printQuestion("", "Enter the number of the item you want to use.", "", Rgb(255, 255, 0));
+        view->printQuestion("", "Enter ESC to cancel.", "", Rgb(255, 255, 0));
+        int ch = -1;
+        while (1)
+        {
+            ch = input->waitKeyDown();
+            if (ch >= '0' && ch <= '9')
             {
-                ch = input->waitKeyDown();
-                if (ch >= '0' && ch <= '9')
-                {
-                    ch = ch - '0';
-                    break;
-                }
-                else if (ch == 27)
-                {
-                    ch = -1;
-                    break;
-                }
-                else
-                {
-                    view->printQuestion("", "Invalid input. Please enter a number.", "", Rgb(255, 255, 0));
-                }
+                ch = ch - '0';
+                break;
             }
-            log(LogLevel::DEBUG, "Got index: " + std::to_string(ch));
-            if (ch != -1)
+            else if (ch == 27)
             {
-                backpack->useFunctionOfItem(ch, *protagonist);
-                return Message("Use item Success!", 0);
+                ch = -1;
+                break;
             }
             else
-                return Message("Use item canceled.", 0);
-        }
-        case EventType::STORE:
-        {
-            view = View::getInstance();
-            log(LogLevel::DEBUG, "getInstance!");
-            store->showProducts(0);
-            log(LogLevel::DEBUG, "Show products.");
-            std::stringstream s1;
-            s1.str("");
-            s1.clear();
-            std::string option = "";
-            int index = -1;
-            while (1)
             {
-                int ch = input->waitKeyDown();
-                // Enter
-                if (ch == 10)
+                view->printQuestion("", "Invalid input. Please enter a number.", "", Rgb(255, 255, 0));
+            }
+        }
+        log(LogLevel::DEBUG, "Got index: " + std::to_string(ch));
+        if (ch != -1)
+        {
+            backpack->useFunctionOfItem(ch, *protagonist);
+            return Message("Use item Success!", 0);
+        }
+        else
+            return Message("Use item canceled.", 0);
+        view->reDraw();
+    }
+    case EventType::STORE:
+    {
+        view = View::getInstance();
+        log(LogLevel::DEBUG, "getInstance!");
+        store->showProducts(0);
+        log(LogLevel::DEBUG, "Show products.");
+        std::stringstream s1;
+        s1.str("");
+        s1.clear();
+        std::string option = "";
+        int index = -1;
+        while (1)
+        {
+            int ch = input->waitKeyDown();
+            // Enter
+            if (ch == 10)
+            {
+                option = s1.str();
+                s1.str("");
+                s1.clear();
+                index = std::stoi(option);
+                break;
+            }
+            // Backspace
+            else if (ch == 8)
+            {
+                if (s1.str().length() > 0)
                 {
-                    option = s1.str();
+                    std::string str = s1.str().substr(0, s1.str().length() - 1);
                     s1.str("");
                     s1.clear();
-                    index = std::stoi(option);
-                    break;
+                    s1 << str;
+                    view->printCmd(s1.str());
                 }
-                // Backspace
-                else if (ch == 8)
-                {
-                    if (s1.str().length() > 0)
-                    {
-                        std::string str = s1.str().substr(0, s1.str().length() - 1);
-                        s1.str("");
-                        s1.clear();
-                        s1 << str;
-                        view->printCmd(s1.str());
-                    }
-                    continue;
-                }
-                else if (ch == 27)
-                {
-                    index = -1;
-                    view->printCmd("");
-                    break;
-                }
-                else if (ch >= '0' && ch <= '9')
-                {
-                    s1 << char(ch);
-                }
-                view->printCmd(s1.str());
+                continue;
             }
-            log(LogLevel::DEBUG, "get index: " + std::to_string(index));
-            if (index == -1)
+            else if (ch == 27)
             {
-                return Message("Store closed.", 0);
+                index = -1;
+                view->printCmd("");
+                break;
             }
-            store->buyProduct(index);
-            log(LogLevel::DEBUG, "buyProduct");
-            return Message("Buy product.", 0);
+            else if (ch >= '0' && ch <= '9')
+            {
+                s1 << char(ch);
+            }
+            view->printCmd(s1.str());
         }
-        case EventType::HELP:
+        view->reDraw();
+        log(LogLevel::DEBUG, "get index: " + std::to_string(index));
+        if (index == -1)
         {
-            ifstream fin(".config/help.txt");
-            if (!fin.is_open())
-            {
-                return Message("Help file not found!", -1);
-            }
-            std::vector<std::string> help_msgs;
-            std::string line;
-            for (int i = 0; i < 11; i++)
-            {
-                std::getline(fin, line);
-                if (line.empty())
-                    break;
-                help_msgs.push_back(line);
-            }
-            view->printOptions(help_msgs);
+            return Message("Store closed.", 0);
         }
-        case EventType::NONE:
-        {
-            return Message("Invalid command!", -1);
-        }
+        store->buyProduct(index);
+        log(LogLevel::DEBUG, "buyProduct");
+        return Message("Buy product.", 0);
     }
+    case EventType::HELP:
+    {
+        ifstream fin(".config/help.txt");
+        if (!fin.is_open())
+        {
+            return Message("Help file not found!", -1);
+        }
+        std::vector<std::string> help_msgs;
+        std::string line;
+        for (int i = 0; i < 11; i++)
+        {
+            std::getline(fin, line);
+            if (line.empty())
+                break;
+            help_msgs.push_back(line);
+        }
+        view->printOptions(help_msgs);
+    }
+    case EventType::NONE:
+    {
+        return Message("Invalid command!", -1);
+    }
+    }
+
 }
 
 Message Controller::playerLogin(std::string &user_name)

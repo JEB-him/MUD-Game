@@ -7,7 +7,9 @@ using json = nlohmann::json;
 
 #include <fstream>
 
-Scene::Scene() : name("Canteen") {}
+Scene::Scene() : name("Canteen") {
+        loadExits();
+}
 
 Scene::Scene(const std::string& scene_name) 
     : name(scene_name) {
@@ -19,7 +21,6 @@ Scene::~Scene() {}
 bool Scene::loadSceneFile(std::filesystem::path fi) {
     std::ifstream file(fi);
     if (!file.is_open()) {
-        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading scene data from: " + fi.string());
         return false;
     }
     try {
@@ -27,7 +28,7 @@ bool Scene::loadSceneFile(std::filesystem::path fi) {
         json scenes_json;
         file >> scenes_json;
         file.close();
-        
+
         // 处理场景数据
         if (scenes_json.contains(name)) {
             const auto& exits_obj = scenes_json[name];
@@ -41,16 +42,13 @@ bool Scene::loadSceneFile(std::filesystem::path fi) {
                     // 将出口信息添加到exits映射中
                     exits[exit_id] = target_scene;
                 } catch (const std::exception& e) {
-                    Controller::getInstance()->log(Controller::LogLevel::ERR, "Error parsing exit data: " + std::string(e.what()));
                 }
             }
             return true;
         } else {
-            Controller::getInstance()->log(Controller::LogLevel::ERR, "Scene not found in data: " + name);
             return false;
         }
     } catch (const std::exception& e) {
-        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error loading scene data: " + std::string(e.what()));
         file.close();
         return false;
     }
@@ -61,6 +59,7 @@ void Scene::loadExits() {
 }
 
 std::string Scene::getSceneName(int key) {
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG , "key ok ");
     auto it = exits.find(key);
     if (it != exits.end()) {
         return it->second;
@@ -74,7 +73,7 @@ std::string Scene::getNPCname(const char& specialChar) {
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
-        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error opening NPC file: " + filePath.string());
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG, "DEBUGor opening NPC file: " + filePath.string());
         return "";
     }
     
@@ -84,7 +83,7 @@ std::string Scene::getNPCname(const char& specialChar) {
         file >> npcData;
         file.close();
     } catch (const std::exception& e) {
-        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error parsing NPC JSON: " + std::string(e.what()));
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG, "DEBUGor parsing NPC JSON: " + std::string(e.what()));
         file.close();
         return "";
     }

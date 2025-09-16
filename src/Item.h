@@ -244,28 +244,3 @@ private:
     ifstream config_file_item;
     json config_item;
 };
-
-/**
- * @brief 物品buff信息库，包含所有外部需要获取的buff信息
- * @param energy_drink_intel_boost 能量饮料buff的智力基础增量
- * @param energy_drink_intel_boost_rate 能量饮料buff的智力比例增量
- * @param milk_drink_intel_boost 牛奶buff的智力基础增量
- * @param milk_drink_intel_boost_rate 牛奶buff的智力比例增量
- */
-//class ItemBuffInf {
-//public:
-//    ItemBuffInf(const float energy_drink_intel_boost,
-//        const float energy_drink_intel_boost_rate,
-//        const float milk_drink_intel_boost,
-//        const float milk_drink_intel_boost_rate,
-//        const int energy_drink_duration,
-//        const int milk_duration,
-//        const int vitamins_duration);
-//    const float energy_drink_intel_boost;
-//    const float energy_drink_intel_boost_rate;
-//    const float milk_drink_intel_boost;
-//    const float milk_drink_intel_boost_rate;
-//    const int energy_drink_duration;
-//    const int milk_duration;
-//    const int vitamins_duration;
-//};

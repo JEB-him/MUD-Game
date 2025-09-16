@@ -4,12 +4,13 @@
  */
 #include "Map.h"
 #include "Controller.h"
+#include <string>
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
 #include "tools.h"
 
-class Controller;
+std::string Map::base_dir = (Controller::getInstance()->getRootDir() / "maps/").string();
 
 Map::Map(const std::string &filename, const Position &pos) : modified(false),
                                                              map(), x(-1), y(-1)
@@ -340,6 +341,10 @@ bool Map::processMap() {
                 sx = i, sy = j;
                 break;
             }
+
+    std::stringstream ss;
+    ss << "开始processMap: " << sx << " " << sy;
+    Controller::getInstance()->log(Controller::LogLevel::DEBUG, ss.str());
     if (sx == -1 || sy == -1) {
         return false;
     }

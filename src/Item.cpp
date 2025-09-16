@@ -10,6 +10,7 @@
   * */
 
 #include"Item.h"
+#include"View.h"
 #include<filesystem>
 #include<vector>
 #include<cmath>
@@ -167,9 +168,10 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
         }
-        // TODO: view
+        //  : view
         ss << "\"" << name << "\"" << "已装备。";
-        //view->gameoutput(ss.str());
+        auto view = View::getInstance();
+        view->printQuestion("",ss.str(), "white");
         ss.str("");
     }
     else {
@@ -181,9 +183,10 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
         }
-        // TODO: view
+        //  view
         ss << "\"" << name << "\"" << "已取消装备。";
-        //view->gameoutput(ss.str());
+        auto view = View::getInstance();
+        view->printQuestion("", ss.str(), "white");
         ss.str("");
     }
 }
@@ -215,9 +218,10 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
           */
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, -time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, -health_preservation_rate, true);
-        // TODO: view
+        // view
         ss << "\"" << name << "\"" << "已装备。";
-        //view->gameoutput(ss.str());
+        auto view = View::getInstance();
+        view->printQuestion("", ss.str(), "white");
         ss.str("");
     }
     /**
@@ -227,9 +231,10 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
         equip_state = false;
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, health_preservation_rate, true);
-        // TODO: view
+        // view
         ss << "\"" << name << "\"" << "已取消装备。";
-        //view->gameoutput(ss.str());
+        auto view = View::getInstance();
+        view->printQuestion("", ss.str(), "white");
         ss.str("");
     }
 }
@@ -275,10 +280,11 @@ void Food::use(Protagonist& protagonist) {
 
     /**
     * @note feedback
-    * TODO view
+    *   view
     */
     ss << "\"" << name << "\"" << "已使用消耗品";
-    //view->gameoutput(ss.str());
+    auto view = View::getInstance();
+    view->printQuestion("", ss.str(), "white");
     ss.str("");
 }
 
@@ -352,10 +358,11 @@ void LearningAid::use(Protagonist& protagonist) {
     }
       /**
       * @note feedback
-      * TODO view
+      *   view
       */
     ss << "\"" << name << "\"" << "已使用消耗品";
-    //view->gameoutput(ss.str());
+    auto view = View::getInstance();
+    view->printQuestion("", ss.str(), "white");
     ss.str("");
 }
 
@@ -405,9 +412,10 @@ void HealthItem::use(Protagonist& protagonist) {
         protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_VITAMINS, true, false);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_VITAMINS, protagonist.getGameTime(), false);
     }
-    // TODO: view
+    //  view
     ss << "\"" << name << "\"" << "已使用消耗品";
-    //view->gameoutput(ss.str());
+    auto view = View::getInstance();
+    view->printQuestion("", ss.str(), "white");
     ss.str("");
 }
 
@@ -421,7 +429,7 @@ void HealthItem::use(Protagonist& protagonist) {
   * @param file_name 包含所有物品参数信息的json文件的名字（字符串）
   */
 ItemCreator::ItemCreator() {
-    // TODO: 需要更新配置文件路径
+    // 更新配置文件路径
     std::filesystem::path file_path(ROOT_DIR);
     file_path = file_path / ".config/Item.json";
 
@@ -589,18 +597,3 @@ Message ItemCreator::updateBuff(Protagonist& protagonist) {
     }
     return Message("buff已更新");
 }
-
-//ItemBuffInf::ItemBuffInf(const float energy_drink_intel_boost,
-//const float energy_drink_intel_boost_rate,
-//const float milk_drink_intel_boost,
-//const float milk_drink_intel_boost_rate,
-//const int energy_drink_duration,
-//const int milk_duration,
-//const int vitamins_duration):
-//    energy_drink_intel_boost(energy_drink_intel_boost),
-//    energy_drink_intel_boost_rate(energy_drink_intel_boost_rate),
-//    milk_drink_intel_boost(milk_drink_intel_boost),
-//    milk_drink_intel_boost_rate(milk_drink_intel_boost_rate),
-//    energy_drink_duration(energy_drink_duration),
-//    milk_duration(milk_duration),
-//    vitamins_duration(vitamins_duration){ }

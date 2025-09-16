@@ -6,7 +6,6 @@
 #include <string>
 #include "tools.h"
 class Controller;
-
 class View;
 /**
  * @brief Map 类，用于读取 map 文件

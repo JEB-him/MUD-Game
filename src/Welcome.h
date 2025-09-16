@@ -26,5 +26,6 @@ const char* OUC_WELCOME_CONTENT = R"(
 └── README.md
 
 请调整字体大小至 12px 以获得最佳游戏体验...
+
 Github: https://github.com/JEB-him/MUD-Game␛[0m
 )";

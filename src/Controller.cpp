@@ -93,8 +93,7 @@ Message Controller::load(std::string username) {
     std::ifstream ifile(file_name, std::ios::binary);
     Position init_pos {-1, -1};
     // 设置默认出生点
-    // TODO 修改逻辑，应当通过默认场景类获得默认文件名
-    std::string map_filename = "Classroom.txt";
+    std::string map_filename = "center.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {
@@ -206,7 +205,6 @@ Message Controller::getEvent(EventType &event_type)
         view->printCmd(ss.str());
     }
     view = View::getInstance();
-    view->reDraw();
     log(LogLevel::DEBUG, "Get event: " + cmd);
     // 处理cmd
     if (cmd == "move")
@@ -253,7 +251,6 @@ Message Controller::getEvent(EventType &event_type)
     else
     {
         view = View::getInstance();
-        view->reDraw();
         view->printQuestion("", "Enter \"help\" to get help.", "", Rgb(255, 255, 0));
         event_type = EventType::NONE;
     }
@@ -515,6 +512,7 @@ Message Controller::handleEvent(EventType &event_type)
         return Message("Invalid command!", -1);
     }
     }
+
 }
 
 Message Controller::playerLogin(std::string &user_name)

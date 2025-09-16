@@ -321,12 +321,14 @@ void NPC::startInteraction() {
         if (choice >= 0 && static_cast<size_t>(choice) < node.options.size()) {
             try {
                 if (node.options[choice].conditions.size() > 0) {
+                    bool conditionsMet = true;
                     for (auto& [type, value] : node.options[choice].conditions) {
                         if (node.options[choice].conditions[0].type == "MONEY") {
                             int required_money = std::stoi(value);
                             if (current_money < required_money) {
+                                conditionsMet = false;
                                 view->printQuestion("", "金钱不足，无法完成交易，请重新选择！", "white");
-                                continue; // 有效输入但条件不满足，重新选择
+                                break; // 有效输入但条件不满足，重新选择
                             }
                         }
                         if (node.options[choice].conditions[0].type == "TIME") {
@@ -334,9 +336,13 @@ void NPC::startInteraction() {
                             int current_time = base_attrs[BasicValue::ProtagonistAttr::GAME_TIME];
                             if (current_time < required_time) {
                                 view->printQuestion("", "时间不足，请重新选择！", "white");
-                                continue; // 有效输入但条件不满足，重新选择
+                                conditionsMet = false;
+                                break; // 有效输入但条件不满足，重新选择
                             }                       
                         }
+                    }
+                    if (!conditionsMet) {
+                        continue; // 条件不满足，重新选择
                     }
                 }
             } catch (const std::invalid_argument& e) {

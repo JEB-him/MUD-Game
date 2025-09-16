@@ -192,7 +192,7 @@ Message Controller::getEvent(EventType &event_type)
         }
 
         // Unexpect input
-        else if (ch == 0)
+        else if (ch == 0 || ch == 27)
         {
             continue;
         }
@@ -384,6 +384,7 @@ Message Controller::handleEvent(EventType &event_type)
         map = std::make_shared<Map>(scene_name+".txt", Position(-1, -1));
         view = View::getInstance();
         view->reDraw();
+        view->printCmd("");
         return Message("Jump Success!", 0);
     }
     case EventType::USE:
@@ -614,6 +615,7 @@ int Controller::run()
     bool running = true;
     // 防止死循环
     // TODO 修改回合次数
+    view->enableCursor();
     static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;

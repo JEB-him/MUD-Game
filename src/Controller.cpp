@@ -192,7 +192,7 @@ Message Controller::getEvent(EventType &event_type)
         }
 
         // Unexpect input
-        else if (ch == 0)
+        else if (ch == 0 || ch == 27)
         {
             continue;
         }
@@ -309,7 +309,7 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname(NPCid);
+        std::string NPCname = scene->getNPCname('j');
         log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
@@ -615,6 +615,7 @@ int Controller::run()
     bool running = true;
     // 防止死循环
     // TODO 修改回合次数
+    view->enableCursor();
     static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;

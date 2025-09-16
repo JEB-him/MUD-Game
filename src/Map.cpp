@@ -10,11 +10,8 @@
 #include <filesystem>
 #include "tools.h"
 
-std::string Map::base_dir = (Controller::getInstance()->getRootDir() / "maps/").string();
-
 Map::Map(const std::string &filename, const Position &pos) : modified(false),
-                                                             map(), x(-1), y(-1)
-{
+                                                             map(), x(-1), y(-1) {
     // 这个地方被搞到了，由于我是在测试中写了很多次 Map，而释放 Map 再创建一个
     // Map 的对象时，C++ 让 map 数组重新使用了原来的内存区域，巧合的导致了一些
     // 没有赋值的地方储存了旧的垃圾值，导致程序出现了异常判断，因此需要在初始
@@ -225,7 +222,7 @@ Message Map::loadMap(const std::string& filename) {
     // 检查文件路径
     for (const auto& ch : filename)
         if (ch == '/' || ch == '\\') return {"非法文件名", -1};
-        Controller::getInstance()->log(Controller::LogLevel::DEBUG,(Controller::getInstance()->getRootDir() / "maps"/filename).string());
+        Controller::getInstance()->log(Controller::LogLevel::DEBUG,(Controller::getInstance()->getRootDir() / "maps" /filename).string());
     map_path = (Controller::getInstance()->getRootDir()  / "maps"/ filename).string();
     bool return_is_valid = false;
 

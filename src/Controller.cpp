@@ -6,15 +6,14 @@
 #include "InputHandler.h"
 #include "Map.h"
 #include "FinalExam.h"
-#include "backpack.h"
 #include "Store.h"
+#include "backpack.h"
+#include "Scene.h"
 #include <iostream>
 #include <fstream>
 #include <regex>
-#include "Store.h"
 #include <fstream>
 #include <string>
-#include "Scene.h"
 #if (defined(_WIN32) || defined(_WIN64))
 #include <Windows.h>
 #endif
@@ -81,6 +80,8 @@ Message Controller::init() {
     scene = std::make_shared<Scene>();
     log(LogLevel::DEBUG, "Init scene");
     store = std::make_shared<Store>();
+    log(LogLevel::DEBUG, "Init final_exam");
+    final_exam = std::make_shared<FinalExam>();
 
     Message msg {"Init Success!", 0};
     std::cout << msg.msg << std::endl;
@@ -248,6 +249,10 @@ Message Controller::getEvent(EventType &event_type)
     {
         event_type = EventType::USE;
     }
+    else if (cmd == "exam")
+    {
+        event_type = EventType::EXAM;
+    }
     else
     {
         view = View::getInstance();
@@ -365,6 +370,12 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         view->printOptions(protagonist->getStatus());
         return Message("Show status.", 0);
+    }
+    case EventType::EXAM:
+    {
+        final_exam->selectQuestionsInRandom(10);
+        final_exam->examing(*protagonist);
+        final_exam->printFinalResult(*protagonist);
     }
     case EventType::JUMP:
     {

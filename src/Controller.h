@@ -24,6 +24,7 @@ class NPC;
 class Protagonist;
 class Map;
 class Store;
+class FinalExam;
 /**
  * @brief MVC 模式中的 Controller
  * @details 程序的总控制器\n
@@ -95,6 +96,7 @@ public:
     std::shared_ptr<Backpack>     backpack    = nullptr;
     std::shared_ptr<Scene>        scene       = nullptr;
     std::shared_ptr<Store>        store       = nullptr;
+    std::shared_ptr<FinalExam>    final_exam  = nullptr;
     template <class Archive>
     void serialize(Archive &archive)
     {

@@ -47,7 +47,7 @@ public:
 	~FinalExam() = default; ///< 默认析构
 	Message selectQuestionsInRandom(int num); ///< 从题库中随机挑选num道题目
 	Message examing(Protagonist& protagonist); ///< 让玩家做所有挑选出来的题
-	Message printFinalResult()const; ///< 打印期末考试成绩（结算画面）
+	Message printFinalResult(Protagonist& protagonist)const; ///< 打印期末考试成绩（结算画面）
 private:
 	std::vector<Question> exam_paper;
 	int num_questions;

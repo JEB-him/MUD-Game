@@ -80,7 +80,7 @@ Message Question::showQuestion(int index) {
 		ops.push_back(ss.str());
 	}
 	view->printOptions(ops);
-	view->printQuestion("", "=======ffffff=========", "white");
+	view->printQuestion("", "================", "white");
 
 	return { "成功输出问题。",0 };
 }
@@ -146,12 +146,6 @@ Message FinalExam::examing(Protagonist& protagonist) {
 	auto view = View::getInstance();
 	auto controller = Controller::getInstance();
 	std::stringstream ss;
-
-	//每100智力覆盖一道错题。
-	float intel_sci = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::INTEL_SCI];
-	float intel_arts = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::INTEL_ARTS];
-	intel_sci = (int)(intel_sci / 100);
-	intel_arts = (int)(intel_arts / 100);
 	
 	//遍历每一道题
 	for (int i = 0; i < exam_paper.size(); i++) {
@@ -170,32 +164,8 @@ Message FinalExam::examing(Protagonist& protagonist) {
 			num_right++;
 		}else
 		{
-			if (exam_paper[i].getIsSci()) {
-				if (intel_sci > 0) {
-					ss << "你原本想要选" << std::to_string(response) << "，但最后改成了" << std::to_string(answer) << "，回答正确！";
-					view->printQuestion("", ss.str(), "white");
-					num_right++;
-					intel_sci--; ///< 理科覆盖机会-1
-				}
-				else
-				{
-					view->printQuestion("", "回答错误！", "white");
-					num_wrong++;
-				}
-
-			}else{
-				if (intel_arts > 0) {
-					ss << "你原本想要选" << std::to_string(response) << "，但最后改成了" << std::to_string(answer) << "，回答正确！";
-					view->printQuestion("", ss.str(), "white");
-					num_right++;
-					intel_arts--; ///< 文科覆盖机会-1
-				}
-				else
-				{
-					view->printQuestion("", "回答错误！", "white");
-					num_wrong++;
-				}
-			}
+			view->printQuestion("", "回答错误！", "white");
+			num_wrong++;
 		}
 	}
 	return { "期末考试已完成",0 };
@@ -204,12 +174,16 @@ Message FinalExam::examing(Protagonist& protagonist) {
 /**
  * @brief 输出期末成绩及鼓励词
  */
-Message FinalExam::printFinalResult()const {
+Message FinalExam::printFinalResult(Protagonist& protagonist)const {
 	auto view = View::getInstance();
 	std::stringstream ss;
 
-	//计算最终成绩
-	float result = ((float)num_right / (float)(num_right + num_wrong)) * 100.0f;
+	//获取文、理智力
+	float intel_sci = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::INTEL_SCI];
+	float intel_arts = protagonist.getBaseAttrs()[BasicValue::ProtagonistAttr::INTEL_ARTS];
+
+	//计算最终成绩【期末总分 * 0.2 + 平时分 * 0.8。其中平时分智力-文、理各占40%，单项达到400时,该部分得40%的分，不足则线性递减】
+	float result = ((float)num_right / (float)(num_right + num_wrong)) * 20.0f + (intel_sci / 400.0f) * 40.f + (intel_arts / 400.0f) * 40.f;
 
 	//格式化输出期末成绩与激励语
 	view->printQuestion("", "================", "white");

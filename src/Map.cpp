@@ -4,12 +4,13 @@
  */
 #include "Map.h"
 #include "Controller.h"
+#include <string>
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
 #include "tools.h"
 
-std::string Map::base_dir = Controller::getInstance()->getRootDir() / "maps/";
+std::string Map::base_dir = (Controller::getInstance()->getRootDir() / "maps/").string();
 
 Map::Map(const std::string &filename, const Position &pos) : modified(false),
                                                              map(), x(-1), y(-1)

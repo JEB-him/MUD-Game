@@ -403,7 +403,7 @@
   },
   
   "Basketball": {
-    "special_char":"q",
+    "special_char":"2",
     "initial": "train_basketball_if",
     "interactions": {
       "train_basketball_if": {

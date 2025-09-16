@@ -168,7 +168,7 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, intel_boost_rate, true);
         }
-        // TODO: view
+        //  : view
         ss << "\"" << name << "\"" << "已装备。";
         auto view = View::getInstance();
         view->printQuestion("",ss.str(), "white");
@@ -183,7 +183,7 @@ void StudyMaterial::equipAndUnequip(Protagonist& protagonist) {
         else {
             protagonist.updateAttr(BasicValue::ProtagonistAttr::INTELARTS_BOOST_RATE, -intel_boost_rate, true);
         }
-        // TODO: view
+        //  view
         ss << "\"" << name << "\"" << "已取消装备。";
         auto view = View::getInstance();
         view->printQuestion("", ss.str(), "white");
@@ -218,7 +218,7 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
           */
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, -time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, -health_preservation_rate, true);
-        // TODO: view
+        // view
         ss << "\"" << name << "\"" << "已装备。";
         auto view = View::getInstance();
         view->printQuestion("", ss.str(), "white");
@@ -231,7 +231,7 @@ void StudyAid::equipAndUnequip(Protagonist& protagonist) {
         equip_state = false;
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_TIME_REDUCTION_RATE, time_reduction_rate, true);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::LEARNING_HEALTH_PRESERVATION_RATE, health_preservation_rate, true);
-        // TODO: view
+        // view
         ss << "\"" << name << "\"" << "已取消装备。";
         auto view = View::getInstance();
         view->printQuestion("", ss.str(), "white");
@@ -280,7 +280,7 @@ void Food::use(Protagonist& protagonist) {
 
     /**
     * @note feedback
-    * TODO view
+    *   view
     */
     ss << "\"" << name << "\"" << "已使用消耗品";
     auto view = View::getInstance();
@@ -358,7 +358,7 @@ void LearningAid::use(Protagonist& protagonist) {
     }
       /**
       * @note feedback
-      * TODO view
+      *   view
       */
     ss << "\"" << name << "\"" << "已使用消耗品";
     auto view = View::getInstance();
@@ -412,7 +412,7 @@ void HealthItem::use(Protagonist& protagonist) {
         protagonist.updateAttr(BasicValue::ProtagonistAttr::BUFF_VITAMINS, true, false);
         protagonist.updateAttr(BasicValue::ProtagonistAttr::T_BUFF_VITAMINS, protagonist.getGameTime(), false);
     }
-    // TODO: view
+    //  view
     ss << "\"" << name << "\"" << "已使用消耗品";
     auto view = View::getInstance();
     view->printQuestion("", ss.str(), "white");

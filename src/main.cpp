@@ -2,6 +2,7 @@
 #include "catch.hpp"
 #include "View.h"
 #include "Controller.h"
+#include "Welcome.h"
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -41,15 +42,7 @@ void envCheck() {
 
 // 显示欢迎信息
 void showWelcome() {
-    std::ifstream welcome_file("static/Welcome.txt");
-    std::string line;
-    if (!welcome_file.is_open()) {
-        std::cout << "文件打开失败，请检查项目是否完整";
-        return;
-    }
-    while(std::getline(welcome_file, line)) {
-        std::cout << line << std::endl;
-    }
+    std::cout << OUC_WELCOME_CONTENT << std::endl;
 }
 
 // 显示主帮助信息

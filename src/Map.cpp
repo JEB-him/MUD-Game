@@ -9,7 +9,7 @@
 #include <filesystem>
 #include "tools.h"
 
-class Controller;
+std::string Map::base_dir = Controller::getInstance()->getRootDir() / "maps/";
 
 Map::Map(const std::string &filename, const Position &pos) : modified(false),
                                                              map(), x(-1), y(-1)
@@ -224,7 +224,7 @@ Message Map::loadMap(const std::string& filename) {
     // 检查文件路径
     for (const auto& ch : filename)
         if (ch == '/' || ch == '\\') return {"非法文件名", -1};
-    map_path = BASE_DIR + filename;
+    map_path = base_dir + filename;
     bool return_is_valid = false;
 
     // 获取当前路径
@@ -340,6 +340,10 @@ bool Map::processMap() {
                 sx = i, sy = j;
                 break;
             }
+
+    std::stringstream ss;
+    ss << "开始processMap: " << sx << " " << sy;
+    Controller::getInstance()->log(Controller::LogLevel::DEBUG, ss.str());
     if (sx == -1 || sy == -1) {
         return false;
     }

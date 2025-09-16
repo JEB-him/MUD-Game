@@ -6,7 +6,6 @@
 #include <string>
 #include "tools.h"
 class Controller;
-
 class View;
 /**
  * @brief Map 类，用于读取 map 文件
@@ -28,7 +27,7 @@ class Map
 public:
     friend class View;
     friend class Controller;
-    inline const static std::string BASE_DIR = ROOT_DIR "maps/";
+    static std::string base_dir;
     /**
      * @brief 地图最大宽度
      */
@@ -63,7 +62,7 @@ public:
         SpecialChar("\U00002563", 1),
         SpecialChar("\U0000256c", 1),
         SpecialChar("", -1),
-        SpecialChar("", -1),
+        SpecialChar("", -1, "y"),
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar(" ", 4), ///< 入口

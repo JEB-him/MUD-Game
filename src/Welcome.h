@@ -1,3 +1,6 @@
+#pragma once
+
+const char* OUC_WELCOME_CONTENT = R"(
 [38;5;45m
   ___  _   _  ____ ____                    ____  _
  / _ \| | | |/ ___/ ___| _   _ _ ____   __/ ___|(_)_ __ ___  
@@ -23,5 +26,5 @@
 └── README.md
 
 请调整字体大小至 12px 以获得最佳游戏体验...
-Github: https://github.com/JEB-him/MUD-Game
-[0m
+Github: https://github.com/JEB-him/MUD-Game[0m
+)";

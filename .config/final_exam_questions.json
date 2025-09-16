@@ -1,0 +1,219 @@
+{
+  "0": {
+    "num_questions": 26
+  },
+  "1": {
+    "question": "什么东西越洗越脏？",
+    "choice1": "水",
+    "choice2": "衣服",
+    "choice3": "思想",
+    "choice4": "空气",
+    "answer": "水",
+    "is_sci": false
+  },
+  "2": {
+    "question": "哪个国家不用交电费？",
+    "choice1": "肯尼亚",
+    "choice2": "缅甸",
+    "choice3": "日本",
+    "choice4": "智利",
+    "answer": "缅甸",
+    "is_sci": false
+  },
+  "3": {
+    "question": "什么书不可能在书店买到？",
+    "choice1": "百科全书",
+    "choice2": "秘书",
+    "choice3": "教科书",
+    "choice4": "小说",
+    "answer": "秘书",
+    "is_sci": false
+  },
+  "4": {
+    "question": "有十只羊，九只蹲在羊圈，一只蹲在猪圈，打一四字成语，是以下哪个呢？",
+    "choice1": "抑扬顿挫（一羊蹲错）",
+    "choice2": "羊入虎口",
+    "choice3": "亡羊补牢",
+    "answer": "抑扬顿挫（一羊蹲错）",
+    "is_sci": false
+  },
+  "5": {
+    "question": "谁生病从来不看医生？",
+    "choice1": "鲁迅",
+    "choice2": "阿炳",
+    "choice3": "张爱玲",
+    "choice4": "聂耳",
+    "answer": "阿炳",
+    "is_sci": false
+  },
+  "6": {
+    "question": "什么东西明明是你的，别人却用得比你多？",
+    "choice1": "钱",
+    "choice2": "名字",
+    "choice3": "时间",
+    "choice4": "衣服",
+    "answer": "名字",
+    "is_sci": false
+  },
+  "7": {
+    "question": "什么鸡没有翅膀？",
+    "choice1": "烤鸡",
+    "choice2": "田鸡",
+    "choice3": "手机",
+    "choice4": "野鸡",
+    "answer": "田鸡",
+    "is_sci": false
+  },
+  "8": {
+    "question": "有两个人掉到陷阱里了，死的人叫死人，活人叫什么？",
+    "choice1": "救命",
+    "choice2": "活人",
+    "choice3": "伤者",
+    "answer": "救命",
+    "is_sci": false
+  },
+  "9": {
+    "question": "什么动物最没有方向感？",
+    "choice1": "麋鹿（迷路）",
+    "choice2": "鸽子",
+    "choice3": "猴子",
+    "answer": "麋鹿（迷路）",
+    "is_sci": false
+  },
+  "10": {
+    "question": "读完中国海洋大学需要多长时间？",
+    "choice1": "一秒",
+    "choice2": "四年",
+    "choice3": "一辈子",
+    "answer": "一秒",
+    "is_sci": false
+  },
+  "11": {
+    "question": "求函数 f (x) = 3x + 5 的导数",
+    "choice1": "3x",
+    "choice2": "3",
+    "choice3": "3x + 5",
+    "answer": "3",
+    "is_sci": true
+  },
+  "12": {
+    "question": "求函数 f (x) = x² 的导数",
+    "choice1": "2x",
+    "choice2": "x",
+    "choice3": "2x²",
+    "answer": "2x",
+    "is_sci": true
+  },
+  "13": {
+    "question": "求函数 f (x) = x³ + 2x² 的导数",
+    "choice1": "3x² + 4x",
+    "choice2": "3x³ + 4x²",
+    "choice3": "x² + 2x",
+    "answer": "3x² + 4x",
+    "is_sci": true
+  },
+  "14": {
+    "question": "求函数 f (x) = 5x + sinx 的导数",
+    "choice1": "5 + cosx",
+    "choice2": "5 + sinx",
+    "choice3": "5x + cosx",
+    "answer": "5 + cosx",
+    "is_sci": true
+  },
+  "15": {
+    "question": "求函数 f (x) = (x+1)² 的导数",
+    "choice1": "2(x+1)",
+    "choice2": "(x+1)",
+    "choice3": "2x+1",
+    "answer": "2(x+1)",
+    "is_sci": true
+  },
+  "16": {
+    "question": "求函数 f (x) = 1/x 的导数",
+    "choice1": "-1/x²",
+    "choice2": "1/x²",
+    "choice3": "-1/x",
+    "answer": "-1/x²",
+    "is_sci": true
+  },
+  "17": {
+    "question": "求函数 f (x) = x sinx 的导数",
+    "choice1": "sinx + x cosx",
+    "choice2": "sinx - x cosx",
+    "choice3": "x cosx",
+    "answer": "sinx + x cosx",
+    "is_sci": true
+  },
+  "18": {
+    "question": "计算定积分 S (从 0 到 2) (x + 1) dx",
+    "choice1": "4",
+    "choice2": "2",
+    "choice3": "6",
+    "answer": "4",
+    "is_sci": true
+  },
+  "19": {
+    "question": "求函数 f (x) = x³ - 2x + 1 的二阶导数",
+    "choice1": "6x",
+    "choice2": "3x² - 2",
+    "choice3": "6x - 2",
+    "answer": "6x",
+    "is_sci": true
+  },
+  "20": {
+    "question": "求不定积分 S x² dx",
+    "choice1": "(1/3)x³ + C",
+    "choice2": "2x + C",
+    "choice3": "x³ + C",
+    "answer": "(1/3)x³ + C",
+    "is_sci": true
+  },
+  "21": {
+    "question": "求不定积分 S (2x + 3) dx",
+    "choice1": "x² + 3x + C",
+    "choice2": "2x² + 3x + C",
+    "choice3": "x² + 3 + C",
+    "answer": "x² + 3x + C",
+    "is_sci": true
+  },
+  "22": {
+    "question": "求函数 f (x) = sinx 在区间 [0, π] 上的定积分",
+    "choice1": "2",
+    "choice2": "0",
+    "choice3": "1",
+    "answer": "2",
+    "is_sci": true
+  },
+  "23": {
+    "question": "求函数 f (x) = e^x 的二阶导数",
+    "choice1": "e^x",
+    "choice2": "e^(2x)",
+    "choice3": "0",
+    "answer": "e^x",
+    "is_sci": true
+  },
+  "24": {
+    "question": "计算定积分 S (从 1 到 3) (1/x) dx",
+    "choice1": "ln3",
+    "choice2": "3",
+    "choice3": "1/3",
+    "answer": "ln3",
+    "is_sci": true
+  },
+  "25": {
+    "question": "求不定积分 S cosx dx",
+    "choice1": "sinx + C",
+    "choice2": "-sinx + C",
+    "choice3": "cosx + C",
+    "answer": "sinx + C",
+    "is_sci": true
+  },
+  "26": {
+    "question": "求函数 f (x) = (x² + 1)² 的一阶导数",
+    "choice1": "4x(x² + 1)",
+    "choice2": "2(x² + 1)",
+    "choice3": "2x (x² + 1)",
+    "answer": "4x(x² + 1)",
+    "is_sci": true
+  }
+}

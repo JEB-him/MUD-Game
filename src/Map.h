@@ -30,7 +30,7 @@ public:
     /**
      * @brief 地图最大宽度
      */
-    constexpr static int MAX_WIDTH = 100;
+    constexpr static int MAX_WIDTH = 120;
     /**
      * @brief 地图最大高度
      */
@@ -75,7 +75,7 @@ public:
         SpecialChar("", -1),
         SpecialChar("\U0000c6c3", 2, false),
         SpecialChar("\U000f0851", 2),
-        SpecialChar("\U0000f96d", 2)
+        SpecialChar("\U000f070e", 2)
     };
     /**
      * @brief 主角索引

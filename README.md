@@ -97,7 +97,7 @@ vector<int> my_vector;
  |          |学生         |s
  |          |室友        |r
  | f0851    |Badminton   |t
-|  f96d      | Running      |u
+|  f070e      | Running      |u
 - `出口` 使用在出口的最上方或最左边的字母 o 来表示
 - `入口` 使用在入口的最上方或最左边的字母 i 来表示
 

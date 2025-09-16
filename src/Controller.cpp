@@ -26,6 +26,7 @@ Controller::Controller(
     level(level),
     log_dir(log_dir),
     root_dir(root_dir) {
+    std::cout << "root_dir " << root_dir.string() << std::endl;
     // 构造函数
 }
 

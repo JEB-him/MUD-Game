@@ -9,7 +9,7 @@
 #include <filesystem>
 #include "tools.h"
 
-std::string Map::base_dir = Controller::getInstance()->getRootDir() / "maps/";
+std::string Map::base_dir = (Controller::getInstance()->getRootDir() / "maps/").string();
 
 Map::Map(const std::string &filename, const Position &pos) : modified(false),
                                                              map(), x(-1), y(-1)
@@ -224,7 +224,11 @@ Message Map::loadMap(const std::string& filename) {
     // 检查文件路径
     for (const auto& ch : filename)
         if (ch == '/' || ch == '\\') return {"非法文件名", -1};
+    std::cout << Controller::getInstance()->getRootDir().string() << std::endl;
+    std::cout << base_dir << std::endl;
     map_path = base_dir + filename;
+    std::cout << map_path << std::endl;
+    gameSleep(3000);
     bool return_is_valid = false;
 
     // 获取当前路径

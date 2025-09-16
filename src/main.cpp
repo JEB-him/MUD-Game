@@ -128,7 +128,7 @@ int handleRunCommand(int argc, char* argv[]) {
     }
 
     std::cout << "\n\n项目运行时目录设置为: " << root_dir << "..."<< std::endl;
-    std::cout << "项目运行时目录设置为: " << log_dir << "..."<< std::endl;
+    std::cout << "项目日志目录设置为: " << log_dir << "..."<< std::endl;
     
     // 创建控制器并运行游戏
     auto controller = Controller::getInstance(levels[level], log_dir, root_dir);

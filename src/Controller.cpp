@@ -619,11 +619,6 @@ int Controller::run()
     Message msg;
     view->printQuestion("", "Welcome to OUCSurvSim!", "", Rgb(255, 255, 0));
     view->printQuestion("", "Enter \"help\" to get help.", "", Rgb(255, 255, 0));
-    FinalExam final_exam;
-    Protagonist protagonist11;
-    final_exam.selectQuestionsInRandom(10);
-    final_exam.examing(protagonist11);
-    final_exam.printFinalResult();
     while (running && turns--)
     {
         msg = getEvent(event_type);

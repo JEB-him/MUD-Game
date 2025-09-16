@@ -224,7 +224,7 @@ Message Map::loadMap(const std::string& filename) {
     // 检查文件路径
     for (const auto& ch : filename)
         if (ch == '/' || ch == '\\') return {"非法文件名", -1};
-    map_path = Controller::getInstance()->getRootDir() / filename;
+    map_path = (Controller::getInstance()->getRootDir() / filename).string();
     bool return_is_valid = false;
 
     // 获取当前路径

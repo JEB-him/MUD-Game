@@ -21,3 +21,4 @@ test
 
 *.exe
 .vscode/settings.json
+*.log

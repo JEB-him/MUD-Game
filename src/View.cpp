@@ -121,6 +121,7 @@ View::~View() {
 }
 
 bool View::reDraw() {
+    // 获取屏幕高度和宽度
 #if defined(__linux__)
     struct winsize current_ws;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &current_ws);
@@ -131,10 +132,15 @@ bool View::reDraw() {
     int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     int height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 #endif
+    // 检测地图指针是否悬空
     if (controller->map == nullptr) {
+        controller->log(Controller::LogLevel::ERR, "悬空 Map");
         return false;
+    } else if (!controller->map->valid()) {
+        controller->log(Controller::LogLevel::ERR, "无效的地图");
     }
 
+    // 设置最小宽度和高度
     min_win_width = controller->map->getMaxWidth() +
                   40 +
                   LEFT_MARGIN +
@@ -163,7 +169,7 @@ bool View::reDraw() {
     // 留出命令输入的位置
     puts_height = height - 3 - TOP_MARGIN - BOTTOM_MARGIN - 1;
     // 清屏
-    std::cout << REASE_S;
+    std::cout << REASE_S << MOVHOME << std::flush;
     // 首先绘制所有框架
     // 为了避免 Windows 和 Linux 的行为差别，统一多加一个 \r
     // 顶部
@@ -345,7 +351,9 @@ void View::invalidate() {
     }
     std::cout << SAVECUS;
     // 移动到全部游戏输出的首行
-    std::cout << uLines(puts_height + 2);
+    std::cout << MOVHOME;
+    std::cout << dLines(TOP_MARGIN + 1);
+    std::cout << rCols(LEFT_MARGIN + 1 + logs_width + 1);
     int next_x = 0, next_y = 0;
     get_cursor_position(next_x, next_y);
     // 输出所有游戏输出
@@ -362,9 +370,9 @@ void View::invalidate() {
     }
     std::cout << SAVECUS;
     // 移动到日志输出的首行
-    std::cout << uLines(logs_height);
-    // 移动到首列
-    std::cout << lCols(logs_width + 1);
+    std::cout << MOVHOME;
+    std::cout << dLines(TOP_MARGIN + 1 + TOP_PADDING + controller->map->getMaxHeight() + BOTTOM_PADDING + 1);
+    std::cout << rCols(LEFT_MARGIN + 1);
     get_cursor_position(next_x, next_y);
     for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
         std::cout << gotoXY(next_x, next_y);

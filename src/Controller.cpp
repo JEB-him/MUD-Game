@@ -93,7 +93,7 @@ Message Controller::load(std::string username) {
     Position init_pos {-1, -1};
     // 设置默认出生点
     // TODO 修改逻辑，应当通过默认场景类获得默认文件名
-    std::string map_filename = "Classroom.txt";
+    std::string map_filename = "center.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {

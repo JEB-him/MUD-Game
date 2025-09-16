@@ -28,7 +28,6 @@ class Map
 public:
     friend class View;
     friend class Controller;
-    inline const static std::string BASE_DIR = ROOT_DIR "maps/";
     /**
      * @brief 地图最大宽度
      */
@@ -62,18 +61,26 @@ public:
         SpecialChar("\U00002560", 1),
         SpecialChar("\U00002563", 1),
         SpecialChar("\U0000256c", 1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
-        SpecialChar("", -1),
+        SpecialChar("\U000f0b59", 2),
+        SpecialChar("\U0000f0b1", 2),
+        SpecialChar("\U0000ed7c", 2),
         SpecialChar(" ", 4), ///< 入口
-        SpecialChar("", -1),
-        SpecialChar("", -1),
+        SpecialChar("\U000f05f2", 2),
+        SpecialChar("\U000f1a20", 2),
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar("", -1),
         SpecialChar(" ", 4), ///< 出口
+        SpecialChar("\U000f04b8", 2),
+        SpecialChar("\U0000c6c3", 2, false),
+        SpecialChar("", -1),
+        SpecialChar("\U0000c6c3", 2, false),
+        SpecialChar("\U000f0851", 2),
+        SpecialChar("\U0000f96d", 2)
     };
+    /**
+     * @brief 主角索引
+     */
     constexpr static int PROTAGONIST_INDEX = 1;
 
     Map() = default;

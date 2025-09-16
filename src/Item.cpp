@@ -597,4 +597,3 @@ Message ItemCreator::updateBuff(Protagonist& protagonist) {
     }
     return Message("buff已更新");
 }
-

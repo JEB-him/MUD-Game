@@ -46,7 +46,7 @@ public:
      */
     inline const static SpecialChar SPECIAL_CHARS[CHAR_MAXN] = {
         SpecialChar("\U000f1302", 2),
-        SpecialChar("\U0000c6c3", 2, false),
+        SpecialChar("\U0000c6c3", 2, false, "blue"),
         SpecialChar("\U000f0c3c", 2),
         SpecialChar("\U00002554", 1),
         SpecialChar("\U0000255a", 1),
@@ -54,7 +54,7 @@ public:
         SpecialChar("\U0000255d", 1),
         SpecialChar("\U00002550", 1),
         SpecialChar("\U00002551", 1),
-        SpecialChar("\U0000c6c3", 2, false, "blue"),
+        SpecialChar("\U0000c6c3", 2, false),
         SpecialChar("\U00002566", 1),
         SpecialChar("\U00002569", 1),
         SpecialChar("\U00002560", 1),

@@ -93,7 +93,7 @@ Message Controller::load(std::string username) {
     std::ifstream ifile(file_name, std::ios::binary);
     Position init_pos {-1, -1};
     // 设置默认出生点
-    std::string map_filename = "center.txt";
+    std::string map_filename = "Center.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {

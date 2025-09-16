@@ -137,7 +137,7 @@ bool View::reDraw() {
         controller->log(Controller::LogLevel::ERR, "悬空 Map");
         return false;
     } else if (!controller->map->valid()) {
-        controller->log(Controller::LogLevel::ERR, "无效的地图");
+        controller->log(Controller::LogLevel::ERR, controller->map->getValidMsg());
     }
 
     // 设置最小宽度和高度
@@ -259,7 +259,9 @@ Message View::drawPoMove(const Position& last_pos, const Position& pos) {
     }
     std::cout << std::flush;
     gotoMap(pos);
+    std::cout << "\x1b[38;5;87m";
     std::cout << protago.special_char;
+    std::cout << "\x1b[0m";
     std::cout << std::flush;
     std::cout << LOADCUS;
     return {"Success", 0};

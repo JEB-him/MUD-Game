@@ -557,8 +557,8 @@
           }
         ]
       },
-      "running_result": {
-        "prompt": "你参加了跑步锻炼，时间-10，体力+50。",
+      "sleep_result": {
+        "prompt": "你睡觉了，时间-10，体力+50。",
         "options": [
           {
             "id": "sleep_end",

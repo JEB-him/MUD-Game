@@ -94,7 +94,7 @@ Message Controller::load(std::string username) {
     Position init_pos {-1, -1};
     // 设置默认出生点
     // TODO 修改逻辑，应当通过默认场景类获得默认文件名
-    std::string map_filename = "center.txt";
+    std::string map_filename = "Classroom.txt";
     Message msg;
     // 创建新用户之后还需要设置主角的位置
     if (!ifile.is_open()) {
@@ -310,7 +310,7 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname('s');
+        std::string NPCname = scene->getNPCname(NPCid);
         log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
@@ -326,7 +326,7 @@ Message Controller::handleEvent(EventType &event_type)
         view = View::getInstance();
         if (NPCid == -1)
             return Message("Invalid NPC id!", -1);
-        std::string NPCname = scene->getNPCname('s');
+        std::string NPCname = scene->getNPCname(NPCid);
         log(LogLevel::DEBUG, "Got name!" + NPCname);
         if (NPCname.empty())
             return Message("Invalid NPC id!", -1);
@@ -371,20 +371,20 @@ Message Controller::handleEvent(EventType &event_type)
     }
     case EventType::JUMP:
     {
+        log(LogLevel::DEBUG,"JUMP"+std::to_string(NPCid));
         // 拿到map.move的NPCid->给Scene对象->拿到场景文件名->重新创建Scene(新场景)->创建Map(新地图)->初始化地图数据->重新绘制地图->提示用户场景名称
         if (NPCid == -1)
         {
             return Message("Jump to default map.", 0);
         }
-        std::string scene_name = scene->getSceneName(NPCid);
+        std::string scene_name = scene->getSceneName(NPCid+1);
+        log(LogLevel::DEBUG,"scene"+scene_name);
         if (scene_name.empty())
         {
             return Message("Invalid NPC id!", -1);
         }
-        scene = nullptr;
         scene = std::make_shared<Scene>(scene_name);
-        map = nullptr;
-        map = std::make_shared<Map>(scene_name, Position(-1, -1));
+        map = std::make_shared<Map>(scene_name+".txt", Position(-1, -1));
         view = View::getInstance();
         view->reDraw();
         return Message("Jump Success!", 0);

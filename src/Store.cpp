@@ -41,7 +41,7 @@ Message Store::showProducts(int page) {
 
     if (page < -1 || startIndex >= items.size()) {
         controller->log(Controller::LogLevel::ERR, "无效页码");
-        return {"无效页码", 1};
+        return {"Page error.", 1};
     }
 
     // 显示当前页码信息
@@ -96,14 +96,11 @@ Message Store::buyProduct(int index) {
     
     // 询问是否确认购买
     view->printQuestion("", "确认购买? (Y/N)", "white");
-    controller->log(Controller::LogLevel::DEBUG, "用户输入：1");
 
     // 获取用户输入
 
     int response = Controller::getInstance()->input->waitKeyDown();
-    view->reDraw();
 
-    controller->log(Controller::LogLevel::DEBUG, "用户输入：2" + std::to_string(response));
     if (response == 'y')
     {
         if (controller->protagonist->getBaseAttrs()[BasicValue::ProtagonistAttr::MONEY] < items[key_target]["value"].get<float>())

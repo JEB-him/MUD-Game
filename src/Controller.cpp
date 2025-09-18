@@ -174,7 +174,7 @@ Message Controller::getEvent(EventType &event_type)
             cmd = ss.str();
             ss.str("");
             ss.clear();
-            view->printCmd(cmd);
+            view->printCmd(ss.str());
             break;
         }
 
@@ -446,9 +446,9 @@ Message Controller::handleEvent(EventType &event_type)
     case EventType::STORE:
     {
         view = View::getInstance();
-        log(LogLevel::DEBUG, "getInstance!");
         store->showProducts(0);
-        log(LogLevel::DEBUG, "Show products.");
+        std::vector<std::string> store_tips = {" ", "Enter the number of the product you want to buy.", "Enter \"0 + PageNumber\" (e.g. 01) to view other pages", "Enter ESC to close the store"};
+        view->printOptions(store_tips);
         std::stringstream s1;
         s1.str("");
         s1.clear();
@@ -461,6 +461,29 @@ Message Controller::handleEvent(EventType &event_type)
             if (ch == 10)
             {
                 option = s1.str();
+                if (option.empty())
+                {
+                    continue;
+                }
+                else if (option[0] == '0' && option.length() >= 2)
+                {
+                    Message msg_store = store->showProducts(std::stoi(option.substr(1)) - 1);
+                    log(LogLevel::DEBUG, "page_index = " + (std::stoi(option.substr(1)) - 1));
+                    if (msg_store.msg == "Page error.")
+                    {
+                        view->printQuestion("", "Page error. Please enter a valid page number.", "", Rgb(255, 255, 0));
+                        view->printQuestion("", "Enter \"0 + PageNumber\" (e.g. 01) to view other pages", "", Rgb(255, 255, 0));
+                    }
+                    else
+                    {
+                        view->printOptions(store_tips);
+                    }
+
+                    s1.str("");
+                    s1.clear();
+                    view->printCmd(s1.str());
+                    continue;
+                }
                 s1.str("");
                 s1.clear();
                 index = std::stoi(option);
@@ -491,14 +514,12 @@ Message Controller::handleEvent(EventType &event_type)
             }
             view->printCmd(s1.str());
         }
-        view->reDraw();
-        log(LogLevel::DEBUG, "get index: " + std::to_string(index));
+        view->printCmd("");
         if (index == -1)
         {
             return Message("Store closed.", 0);
         }
         store->buyProduct(index);
-        log(LogLevel::DEBUG, "buyProduct");
         return Message("Buy product.", 0);
     }
     case EventType::HELP:
@@ -626,12 +647,12 @@ int Controller::run()
     bool running = true;
     // 防止死循环
     // TODO 修改回合次数
-    view->enableCursor();
     static int turns = 100;
     EventType event_type = EventType::NONE;
     Message msg;
     view->printQuestion("", "Welcome to OUCSurvSim!", "", Rgb(255, 255, 0));
     view->printQuestion("", "Enter \"help\" to get help.", "", Rgb(255, 255, 0));
+    std::vector<std::string> gaps = {" ", " ", " ", " ", " ", " "};
     while (running && turns--)
     {
         msg = getEvent(event_type);
@@ -639,6 +660,7 @@ int Controller::run()
             break;
         }
         event_type = EventType::NONE;
+        view->printOptions(gaps);
     }
 
     // 保存游戏

@@ -302,7 +302,15 @@ void NPC::startInteraction() {
     }
 
     while (true) {
-        auto press_ascii = input->waitKeyDown();
+        int press_ascii;
+        while (1)
+        {
+            press_ascii = Controller::getInstance()->input->waitKeyDown();
+            if (press_ascii >= '0' && (press_ascii - '0') <= node.options.size())
+            {
+                break;
+            }
+        }
         view->reDraw();
         press_ascii -= '0';
         choice = press_ascii;

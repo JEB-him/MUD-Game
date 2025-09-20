@@ -435,7 +435,8 @@ ItemCreator::ItemCreator() {
 
     config_file_item.open(file_path);
     if (!config_file_item.is_open()) {
-        throw std::runtime_error("无法打开物品配置文件");
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "无法打开物品配置文件");
+        Controller::getInstance()->gameExit();
     }
     config_file_item >> config_item;
     config_file_item.close();
@@ -536,7 +537,8 @@ std::shared_ptr<Item> ItemCreator::createItem(string &item_name)
         break;
     }
     default:
-        throw std::runtime_error("Error:Item.cpp 找不到目标物品细分类");
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "Error:Item.cpp 找不到目标物品细分类");
+        Controller::getInstance()->gameExit();
         break;
     }
 }

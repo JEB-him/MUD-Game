@@ -22,6 +22,10 @@
 #include <iostream>
 #include <string>
 
+void View::disableInput() {
+
+}
+
 void View::enableCursor() {
 #if defined(__linux__)
     std::cout << "\x1b[?25h";
@@ -138,6 +142,8 @@ bool View::reDraw() {
         return false;
     } else if (!controller->map->valid()) {
         controller->log(Controller::LogLevel::ERR, controller->map->getValidMsg());
+        controller->gameExit();
+        return false;
     }
 
     // 设置最小宽度和高度

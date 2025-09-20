@@ -67,7 +67,8 @@ void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& 
 
     std::ifstream file(config_path.c_str());
     if (!file.is_open()) {
-        throw std::runtime_error("无法打开配置文件: " + config_path);
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "无法打开配置文件: " + config_path);
+        Controller::getInstance()->gameExit();
     }
 
     try {
@@ -76,29 +77,34 @@ void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& 
 
         // 验证角色配置存在
         if (!config.contains(npc_type)) {
-            throw std::runtime_error("配置文件缺少" + npc_type + "角色配置");
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "配置文件缺少" + npc_type + "角色配置");
+            Controller::getInstance()->gameExit();
         }
         auto& roleConfig = config[npc_type];
 
         // 检查initial字段
         if (!roleConfig.contains("initial")) {
-            throw std::runtime_error("角色配置缺少initial字段");
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "角色配置缺少initial字段");
+            Controller::getInstance()->gameExit();
         }
         if (!roleConfig["initial"].is_string()) {
-            throw std::runtime_error("initial字段必须是字符串");
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "initial字段必须是字符串");
+            Controller::getInstance()->gameExit();
         }
         std::string initialNode = roleConfig["initial"].get<std::string>();
         currentInteractionId = npc_type + "_" + initialNode;
 
         // 加载交互节点
         if (!roleConfig.contains("interactions") || !roleConfig["interactions"].is_object()) {
-            throw std::runtime_error("interactions字段缺失或不是对象");
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "interactions字段缺失或不是对象");
+            Controller::getInstance()->gameExit();
         }
         auto& interactions = roleConfig["interactions"];
         for (auto& [nodeId, nodeData] : interactions.items()) {
             // 检查prompt字段
             if (!nodeData.contains("prompt") || !nodeData["prompt"].is_string()) {
-                throw std::runtime_error("节点" + nodeId + "的prompt字段缺失或不是字符串");
+                Controller::getInstance()->log(Controller::LogLevel::ERR, "节点" + nodeId + "的prompt字段缺失或不是字符串");
+                Controller::getInstance()->gameExit();
             }
             std::string prompt = nodeData["prompt"].get<std::string>();
             replaceText(prompt);
@@ -110,13 +116,15 @@ void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& 
 
             // 检查options字段
             if (!nodeData.contains("options") || !nodeData["options"].is_array()) {
-                throw std::runtime_error("节点" + nodeId + "的options字段缺失或不是数组");
+                Controller::getInstance()->log(Controller::LogLevel::ERR, "节点" + nodeId + "的options字段缺失或不是数组");
+                Controller::getInstance()->gameExit();
             }
             auto& options = nodeData["options"];
             for (auto& option : options) {
                 // 检查text字段
                 if (!option.contains("text") || !option["text"].is_string()) {
-                    throw std::runtime_error("选项缺少text字段或不是字符串");
+                    Controller::getInstance()->log(Controller::LogLevel::ERR, "选项缺少text字段或不是字符串");
+                    Controller::getInstance()->gameExit();
                 }
                 std::string text = option["text"].get<std::string>();
                 replaceText(text);
@@ -128,7 +136,8 @@ void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& 
                     } else if (option["next"].is_null()) {
                         nextNode = "END"; // 处理null值
                     } else {
-                        throw std::runtime_error("next字段必须是字符串或null");
+                        Controller::getInstance()->log(Controller::LogLevel::ERR, "next字段必须是字符串或null");
+                        Controller::getInstance()->gameExit();
                     }
                 } else {
                     nextNode = "END";
@@ -163,11 +172,13 @@ void NPC::loadInteractionConfig(const std::string& npc_type, const std::string& 
 
         // 验证初始节点存在
         if (interactionTree.find(currentInteractionId) == interactionTree.end()) {
-            throw std::runtime_error("初始节点" + currentInteractionId + "不存在");
+            Controller::getInstance()->log(Controller::LogLevel::ERR, "初始节点" + currentInteractionId + "不存在");
+            Controller::getInstance()->gameExit();
         }
 
     } catch (const json::exception& e) {
-        throw std::runtime_error("JSON解析错误: " + std::string(e.what()));
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "JSON解析错误: " + std::string(e.what()));
+        Controller::getInstance()->gameExit();
     }
 }
 
@@ -190,16 +201,19 @@ void NPC::startInteraction() {
     //     }
     // }
     if (interactionTree.empty()) {
-        throw std::runtime_error("交互树未初始化");
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "交互树未初始化");
+        Controller::getInstance()->gameExit();
     }
     
     if (currentInteractionId.empty()) {
-        throw std::runtime_error("未设置初始交互节点");
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "未设置初始交互节点");
+        Controller::getInstance()->gameExit();
     }
     
     auto it = interactionTree.find(currentInteractionId);
     if (it == interactionTree.end()) {
-        throw std::runtime_error("找不到交互节点: " + currentInteractionId);
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "找不到交互节点: " + currentInteractionId);
+        Controller::getInstance()->gameExit();
     }
     auto& node = it->second;
     auto view = View::getInstance();
@@ -393,7 +407,8 @@ void NPC::handleOptionSelection(int optionIndex) {
     }
     else
     {
-        throw std::runtime_error("选项索引超出范围");
+        Controller::getInstance()->log(Controller::LogLevel::ERR, "选项索引超出范围");
+        Controller::getInstance()->gameExit();
     }
 }
 

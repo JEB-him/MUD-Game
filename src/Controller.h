@@ -87,6 +87,11 @@ public:
      */
     std::filesystem::path getRootDir() const;
 
+    /**
+     * @brief 强制退出
+     */
+    void gameExit();
+
     // Model 类的智能指针
     std::shared_ptr<Map>          map         = nullptr;
     std::shared_ptr<Protagonist>  protagonist = nullptr;

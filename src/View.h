@@ -130,6 +130,11 @@ public:
      */
     static void disableCursor();
 
+    /**
+     * @brief 禁止用户输入
+     */
+    static void disableInput();
+
 private:
     // 控制器智能指针
     std::shared_ptr<Controller> controller;

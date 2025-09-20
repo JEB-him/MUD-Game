@@ -113,6 +113,7 @@ Message FinalExam::selectQuestionsInRandom(int num) {
 	std::ifstream file;
 	file.open(file_path);
 	if (!file.is_open()) {
+        Controller::getInstance()->gameExit();
 		throw std::runtime_error("无法打开期末试题配置文件");
 	}
 	nlohmann::json questions;

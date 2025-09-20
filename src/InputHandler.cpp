@@ -1,7 +1,6 @@
 #include "InputHandler.h"
 
 #if defined(_WIN32) || defined(_WIN64)
-
 // Windows 实现
 std::atomic<int> InputHandler::capturedKey(-1);
 std::atomic<bool> InputHandler::keyCaptured(false);

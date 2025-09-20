@@ -674,3 +674,10 @@ int Controller::run()
 std::filesystem::path Controller::getRootDir() const {
     return root_dir;
 }
+
+void Controller::gameExit() {
+    cout << std::endl << std::endl;
+    save();
+    View::enableCursor();
+    exit(1);
+}

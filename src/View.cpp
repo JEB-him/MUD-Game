@@ -23,6 +23,11 @@
 #include <iostream>
 #include <string>
 
+void View::clearOutputs() {
+    // 清空游戏和其他输出
+    logs.clear();
+    game_outputs.clear();
+}
 
 void View::disableInput() {
 #if defined(__linux__)
@@ -220,10 +225,6 @@ bool View::reDraw() {
     if (width < min_win_width || height < min_win_height) {
         return false;
     }
-
-    // 清空游戏和其他输出
-    logs.clear();
-    game_outputs.clear();
 
     int map_width =  controller->map->getMaxWidth();
     int map_height = controller->map->getMaxHeight();

@@ -394,6 +394,7 @@ Message Controller::handleEvent(EventType &event_type)
         scene = std::make_shared<Scene>(scene_name);
         map = std::make_shared<Map>(scene_name+".txt", Position(-1, -1));
         view = View::getInstance();
+        view->clearOutputs();
         view->reDraw();
         view->printCmd("");
         return Message("Jump Success!", 0);

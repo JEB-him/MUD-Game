@@ -140,6 +140,11 @@ public:
      */
     static void enableInput();
 
+    /**
+     * @brief 清空输出
+     */
+    void clearOutputs();
+
 private:
     // 控制器智能指针
     std::shared_ptr<Controller> controller;

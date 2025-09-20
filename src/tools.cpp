@@ -5,13 +5,16 @@
 #else
 #include <unistd.h>
 #endif
+#include <thread>  // 包含 C++11 线程库
+#include <chrono>  // 用于时间控制
 
 void gameSleep(unsigned int time) {
-#ifdef _WIN32
-    Sleep(time);
-#else
-    usleep(time * 1000); // 转换为微秒
-#endif
+    std::this_thread::sleep_for(std::chrono::milliseconds(time));
+// #ifdef _WIN32
+//     Sleep(time);
+// #else
+//     usleep(time * 1000); // 转换为微秒
+// #endif
 }
 
 Position::Position(const int& x, const int& y) : x(x), y(y) {}

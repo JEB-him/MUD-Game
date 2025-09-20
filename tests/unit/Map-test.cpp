@@ -1,3 +1,9 @@
+/**
+ * @brief Map 类的测试代码
+ * @details Version 1 的 Map 类可以通过测试，在编写 Controller 类进行最后阶段\n
+ *          的统筹时,由于进行了破坏性的重构，本测试模块废弃，但可以保证重构的\n
+ *          代码不影响 Map 的正常运行
+ */
 // #include "catch.hpp"
 // #include "Map.h"
 // #include <iostream>

@@ -545,7 +545,7 @@ Message Controller::handleEvent(EventType &event_type)
         return Message("Invalid command!", -1);
     }
     }
-
+    return {"Success", 0};
 }
 
 Message Controller::playerLogin(std::string &user_name)

@@ -541,6 +541,7 @@ std::shared_ptr<Item> ItemCreator::createItem(string &item_name)
         Controller::getInstance()->gameExit();
         break;
     }
+    return nullptr;
 }
 
 /**

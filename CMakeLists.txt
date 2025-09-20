@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # 项目名
-project(OUCSurvSim VERSION 0.0.1)
+project(OUCSurvSim VERSION 0.1.2)
 
 # 指定 C++ 标准
 set(CMAKE_CXX_STANDARD 20)
@@ -51,7 +51,8 @@ else()
     message(STATUS "平台检测:${CMAKE_GENERATOR}")
     # 编译模式下开启警告和调试信息
     target_compile_options(game
-        PRIVATE -g -Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Wconversion -Wsign-conversion
+        # PRIVATE -g -Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Wconversion -Wsign-conversion
+        PRIVATE -O2
     )
 endif()
 

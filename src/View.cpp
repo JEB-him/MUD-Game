@@ -15,6 +15,7 @@
 #   include <unistd.h>
 #   include <sys/ioctl.h>
 #   include <termios.h>
+    static struct termios original_termios;
 #elif defined(_WIN32)
 #   include <windows.h>
 #   include <conio.h>
@@ -22,7 +23,6 @@
 #include <iostream>
 #include <string>
 
-static struct termios original_termios;
 
 void View::disableInput() {
 #if defined(__linux__)

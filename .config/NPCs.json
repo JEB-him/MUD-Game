@@ -103,7 +103,7 @@
           {
             "id": "DormManager_chat_again",
             "text": "继续聊天",
-            "next": "DormManager_chat_deep"
+            "next": "DormManager_chat_result"
           },
           {
             "id": "DormManager_leave_chat",

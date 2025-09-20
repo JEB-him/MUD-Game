@@ -22,8 +22,65 @@
 #include <iostream>
 #include <string>
 
-void View::disableInput() {
+static struct termios original_termios;
 
+void View::disableInput() {
+#if defined(__linux__)
+    struct termios new_termios;
+    
+    // 获取当前终端设置
+    tcgetattr(STDIN_FILENO, &original_termios);
+    
+    // 创建新的终端设置
+    new_termios = original_termios;
+    
+    // 禁用回显和规范模式输入
+    new_termios.c_lflag &= ~(ECHO | ICANON);
+    
+    // 设置最小字符数和超时
+    new_termios.c_cc[VMIN] = 0;
+    new_termios.c_cc[VTIME] = 0;
+    
+    // 应用新设置
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+#elif defined(_WIN32)
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode;
+    
+    // 获取当前控制台模式
+    GetConsoleMode(hStdin, &mode);
+    
+    // 禁用行输入和回显输入，启用窗口输入（用于处理窗口大小变化）
+    mode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
+    mode |= ENABLE_WINDOW_INPUT;
+    
+    // 应用新设置
+    SetConsoleMode(hStdin, mode);
+#endif
+}
+
+void View::enableInput() {
+#if defined(__linux__)
+    struct termios new_termios;
+
+    // 创建新的终端设置
+    new_termios = original_termios;
+    
+    // 启用回显和规范模式输入
+    new_termios.c_lflag |= (ECHO | ICANON);
+    
+    // 设置最小字符数和超时
+    new_termios.c_cc[VMIN] = 1;
+    new_termios.c_cc[VTIME] = 0;
+    
+    // 应用新设置
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+#elif defined(_WIN32)
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    
+    // 设置标准控制台模式：启用回显和行输入
+    SetConsoleMode(hStdin, ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
+#endif
 }
 
 void View::enableCursor() {
@@ -163,6 +220,11 @@ bool View::reDraw() {
     if (width < min_win_width || height < min_win_height) {
         return false;
     }
+
+    // 清空游戏和其他输出
+    logs.clear();
+    game_outputs.clear();
+
     int map_width =  controller->map->getMaxWidth();
     int map_height = controller->map->getMaxHeight();
     // 设置日志和游戏输出的最大行数
@@ -335,7 +397,6 @@ void View::colorPrint(
         size_t insert_len = cutUTFString(text, index, width);
         if (insert_len > static_cast<size_t>(width)) {
             controller->log(Controller::LogLevel::ERR, "消息打印错误");
-            gameSleep(1500);
             return;
         }
         ss << text.substr(old_index, index - old_index);
@@ -359,11 +420,7 @@ void View::invalidate() {
     }
     std::cout << SAVECUS;
     // 移动到全部游戏输出的首行
-    std::cout << MOVHOME;
-    std::cout << dLines(TOP_MARGIN + 1);
-    std::cout << rCols(LEFT_MARGIN + 1 + logs_width + 1);
-    int next_x = 0, next_y = 0;
-    get_cursor_position(next_x, next_y);
+    int next_x = TOP_MARGIN + 2, next_y = LEFT_MARGIN + 1 + logs_width + 2;
     // 输出所有游戏输出
     for (auto iter = game_outputs.begin(); iter != game_outputs.end(); ++iter) {
         std::cout << gotoXY(next_x, next_y);
@@ -378,10 +435,8 @@ void View::invalidate() {
     }
     std::cout << SAVECUS;
     // 移动到日志输出的首行
-    std::cout << MOVHOME;
-    std::cout << dLines(TOP_MARGIN + 1 + TOP_PADDING + controller->map->getMaxHeight() + BOTTOM_PADDING + 1);
-    std::cout << rCols(LEFT_MARGIN + 1);
-    get_cursor_position(next_x, next_y);
+    next_x = TOP_MARGIN + 1 + TOP_PADDING + controller->map->getMaxHeight() + BOTTOM_PADDING + 2;
+    next_y = LEFT_MARGIN + 2;
     for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
         std::cout << gotoXY(next_x, next_y);
         std::cout << *iter;

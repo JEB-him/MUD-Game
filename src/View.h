@@ -135,6 +135,11 @@ public:
      */
     static void disableInput();
 
+    /**
+     * @brief 启用用户输入
+     */
+    static void enableInput();
+
 private:
     // 控制器智能指针
     std::shared_ptr<Controller> controller;
